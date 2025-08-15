@@ -1,0 +1,212 @@
+とりあえずEmacsの環境変数について色々調べてみた。
+
+とにもかくにも、変数値の調べ方
+1) M-x describe-variable
+2) C-h v 変数名
+んで、変数値の設定方法
+1) setq (設定ファイル中)
+2) M-x set-variable
+
+んで、TLXW8での設定ファイルの読み込まれる順番。
+1. ~/.emacs じゃない。.emacsは実はXemacs用。Emacsは・・・
+2. ~/.emacs.el をEmacsは読み込むのだ。
+
+ちなみに、Xemacsの.emacsではTLXW8では、~/.xemacs/init.elを読み込むようになっている以外、
+何にも設定なし。
+
+.emacs.elの冒頭コメントにはどうやら英語を意識してカスタマイズされているらしい。
+うれしいことに、
+(cond
+ ((eq window-system 'x)
+  ;; When running on X 
+  ;; ...X上でのEmacs用の基本設定(省略)
+ (t
+  ;; When running on any terminal (e.g. emacs -nw)
+  ;; Remove menu bar
+  (menu-bar-mode -1)
+  ;; Activate Backspace 
+  (load-library "term/keyswap")
+  (define-key function-key-map [delete] [8])
+  (put 'delete 'ascii-character 8)))
+といった感じでTerminal用の設定が済んでいるという、超うれしい誤算。
+
+しかし。たかがそれだけで満足か？・・・よし。オリジナルカスタマイズファイルを読み込ませる
+ように変更できないか？
+実際問題、設定をフルに支配下におくためには・・・。やはりTerminalから、あるいは-nwで起動
+したら、設定ファイルをカスタムファイルに切り替えるべきだろう。
+つまり、(t セクション（Lisp知らないからこうとしか言えない）の末尾に、
+(load-options-file "$HOME/.emacs_local.el"))
+を追加してみればよい。
+
+・・・と思ったのだが。どうもうまくいかない。なんだか、load-options-fileがInvalidです、とか
+言われているらしいのだ。なんだ？そりゃあ・・・。
+待てよ？これって、Xemacs用の設定ファイルから抜き出したやつだよな。
+原点はどうなってたっけ？
+(cond
+ ((and (featurep 'xemacs)
+       (fboundp 'load-options-file))
+  (load-options-file "$HOME/.xemacs/init.el")))
+・・・ひょっとして。featurepとfboundpで「Xemacsで、なおかつload-options-fileが」云々を
+チェックしているんでないかい？
+　疑ってみて、.emacs.elで
+  (cond
+;; for Emacs, load-options-file functions is invalid.
+;; this function is only for Xemacs.
+    ((fboundp 'load-options-file)
+;;     (menu-bar-mode 1)
+     (load-options-file "$HOME/.emacs_local.el"))
+  (t
+     (menu-bar-mode -1)))))
+　とか見よう見まねで条件分岐させてみて、menu-barの状態を元にして試してみたよ。
+　すると、見事にload-options-fileは外されていました。つまり、emacsではサポートされていない、
+ということですな。
+
+　・・・しょうがないです。とりあえずEmacsではあきらめるしかないですな。.emacs.elをバックアップ
+しておいて、いじくり回すしかないです。残すのもうざったいので、load-options-fileいじくった形跡
+ごと抹消。どーせバックアップとってあるんだから好きにいじくってやれ。
+　結局terminalの(cond部分は元に戻っちゃった。
+
+;; When new file that is not exist yet is opened, insert a template file.
+;;(add-hook 'find-file-hooks 'auto-insert)
+;;(setq auto-insert-directory "~/.template/"    ;; Template file directory
+;;      auto-insert-alist (append               ;; Template file alist
+;;                       '((html-mode . "insert.html")
+;;                         (rpm-mode  . "insert.spec"))
+;;                       auto-insert-alist))
+　このalistとか言うのも起動時に、引っかかっていてエラーが表示される。テンプレートなど要らない
+ので（今のところ。）、上の部分をコピーしている時点で既にコメントアウトしているのだが思い切って
+ざっくり削除します。
+
+さらに、末尾にあるWheel mouse対応もそもそも使ってないし、よけいな機能でミスをしたくないので
+以下の部分をざっくり削除。
+;; Wheel mouse
+(defun down-slightly () (interactive) (scroll-down 5))
+(defun up-slightly   () (interactive) (scroll-up   5))
+(global-set-key [mouse-4] 'down-slightly)
+(global-set-key [mouse-5] 'up-slightly  )
+(defun down-one () (interactive) (scroll-down 1))
+(defun up-one   () (interactive) (scroll-up   1))
+(global-set-key [S-mouse-4] 'down-one)
+(global-set-key [S-mouse-5] 'up-one  )
+(defun down-a-lot () (interactive) (scroll-down))
+(defun up-a-lot   () (interactive) (scroll-up  ))
+(global-set-key [C-mouse-4] 'down-a-lot)
+(global-set-key [C-mouse-5] 'up-a-lot  )
+　削除したものではあるけれど、いろいろ使えそうな記述があるのでここに残しときます。
+
+　まだまだスリム化できる。文字コードの環境判別をしている部分。
+(setq lang (getenv "LANG"))
+(cond
+ ((or
+   (equal lang "ja_JP.eucJP")
+   (equal lang "ja_JP.ujis")
+   (equal lang "ja_JP.EUC")
+   (equal lang "japanese.euc"))
+  (set-language-environment "Japanese")
+  ;;(set-default-coding-system 'euc-jp-unix)
+  (set-buffer-file-coding-system 'euc-jp-unix)
+  (set-terminal-coding-system 'euc-jp-unix)
+  (set-keyboard-coding-system 'euc-jp-unix))
+ (t
+  (progn
+    (set-language-environment "English")
+    ;;(set-default-coding-system 'iso-8859-1)
+    (set-buffer-file-coding-system 'iso8859-1)
+    (set-terminal-coding-system 'iso8859-1)
+    (set-keyboard-coding-system 'iso8859-1))))
+　これ単体でも、setqだのcond-or-equal-landだの、興味深いLisp構文が使われているが。
+　とりあえず、ssh経由でのログイン時などに判明したのだがLANGが設定されていない場合がある。
+　そんなときは(tセクションでEnglishモードになるのだが・・・何か、iso8859-1とかが無効ですよー。
+とか言われるんだけど。
+　んでもって、結局TTSSHとか使って日本語使えるので、めんどくさいから(cond-(t全体をコメントアウトして、
+何が何でも日本語環境にしようとしたり。
+　んでも、結局かのエラーメッセージは本当はiso-8859-1だったのが何を間違えたかハイフンが一個
+抜けていて、iso8859-1になっているのに気づいて、なおしたら普通に動いてくれたはよいのだが、
+英語モードになってしまうのでやっぱりTTSSH上からは使いづらかったり。
+　結局、めんどくさいのでここら辺を
+;; Loading CANNA libraries
+(if (and (fboundp 'CANNA) CANNA)
+  (progn
+    (load-library "canna")
+    (canna) ))
+
+;; Enforcing coding-system to EUC.
+(set-language-environment "Japanese")
+(set-buffer-file-coding-system 'euc-jp-unix)
+(set-terminal-coding-system 'euc-jp-unix)
+(set-keyboard-coding-system 'euc-jp-unix)
+　で終わりにしちゃいました。set-default-codig-systemは何だか知りませんがエラーになったり
+したので外します。んで、cannaはデフォルトでオッケーみたいではあるのですが。
+　まあ、本に乗っ取って追加しました。
+
+　行の折り返し。truncate-linesでいじくれるのだが、どうも折り返しを有効にしている方が何だか
+妙な気分。ただ、折り返しOFFの場合。Emacsはデフォルトのスクロールが「半画面」とかになってて、
+明らかにとまどう。これさえなければ折り返しOFFでもよいのだが・・・。
+　とにかく、折り返しはOFFっとく。
+;; Word Wrap OFF
+(setq truncate-partial-width-windows nil)
+(setq truncate-lines t)
+　・・・何度、どんなパターンを試してもtruncate-linesが設定できないんですけど。
+　truncate-partial-width-windowsは反映されるんだけどなー。わからん。
+　というわけで、いい加減頭キタノでこれ、放置。まあいいよ。
+M-x set-variable truncate-lines t
+　打ち込めばいいんだから。
+　それよりも、スクロールだのDELだとC-hでヘルプになっちまうだのをどうにかしないと。
+
+　まず、DELとBackSpace。とりあえずX上ではほとんど問題なく動いてしまう両者。
+　だがどうせX上でEmacsを使う状況など想定していないのだから、さっさと端末用にしてしまう。
+ ;; Activate Backspace
+  (load-library "term/keyswap")
+　という記述が済んでいるのだが。これって、BackSpaceとDELを入れ替えているだけなのね。
+　つまり、普通ではDelでカーソル前の文字削除、BackSpaceがC-hでヘルプになるわけ。
+　これを入れ替えてるだけだから、今度はDelがC-hになるだけの話。これじゃあ、根本解決にはほど遠い。
+　訳が分からないのは続く、
+  (define-key function-key-map [delete] [8])
+  (put 'delete 'ascii-character 8)))
+　これ。何してんだろ？
+
+define-key is a built-in function.
+(define-key KEYMAP KEY DEF)
+Args KEYMAP, KEY, DEF.  Define key sequence KEY, in KEYMAP, as DEF.
+KEYMAP is a keymap.  KEY is a string or a vector of symbols and characters
+meaning a sequence of keystrokes and events.
+Non-ASCII characters with codes above 127 (such as ISO Latin-1)
+can be included if you use a vector.
+DEF is anything that can be a key's definition:
+　「KEYMAP」はキーマップで、「KEY」は文字列か、シンボルのベクターとか言うやつらしい。
+　んでもって、DEFはキー定義なら何でも良いみたい。
+　つまり、function-key-mapキーマップのdeleteシーケンスを、[8](0x08?)として定義してるみたい。
+
+put is a built-in function.
+(put SYMBOL PROPNAME VALUE)
+Store SYMBOL's PROPNAME property with value VALUE.
+It can be retrieved with `(get SYMBOL PROPNAME)'.
+　つまり、deleteのascii-characterを0x08に設定してますよ、ということ。
+
+
+
+　とりあえず一行ずつスクロールはこれでオッケー。
+;; Set Scroll step to 1.
+(setq scroll-step 1)
+　0にsetqすれば、元の半画面スクロールに戻る。
+
+　謎の行だったのだが。
+;; Don't make new line when cursor is end of buffer.
+(setq next-line-add-newlines nil)
+　これ、ファイル末部でC-n押しても空行をつくらない、っちゅーことを指示してる。
+　何でC-n?とか思うけど、Emacsのカーソル移動キーバインドで一行下が、C-nになっているから
+なのだ。
+
+
+　あー・・・何か、xemacs -nwが使えることがたった今、判明したよ。めんどくせ。
+　Xemacsに乗り換えよーかな。Canna使えるしい。
+
+　あー！！めちゃくちゃむかつくー！！
+　性に合わない。とことん合わない。
+
+　というか、今試したらTeraterm上からviに対して、IMEで普通に日本語文字列送信できたから。
+　もういい。というか、文字コード変換に関してもnkfとかiconv使えば良いだけだし。
+　もういいや。なんか、Emacsってある程度妥協が必要。でも、viに慣れてくるとその妥協が
+うざくなってくるので。もういいや。
+
+

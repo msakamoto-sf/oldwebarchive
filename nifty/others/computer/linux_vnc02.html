@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VNCの使い方・その２</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>VNCの使い方・その２</h1>
+初版作成：2003/09/07<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<p>
+<h2><a name="preface">前書き</a></h2>
+　VNCの奇妙さに惹かれて、思ったよりも簡単そうだったこともありいろいろ試してみました。<br>
+　といってもほとんどVNCのサイトのドキュメントページに解説してあるものばかりですが。<br>
+　とりあえず、SSH越しに使えないかなとWindowsから頑張ってみたり。あとは画面サイズ変更できないかな、とか、ウインドウマネージャ変更できないかな。とか。<br>
+<br>
+　その結果として、実質上今回でVNCに関しては一通り使えるようになってしまいました。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+
+<p>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">WindowsクライアントからSSH越しにVNCを使う</a></li>
+	<li><a href="#main_02">VNCのウインドウサイズを変更してみる</a></li>
+	<li><a href="#main_03">VNCのウインドウマネージャを変更してみる</a></li>
+</ol>
+
+<p>
+<font size=+1><b><a name="main_01">WindowsクライアントからSSH越しにVNCを使う</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　今回はWindowsからだったらほぼ定番の、TeraTerm Pro とそれのSSH版である TTSSH を使ってSSH転送機能による VNC over SSH を試してみました。<br>
+　TeraTerm Pro と TTSSH 及びその日本語化（兼諸問題フィクス）パッチの入手やインストール方法については、至る所で記述されているのでここではわざわざ述べません。入手だけならVectorで検索すれば問題ないと思います。<br>
+　というわけで、TeraTerm Pro と TTSSH のインストールはすでに完了しているものとします。<br>
+<br>
+　まず、VNC over SSH の基本原理の説明を簡単に済ませましょう。SSHには<b>SSH転送機能（SSHポートフォワード）</b>と呼ばれる機能があります。下の図を見てください。<br>
+<img src="vnc_ssh/vnc_ssh00.jpg"><br>
+<br>
+　このように、あるポート（上の図では5902番）を使ったやりとりを、SSH暗号化をかけた上で、別のポートへ転送する機能のことです。<br>
+<br>
+　SSH転送はクライアント側で実装すればよく、サーバー側（上の図ではvncserver側）では特に設定は入りません。<br>
+<br>
+　んで、ですね。<b>ポート番号に注意</b>していただきたいのです。<br>
+　VNCではポート番号を基本的に、<font size=+3>5900+ディスプレイ番号</font>のポートを使用します。つまり、vncserverコマンドでもし「:1」とか返ってきたら、5900+1=5901番がVNCの使うポート番号になります。「:2」が返ってきたら5900+2=5902番になります。<br>
+　ここでUNIX/Linux とWindows の差がちょこっとでます。vncserverを実行している<b>VNCサーバーがWindowsの場合、通常ディスプレイ番号が０番になる</b>そうです。んで、<b>UNIX/LinuxのVNCサーバーの場合、通常ディスプレイ番号が１番になります。</b><br>
+　従って、（もしサーバー側でFireWallの関係で特殊なポート番号に指定しない限り）通常は Windowsサーバーなら 5900 番、UNIX/Linuxなら 5901 番がVNCの利用する通信ポートになります。<br>
+<br>
+　というわけで、TTSSHを使った VNC over SSH の設定を実際にやってみます。<br>
+　まず、TTSSHを起動します。最初に接続先を求めるダイアログボックスが開かれますが、ここは一旦「キャンセル」ボタンをクリックします。「未接続」状態のTeraTermウインドウが表示されます。<br>
+　続いて「設定」メニューの「SSH転送」というそのものズバリを選択します。「TTSSHポート転送設定」なるダイアログボックスが表示されますので、「追加」をクリックします。<br>
+　「SSHポート転送」の設定ダイアログボックスが表示されます。ここで、下のようなポート転送設定をします。192.168.2.20が今回使用するVNCサーバーになります。<br>
+<img src="vnc_ssh/vnc_ssh01.jpg"><br>
+<br>
+　先ほど説明しましたとおり、実際にVNCサーバーと通信するポート番号が5901番になっている点にも注意してください。<br>
+<br>
+　追加したら、「TTSSHポート転送設定」ダイアログボックスはこんな風になりました。5902番が192.168.2.20宛の5901番に転送されるよう、設定されていることがわかります。「OK」ボタンをクリックします。<br>
+<img src="vnc_ssh/vnc_ssh02.jpg"><br>
+<br>
+　ではサーバー側でvncserverを実行します。UNIX/Linuxを使ったので、予想通り「:1」となり、ディスプレイ番号は1番。よってポート番号5901番になります。<br>
+　いよいよクライアント側から接続してみます。vncviewerを実行します。<font size=+3>接続先に注意してください。ポート転送を行うマシンはWindowsマシン自身ですから、IPアドレスは127.0.0.1、ポート番号は5902番ですから、逆算してディスプレイ番号は２番になります。</font><br>
+<img src="vnc_ssh/vnc_ssh03.jpg"><br>
+<br>
+　パスワードが聞かれてきますが、ここではvncserver側で登録したパスワードで大丈夫です。SSHのパスワード・パスフレーズとは無関係です。<br>
+　もしポート番号・IPアドレス・ディスプレイ番号に間違いがなければ、無事ディスプレイが表示されるはずです。<br>
+<br>
+　<b>間違って「192.168.2.20:1」などとすると、SSH転送機能を使わずにVNCサーバーにつながってしまいます。</b>注意してください。SSH転送はあくまでも、クライアント側から明示的に用いなければ実行されません。サーバー側ではいつも通り、暗号化無しの 5901 番で接続を受け付けてくれています。（ではvncserverのパスワードが危険ではないか？という疑問が生じますが、どうやら乱数を使って毎度毎度何らかの暗号化を施してからパスワードをやりとりしているようなので、そこは安心して良いかもしれません。問題は認証終了後だということです。）<br>
+<br>
+　これで Windowsクライアントを利用した VNC over SSH の使用方法は一旦おしまい。UNIX/Linuxクライアントの場合は OpenSSH でも入れて、「ssh -L 5902:localhost:5901 vncserver」とでも打ち込めば大丈夫みたいです。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_02">VNCのウインドウサイズを変更してみる</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　vncserverはデフォルトでXGA, 1024x768の大きさでXを起動します。<br>
+　ところが、<font size=+3>もしもクライアント側もXGAだった場合、</font>VNC画面の脇にスクロールバーが表示されてしまうんですよねえ。「全画面表示」とかいう機能もなさそうですし。<br>
+　というわけで、せめて SVGA 800x600 の大きさでXを起動させたいものです。<br>
+<pre>
+$ vncserver -geometry 800x600
+</pre>
+　以上。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_03">VNCのウインドウマネージャを変更してみる</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　<font size=+3>いつまでも twm を使いたくはありません。</font>いや、twmが駄目だと言っているわけではないのです。fvwmやblackboxやKDEなどを使えるなら、素直にそちらを使おうじゃないか・・・という話です。<br>
+　これも非常に簡単でした。<br>
+<br>
+　vncserverがXを起動した後に実行するスクリプト、すなわち通常のXで言うところの「.xinitrc」ファイルは<font size=+3>‾/.vnc/xstartupスクリプト</font>です。<br>
+<br>
+　<font size=+3>結局、‾/.xinitrc を ‾/.vnc/xstartup へコピーしてしまえば良いわけです。</font><br>
+<br>
+　実行結果です。フォント情報は崩れてしまいますが、KDEでもほぼ実用に耐えうる画面です。お好みにより、vncserverの時だけblackboxやfvwmなど軽めのWMを実行するようにすればまた楽しみも増えるでしょう。元の.xinitrcが良くできているおかげで、日本語入力もATOKXなりCannaなりを使って利用できます。（さすがに商用のXのように、Windows上のIMEからそのまま入力というわけにはいきませんが・・・）<br>
+<img src="vnc_ssh/vnc_ssh04.jpg"><br>
+<br>
+　ちなみに背景画像は<a href="http://www4.plala.or.jp/hituji/index.html" target=_blank>十四羊交差点</a>の暑中見舞い画像より頂きました。<br>
+<br>
+
+<p>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　う〜〜ん。なかなかVNCって、おもしろいツールですねえ。んでもって、プログラム自体のファイルサイズも小さい。Windows用でも600KB無いし。Windows用のクライアントだけなら、zip圧縮ファイルで30KB無い！それでいて、この機能・・・。VMwareや商用Xに比べるとクライアントホストOSとのデータのやりとりや、クライアントホスト上のIMEから直接日本語入力できないなど常用する分にはいろいろと機能不足の面もありますが、<font size=+3>いざというときの十徳ナイフ</font>としては必要十分でしょう。大助かりです。リモートでXがこんなに簡単に使えるだけでも。<br>
+　というわけで、これで一通りVNCは使えるようになったと思います。ぜひ、サーバー管理のお供に。あるいは Linux の実験・練習をWindowsから。とか。使い道はいろいろ広がりますので、試してみてください。<br>
+　というわけで今回はこの辺で失礼します。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

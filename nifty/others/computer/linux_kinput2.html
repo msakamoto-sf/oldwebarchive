@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kinput2への「変換」キー対応パッチの作成</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>kinput2への「変換」キー対応パッチの作成</h1>
+初版作成：2003/09/18<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<p>
+<h2><a name="preface">前書き</a></h2>
+　最近のTLXW8ではatokxが入っていたりして、デフォルトの日本語入力が随分やりやすくなっています。<br>
+　しかし。いかんせんatokxのUI、起動が遅い。<br>
+　何よりもBSD系列も視野に入れると、どうしてもやっぱ、基本のCanna+kinput2を使えなければ、辛い。<br>
+<br>
+　というわけでCannaとkinput2をしばらくちょこちょこ勉強してたのですが・・・ふと気づきました。<br>
+　<font size=+3>「変換（前候補・次候補）」が効かない。</font><br>
+<br>
+　ATOKシリーズの場合、通常全角・半角切替えが「変換」キーに設定されています。んで、これ結構使ってる内になれてしまうんです。位置的にちょうど右手親指のすぐ隣にあるので。基本的な利き手が右手ということもあり、凄い便利なんですな。<br>
+　少なくとも左手小指を更に伸ばさなくては押せない「半角／全角」キーよりは数倍ましな位置にあります。<br>
+　そういうわけで、是非ともCanna+kinput2でも「変換」キーで全角・半角入力をトグルしようと.cannaをいじくったのですが・・・先ほどの通り、どうも「変換」キーが認識されていないようなんです。<br>
+<br>
+　いろいろ.cannaをいじくったりしたんですが。結局kinput2が元凶じゃねえのかと思ってkinput2のソースコードを斜め読みしたら、<font size=+3>j106キーボードの「変換」キーを無視してました。</font><br>
+<br>
+　そういうわけで、以下、この発見に至るまでのざっとした過程及び修正パッチの作成に至るまでの経過です。<b>ちなみに対象パッケージは TurboLinux workstation 8用に作成された kinput2-3.0-8 ですので、他のディストリビューションをお使いの人は注意してください。</b><br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+
+<p>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">Cannaとkinput2の関係</a></li>
+	<li><a href="#main_02">.cannaファイルの役目と「変換」キー</a></li>
+	<li><a href="#main_03">Xとkinput2と「変換」キー</a></li>
+	<li><a href="#main_04">Cannaと.cannaとkinput2とXと「変換」キーのまとめ</a></li>
+	<li><a href="#main_05">修正パッチの作成とパッケージ化</a></li>
+	<li><a href="#main_06">もっと簡単にxmodmapでキーを入れ換えてしまいませう。</a></li>
+</ol>
+
+<p>
+<font size=+1><b><a name="main_01">Cannaとkinput2の関係</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　そもそもCannaとkinput2はどんな役割分担をしているのか？果たして.cannaはどちらの設定ファイルなのか？kinput2自体の設定はどこで行えるのか？<br>
+　・・・意外とこれらの基本的かつ重要な問いに対して答えているサイトは少ないような気がします。・・・いえ、単に調べてないだけなんですけど。<br>
+　<font size=-1>でもね、でもね。パッケージ付属のドキュメント読んでるだけでもパッチ作れちゃうんだよ？何かあればすぐGoogleっていうのが馬鹿らしくなってこない？ねえ？</font><br>
+<br>
+　というわけで、CannaとXとkinput2がどんな関係になっているのか簡単な図にしてみました。<br>
+<img src="kinput2_01.jpg"><br>
+<br>
+　Cannaサーバーとkinput2の間は、Canna専用の通信プロトコルで結ばれています。<br>
+　さて、この図からCannaとkinput2とXのつながりを考えてみます。（おそらくこのページを訪れた方のほとんどがkinput2とCannaについては大分学習済みだと思われますので、単なる復習になると思いますがご勘弁を。）<br>
+<ul>
+	<li>キーボード入力を最初に受け取るのはXである。</li>
+	<li>入力されたキーボードはXを通り、kinput2に入る。</li>
+	<li>kinput2は入力されたキーをそのままCannaプロトコルに乗せる<b>のではなく、</b>kinput2内で何らかの取捨選択処理を行ってから、<b>Cannaの定めるキーコードに変換して</b>Cannaに伝える。</li>
+	<li>Cannaが実際に認識するキーは、結局<b>kinput2が喋ったキーのみ</b>となる。</li>
+</ul>
+　ここら辺はCanna+kinput2を取り上げたサイトやいろいろなドキュメント上で取り上げられているので今更・・・と言う感じです。が、今回私はここら辺が混乱していたため多少回り道してしまったのです。はい。というわけで混乱した状態からすっきりした状態へ、足跡をたどっていきたいと思います。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_02">.cannaファイルの役目と「変換」キー</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　Cannaのカスタマイズとくれば、真っ先に思い浮かぶのが「.canna」ファイルです。とにもかくにも、どんなサイトにもこのファイルのカスタマイズは必ず言及されているはずです。<br>
+　んで、ですね。このファイルの中身。これ、Lispで書かれているのも殆どの人が知っています。<br>
+<br>
+　じゃあ、EmacsLispというのもあるけどそれとの関係は？<br>
+　Cannaと.cannaを勉強していて最初に浮かんだ疑問がこれでした。「.cannaの解釈にはEmacsが一役買っているのかしらん」と考えてしまったんです。何でこんなこと考えたかというと、参考書には .canna のカスタマイズ項目と Emacsでtamagoやえせかんなを使うためのEmacs-Lispのカスタマイズ項目がまぜこぜで載っていたからです。<br>
+　んじゃあ、Cannaパッケージを調べてみようとみてみたら・・・Emacsは全然でてきません。<br>
+<br>
+　後になってCannaのマニュアルPDFを読んでわかったんですが。<font size=+3>.cannaで使われているLispは"canlisp"と呼ばれるCanna独自のLispで、Emacsとは何の関係もない。</font><br>
+　これ、注意すべき第一点です。<b>これに気づかないと、.cannaファイル中でEmacsLispのキーバインド定義をしてしまったりという間違いを犯します。</b><br>
+<br>
+　では.cannaファイル中でcanlispを用いると「変換」キーで半角・全角のトグルはどう設定されるかというと・・・（ちなみにデフォルトに近い設定をいじくった場合です）<br>
+<pre>
+(global-set-key "¥Xfer" 'henkan-nyuuryoku-mode)
+(set-key 'henkan-nyuuryoku-mode "¥Xfer" 'hankaku-eisu-mode)
+</pre>
+　こんな感じです。canlispのドキュメントによると、jp106キーボードの場合ではキー文字列は次のような対応になるそうです。<br>
+<pre>
+"¥Nfer"→「無変換」キー
+"¥Xfer"→「変換」キー
+</pre>
+　たとえばjust.cannaなどでは最初は「無変換」を表す"¥Nfer"が使われていました。<br>
+<br>
+　では、これで「変換」キーでめでたくトグルできるようになったのかというと・・・<b>トグルできてりゃパッチなんか作ってないんだよ。</b><br>
+　動きません。少なくとも、TLXW8のkinput2パッケージでは動きません。<br>
+　ちなみにkinput2を再起動する方法は<br>
+<pre>
+$ ps ux
+... (kinput2のプロセスIDをゲット) ...
+$ kill -9 (kinput2のPID)
+$ kinput2 -canna
+</pre>
+　です。<br>
+<br>
+　ここで.cannaをあれこれいじくっても無駄です。最初を思い出してください。<b>Cannaがキーを認識するのは、kinput2などのXIMからCannaプロトコルを使って送られてきたキーコードのみだ、ということを。</b><br>
+　.cannaの段階で認識できないと言うことは、すなわちXIM(この場合はkinput2)から<b>Cannaの認識する「変換」キーコードが送られてきていない</b>ということです。<br>
+　実際にソースを調べてみましょう。<br>
+<pre>
+# ls
+CHANGES.jp  Canna.conf.conf  Canna_conf.bak  INSTALL     Imakefile  README.jp  WHATIS.jp  canuum/   cmd/  doc/  misc/          sample/  shion/
+Canna.conf  Canna.conf.dist  ChangeLog       INSTALL.jp  README     WHATIS     canna/     ccustom/  dic/  lib/  mkrelease.sh*  server/
+# grep -r -n Xfer *
+canna/keydef.h:28:#define CANNA_KEY_Xfer                0x81
+canna/keydef.h:46:#define CANNA_KEY_Shift_Xfer  0x91
+canna/keydef.h:55:#define CANNA_KEY_Cntrl_Xfer  0x97
+...
+ccustom/keydef.h:28:#define CANNA_KEY_Xfer              0x81
+ccustom/keydef.h:43:#define CANNA_KEY_Shift_Xfer        0x91
+ccustom/keydef.h:52:#define CANNA_KEY_Cntrl_Xfer        0x97
+...
+</pre>
+　canna/keydef.hをみてみると、制御系のキーコードを定義しているファイルのようです。ちなみに「無変換」キーを表す"Nfer"を調べてみると・・・<br>
+<pre>
+# grep -r -n Nfer canna/keydef.h 
+27:#define CANNA_KEY_Nfer               0x80
+45:#define CANNA_KEY_Shift_Nfer 0x90
+54:#define CANNA_KEY_Cntrl_Nfer 0x96
+132:#define IROHA_KEY_Nfer              CANNA_KEY_Nfer
+147:#define IROHA_KEY_Shift_Nfer        CANNA_KEY_Shift_Nfer
+156:#define IROHA_KEY_Cntrl_Nfer        CANNA_KEY_Cntrl_Nfer
+</pre>
+　となりました。<br>
+<br>
+　では実際、ここで定義されている数値と実際にXが受け取る「キースキャンコード」は関連性があるのでしょうか？最初に復習した限りでは、XとCannaを取り持つのはkinput2の役目です。となると、Xからやってきたキースキャンコードとの関連性はkinput2が決めていることになります。とにかく、実際にXでの「無変換」「変換」キーのコードを調べてみましょう。<br>
+　こういうときには「xev」(X event)プログラムを使います。Xに標準でくっついてきます。<br>
+<br>
+　ターミナルなどで「xev」とタイプします。下のようなウインドウが表示されます。<br>
+<img src="xev.jpg">
+　このウインドウ上でマウスを動かすと、起動したターミナルウインドウの方ですごい量のメッセージが流れていきます。xevはマウスやキーボードのイベント情報をXからそのまま受け取り、端末に流してくれるプログラムです。これを使うとマウスやキー入力のX内部でのステータスをみることができます。<br>
+　これを使って「変換」「無変換」を叩いたときのメッセージをどうにかして捉えてみますと・・・<br>
+<pre>
+・「変換」キー
+state 0x20, keycode 129 (keysym 0xff23, Henkan_Mode), same_screen YES,
+・Shift+「変換」キー
+state 0x1, keycode 129 (keysym 0xff7e, Mode_switch), same_screen YES,
+・「無変換」キー
+state 0x0, keycode 131 (keysym 0xff22, Muhenkan), same_screen YES,
+(なお、「無変換」キーに関してはShiftキーの影響はありませんでした。)
+</pre>
+　・・・どうも・・・関連性は・・・無いような気がしてきます。つまり、単純にキーコードに定数を加減算したのがCANNA_KEY_***になっているのではない、ということです。<br>
+　というわけでそろそろいい加減Cannaから一旦離れます。これ以上Cannaにおいて「変換」キーを有効にするために調べるものはたぶん、ありません。Xとkinput2を調べてみなくては真相は分からないでしょう。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_03">Xとkinput2と「変換」キー</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　というわけで、まずは先ほどのxevで得られた「Henkan_Mode」や「Muhenkan」「Mode_switch」はどこに隠れているのか探します・・・つっても大体検討はついてますけどね。<br>
+　こういった定義ファイルはincludeを調べてみた方が早そうです。<br>
+<pre>
+$ cd /usr/include/X11/
+$ ls
+...
+... keysym.h keysymdef.h ...
+...
+$ grep -r -n Henkan_Mode *
+keysymdef.h:86:#define XK_Henkan_Mode           0xFF23  /* Start/Stop Conversion */
+keysymdef.h:87:#define XK_Henkan                0xFF23  /* Alias for Henkan_Mode */
+$ grep -r -n Muhenkan *
+keysymdef.h:85:#define XK_Muhenkan              0xFF22  /* Cancel Conversion */
+</pre>
+　どんぴしゃりでヒットしました。16進数表記もxevの結果と一致しています。<br>
+　ではここでちょっと寄り道。果たしてこれらの定義は、Cannaのソースファイルで使われているのか？grepしてみればわかりますが、使われてません。<br>
+<br>
+　んでわ。<b>kinput2でこれらの定義は使われているのか？</b><br>
+　結論から言います。少なくともTLXW8用のkinput2-3.0-8では<font size=+3>XK_Muhenkan(「無変換」キー)は使われていますが、XK_Henkan_Mode(「変換」キー)は全く使われていません。</font><br>
+<pre>
+$ grep -r -n XK_Muhenkan *
+lib/Canna.c:1311:    case XK_Muhenkan:
+lib/Canna.c:1618:  {(unsigned char)<b>CANNA_KEY_Nfer</b>,      XK_Muhenkan,    0},
+lib/Canna.c:1631:  {(unsigned char)<b>CANNA_KEY_Shift_Nfer</b>,        XK_Muhenkan,    ShiftMask},
+lib/Canna.c:1638:  {(unsigned char)<b>CANNA_KEY_Cntrl_Nfer</b>,        XK_Muhenkan,    ControlMask},
+</pre>
+　しかもですよ？<b>XK_MuhenkanにはしっかりとCANNA_KEY_Nferが割り当てられているではありませんか。</b><br>
+<br>
+　では、逆にCANNA_KEY_Xferを調べてみると・・・
+<pre>
+$ grep -r -n CANNA_KEY_Xfer *
+...
+lib/Canna.c:1619:  {(unsigned char)CANNA_KEY_Xfer,    XK_Kanji,       0},
+...
+</pre>
+　・・・見事に別のキー（「漢字」キーという、SolarisなどのUNIX系キーボードで使われている）が割り当てられているようです。<br>
+<br>
+　調べてみると、CANNA_KEY_*とXK_*をつなげているのは lib/Canna.c 中の1600〜1670行目くらいにある「cannakeymap[]」という構造体の配列です。<br>
+　あと、「checkIfFunctionalChar(event_struct, keysym, buffer_return, n_buffer)」という関数でもswitch-case文中でXK_*系列のチェックをしていました。<br>
+<br>
+　ここまでくれば敵（？）の喉元まで迫ったも同然。XK_Kanjiではなく、XK_Henkan_ModeをCANNA_KEY_Xferと結びつけるようcannakeymap[]を修正し、checkIfFunctionalChar関数の方でもXK_Kanjiと同様のcase文でXK_Henkan_Modeを追加すれば晴れて「変換」キーは「CANNA_KEY_Xfer」へ結ばれ、"¥Xfer"キーバインドが効き始めるわけです。<br>
+　というわけでいよいよ修正パッチの作成に入ります・・・の前に。ちょこっと今までの関係を整理してみます。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_04">Cannaと.cannaとkinput2とXと「変換」キーのまとめ</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　今までの関係を「修正前」と、期待される「修正後」で整理してみます。<br>
+<br>
+・修正前：kinput2側でCANNA_KEY_Xferを送出するキーがXK_Kanjiになってしまっていた。XK_Henkan_Modeは未使用。<br>
+<img src="kinput2_02.jpg"><br>
+<br>
+・修正後：XK_Henkan_ModeでCANNA_KEY_Xferを送出するよう変更する。XK_Kanjiは無効化する。<br>
+<img src="kinput2_03.jpg"><br>
+<br>
+　では、いよいよパッケージの修正・パッチ作成へと移ります。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_05">修正パッチの作成とパッケージ化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　パッケージの作成ですが、注意点があります。今回のSRPMを利用するには Canna-devel と Wnn6-devel パッケージが必要です。<b>ようするにCannaとWnn6のヘッダファイルが要り用なわけ。</b>というわけで、入れておくかソースから手動でインストールしておいてください。<br>
+<br>
+<del>今回作成したパッチ、SRPM, RPMファイルは以下のリンクから入手できます。</del><br>
+2008/11月現在、情報が古すぎる為リンク削除。
+<table border>
+<tr><td>パッチ</td><td><del>kinput2-v3-jp106_xfer.patch</del></td></tr>
+<tr><td>RPM</td><td><del>kinput2-3.0-8_jp106_xfer.i586.rpm</del></td></tr>
+<tr><td>SRPM</td><td><del>kinput2-3.0-8_jp106_xfer.src.rpm</del></td></tr>
+
+</table>
+<br>
+　それでは実際の作成過程を追って行きましょう。<br>
+<pre>
+$ su -
+# rpm -ivh kinput2-*.src.rpm
+# cd /var/src/rpm/SPECS
+# rpm -bp kinput2.spec
+...
+# cd ../BUILD/
+# cp -rp kinput-v3 kinput-v3.orig
+# cd lib/
+# grep -r -n XK_Kanji
+...(Canna.c と Canna.ia64 に変更必要箇所があるのを確認) ...
+</pre>
+　すでにIA64用のパッチが当たっているらしく、Canna.c とCanna.ia64の二つがありました。どっちがどっちだかわかんなくなったので、とりあえず両方を以下のパッチっぽく変更します。<br>
+<a href="kinput2-v3-jp106_xfer.patch">kinput2-v3-jp106_xfer.patch</a><br>
+　んで、変更したらコンパイルしてみます。<br>
+<pre>
+# cd /var/src/rpm/SPECS
+# rpm -bc kinput2.specs
+...
+（異常なく終了した場合）
+# cd /var/src/rpm/BUILD
+（できたkinput2を念のためローカルコピーし、動作を確認してください。）
+（動作確認できればパッチ作成に移ります。）
+# cd /var/src/rpm/BUILD
+# diff -uNr kinput-v3.orig kinput-v3 &gt; kinput2-v3-jp106_xfer.patch
+# cp kinput-v3-jp106_xfer.patch /var/src/rpm/SOURCES/
+# vi /var/src/rpm/SPECS/kinput2.spec
+（ここでパッチを当てるよう記述します。具体的には
+Patch6: kinput2-v3-jp106_xfer.patch
+　としてパッチを定義した後、
+%patch5 -p1 -b .ia64
+%patch6 -p1 -b .orig
+　のようにパッチを当てさせるコマンドを記述します。）
+# rpm -ba /var/src/rpm/SPECS/kinput2.spec
+</pre>
+　以上です。エラー無くパッケージが作成できれば終了です。<br>
+　今回はパッチ作成から行いましたが、前掲のパッチをDLし、直接SPECファイルを編集してパッチをあてても大丈夫かもしれません。<br>
+<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_06">もっと簡単にxmodmapでキーを入れ換えてしまいませう。</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　今更ながら気づいたんですが・・・<br>
+　<font size=+3>xmodmapを使って 「変換」キーのキーコードを XK_Kanji に割り当ててしまえばどうにかなっていたんじゃ・・・</font><br>
+　というわけでやってみました。とりあえず、xmodmapがxinitrc中で呼ばれているか確認です。<br>
+<pre>
+$ cat .xinitrc
+...
+usermodmap=$HOME/.Xmodmap
+...
+if [ -f $usermodmap ]; then
+    xmodmap $usermodmap
+fi
+</pre>
+　というわけで$HOME/.Xmodmapが存在していた場合、自動でxmodmapが実行されます。ほんじゃ.Xmodmapを設定しませう。<br>
+　xmodmapに読み込ませるファイルはキー設定を以下の順で設定します。<br>
+<br>
+<tt>keycode <i>キーコード</i> <i>キーシム</i></tt><br>
+<br>
+　<i>キーコード</i>というのが、xevで表示される所の「keycode 49」の数字です。<br>
+　<i>キーシム</i>というのがxevで表示される所の「(keysym 0xff2a, Zenkaku_Hankaku)」の「Zenkaku_Hankaku」で、/usr/include/X11/keysymdef.hで定義されている「XK_Zenkaku_Hankaku」から「XK_」を取り除いた部分です。<br>
+<table border>
+<tr><td>キー表記</td><td>キーコード</td><td>キーシム</td></tr>
+<tr><td>(例)「半角／全角(漢字)」</td><td>49</td><td>Zenkaku_Hankaku</td></tr>
+<tr><td>「変換」</td><td>129</td><td>Henkan_Mode</td></tr>
+</table>
+<br>
+　以上より、「変換」キーを「XK_Kanji」として認識させるには以下の行を.Xmodmapに追加すれば良い事になります。<br>
+<pre>
+keycode 129 = Kanji
+</pre>
+　これでシステムを再起動させ、xevを実行させてみます。<br>
+<pre>
+$ xev
+...
+ keycode 129 (keysym 0xff21, Kanji)
+...
+</pre>
+　このように「変換」キーがX上では「漢字」キーとして認識されている事が確認できました。試しに.cannaでXferによる全角／半角切替えを実験してみたところ見事に成功。<br>
+<br>
+　<font size=+3>結局これが一番簡単な方法でした・・・(泣)。</font>ま、まあ良いか・・・ソースコードのハックは楽しかったし・・・kinput2とCannaの関係も整理できたし・・・。<br>
+　というわけで。せめてもの愚痴がてらに、後書きの方に今回の経験を生かしてさらにkinput2を改造する予定(は未定)を書き散らしたり。<br>
+<br>
+以上。<br>
+<br>
+
+<br>
+
+<p>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　xmodmapについては<b>正直やられた、という感じ</b>でしたねえ・・・。ただ・・・なかなかソースコードまで読み解かないとそこまで到達できません。だって、ここに至るにはkinput2とCannaとcanlispと、更にXのキー設定の知識全てが必要になるわけです。これは、かなり難しいなあと。<br>
+　まあでもせっかくここまでハックしたのですから、もうちょっとやりたい事もあるかな、と。kinput2に限りませんが・・・<br>
+<ul>
+<li>Cannaの方で「半角／全角」でCannaを終了させる。これとkinput2のXリソースを併用すれば、真に「半角／全角」キーによるXIMのトグルが可能になるはず。</li>
+<li>MacOSXで使用した場合、Macのキーボード用にkinput2をカスタマイズする。</li>
+</ul>
+　予定は未定ですが。<br>
+<br>
+　Linux/UNIXを使っていて、特に昔ながらのツールを使っていて最近特に思うのはですね。どうも<font size=+3>「WindowsとUNIX文化の対立」ではなくて、「日本人の使い心地と欧米人の使い心地の対立」が隠れている</font>ような気が最近するのです。<br>
+　まあ結局、「NEC PC-98時代のインターフェイス vs PC-DOS/Unixワークステーションのインターフェイス」に帰結するのかもしれませんが。<br>
+<br>
+　特にEmacsに関しては愛憎半ばといった感じが強い。よくよく考えたらEmacs作ったのはRMS氏なんだよね。根本思想は素晴らしいとは思うんだけど・・・もうちょっとインターフェイス部分改善できなかったのかなあとか。ファンクションキーが使えるんだったら、画面下部にダイナミックなメニューインターフェイス(当然拡張可能)を設置できてたんじゃないかなとか。<br>
+　あと、なんでWin32版のEmacsは遅いのかな、とか。なんでWindowsでも/usr/local/...に固執するのかな、とか。<br>
+<br>
+　あと最近とみに良く気になるのが、なんでみんなキーバインドしちゃうのかな、とか。<font size=+3>みんなC-cにバインドしたり、連想不可能なキーシーケンスにバインドする意図が分からない。また、分かったとしても賛成する気になれない。</font><br>
+　無駄に記憶力使ってるような気がする。YaTeXのキーバインドははっきり言って無駄な物も多いような気がする。どうせリファレンス脇目に打ち込んでいるんだろうし。begin-endを正しく補完してくれるなら十分だ。<br>
+<br>
+　まあ偉そうな事言ってますが、これ書いてるエディタ自体が既にEmacsなわけで。何だかんだ言いつつもEmacs面白いことに変わりは無いわけで。<br>
+<br>
+　文句言いつつ使うのは人の性ですか。文句言うから進歩するのかな。まあいいや。というわけで何だか話が拡散しましたが、とりあえず「変換」キーで「半角・全角」切替えを実装する当初の目的は二種類の方法で達成できるわけです。(おお！？二つの方策を提供できるのは至上だ。珍しく良い結果に終った。)<br>
+　kinput2に関しては既に一時配布元が不明になっているらしく、各ディストリビューションそれぞれ、あるいは有志のハッカーそれぞれがもろもろパッチやらパッケージやらtarボールやら、初心者向けTipsやらなにやらかにやら書いているわけで。今更な気もしますが・・・ま、やって良かったし現に違和感無いし。使いやすければいいでしょう。<br>
+　勉強になりましたし、ね。<br>
+<br>
+　それでは今回はこの辺で失礼します。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

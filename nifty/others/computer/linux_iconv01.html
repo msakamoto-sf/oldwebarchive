@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iconvその１(ブックマーク変換Konqueror→Netscape7)</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>iconvその１(ブックマーク変換Konqueror→Netscape7)</h1>
+初版作成：2002/10/25<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+<br>
+　先日Linux版のNetscape7が出ていました。バイト先ですでに7pr1を試用していましたのでその安定性や、使い心地の良さには信頼があったので入れてみました。<br>
+　で、それまではKDE付属のKonqueror（以下Konq）を使っていたのですが、ブックマークをKonqからネスケ用に変換してみようと思い立ちました。<br>
+　ところが、Konqのブックマークエディタのエキスポート機能を使ったは良いがうまくいかずの七転八苦・・・とまでは言いませんが、ちこっとめんどくさかったし。Mozillaとの相性もあるので、今後のためにHP上にメモっときます。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+　それほど長くもないんですが、内容がiconv辺りで区切れますので。ちこっとだけ目次をつくっときます。<br>
+<ol>
+	<li><a href="#main_01">とりあえず素直にエキスポート</a></li>
+	<li><a href="#main_02">Mozillaを既に一度起動していて、設定ファイルの優先順位。</a></li>
+	<li><a href="#main_03">ネスケのブックマークの文字コード</a></li>
+	<li><a href="#main_04">iconvの使い方</a></li>
+	<li><a href="#main_05">ネスケのブックマークはチェックが厳しい</a></li>
+</ol>
+<br>
+<b><a name="main_01">とりあえず素直にエキスポート</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて。とりあえずKonqと起動して、ブックマークの編集でブックマークエディタを起動しまして。「ファイル」メニューの「Netscapeへブックマークをエクスポート」を選択します。<br>
+　すると、<b>$HOME/.netscape/bookmarks.html</b>というのと、$HOME/.netscape/bookmarks.html.beforekdeという二つのファイルが生成されます。beforekdeというのが、大方の予想道理bookmarksのバックアップファイルです。Konqのブックマークエディタから行うことはこれくらいです。<br>
+<br>
+<b><a name="main_02">Mozillaを既に一度起動していて、設定ファイルの優先順位。</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　それではネスケを起動しましょう・・・。どうです？読み込まれましたか？っていうか、<b>正直な話もし読み込まれたとしても、口述の文字コードだのブックマークのヘッダ部分などのチェックがあってまともに表示されることはありません。</b><br>
+　従って。１．なんか何もブックマークとして表示されない。２．変化なし。相変わらずネスケのデフォルトのまま。の二通りになると思います。１．の人はここは読み飛ばしてください。<br>
+　２．ですが。これに該当する人はおそらく、既にMozillaを起動してしまっていて、.mozillaディレクトリが生成されてしまっている人たちだと思われます。<br>
+　TLXW8だけかもしれませんが、どうもNetscape7 for Linuxは、<b>.mozillaディレクトリがあればそちらの方を設定ディレクトリとして扱っているみたいです。</b>そのため.netscape/ディレクトリは無視されちゃうみたい。<br>
+　で、Mozillaのブックマークは<b>$HOME/.mozilla/default/(何かID値みたいな文字列).slt/bookmarks.html</b>です。<br>
+　んで、念のためbookmarks.htmlをbookmarks.html.defaultとでも変更して、Konqのブックマークエディタが作った$HOME/.netscape/bookmarks.htmlをコピーします。んで、今度こそと思ってネスケを起動すると・・・。<br>
+<br>
+<b><a name="main_03">ネスケのブックマークの文字コード</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　・・・はい。なーんも、ブックマークに表示されないと思います。きっと「ブックマークの整理」だの、「ブックマークの管理」だの、編集用メニューしか表示されないことと思われます。この原因は何か？ちょっと、<b>バックアップしておいたbookmarks.html.default</b>をlessやcatで覗いてみましょう。<br>
+　まず、catで試してみます。見事にデフォルトのブックマーク.htmlは文字化けするはずです(TLXW8)。次。lessで試してみます。TLXW8なら間違いなくlessでも文字化けするはずです。<br>
+　catはEUC-JPのみ対応です。lessはTLXW8やTLXS7など、最近のディストリビューションならShift_JISも自動判別して適切に表示してくれます。となると。これでも文字化けするとなると。・・・<b>そうです。UTF-8です。</b><br>
+　さてな。Shift_JIS←→euc-jpはNKFがあったけど。UTF-8に変換するコマンドなんてあったっけかな・・・。と思ってしばらく検索していたら。<b>iconvという変換ライブラリ</b>がありました。基本的に共有ライブラリを提供しているみたいですが、おまけでiconvというそのものズバリの名前のコマンドもくっついてくるみたいです。最近のディストリビューションには入ってきているはずですし、ソースからもビルド可能です。それでは、これを使って変換すれば大丈夫なのか？<br>
+　とりあえずiconvの使い方を確認しておきましょう。<br>
+<br>
+<b><a name="main_04">iconvの使い方</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　とりあえず、rpm -qa | grep iconvとか、iconvとか打ち込んでiconvが入っているか確認してください。最近のディストリビューションなら大丈夫だと思います。無い場合はネットで適当に検索して適当にビルドして適当にインストールしてください。<br>
+　んで。iconvコマンドの使い方ですが。<br>
+<tt>$ iconv [オプション] 変換元ファイル名</tt><br>
+　となります。オプションには以下のものがあります。<br>
+<table>
+<tr>
+	<td>-f, --from-code=NAME</td>
+	<td>変換元の文字コード</td>
+</tr>
+<tr>
+	<td>-t, --to-code=NAME</td>
+	<td>変換先の文字コード</td>
+</tr>
+<tr>
+	<td>-l, --list</td>
+	<td>使用できる文字コード一覧</td>
+</tr>
+<tr>
+	<td>-c</td>
+	<td>無効な文字を出力ファイルから除く</td>
+</tr>
+<tr>
+	<td>-o, --output=FILE</td>
+	<td>出力ファイル名</td>
+</tr>
+<tr>
+	<td>-s, --silent</td>
+	<td>警告メッセージを抑制</td>
+</tr>
+<tr>
+	<td>--verbose</td>
+	<td>処理情報の表示</td>
+</tr>
+<tr>
+	<td>-?, --help</td>
+	<td>ヘルプガイドの表示</td>
+</tr>
+<tr>
+	<td>--usage</td>
+	<td>短い使い方メッセージ</td>
+</tr>
+</table>
+<br>
+　ちなみに、<b>「man iconv」とやってもiconvライブラリの使い方しか表示されません。</b>のでご注意を。<br>
+　まあ、要するにですね。例えばeuc-jpからUTF-8へ変換するには以下のコマンドを打ち込めばいいわけです。<br>
+<tt>$ iconv -f EUC-JP -t UTF-8 -o bookmarks.html.euc-jp bookmarks.html.utf-8</tt><br>
+　ちなみにShift_JISから変換するには・・・<br>
+<tt>$ iconv -f SJIS -t UTF-8 -o bookmarks.html.sjis bookmarks.html.utf-8</tt><br>
+　そりでは。以上のことを踏まえて。<br>
+　１．とりあえず、元のブックマークはbookmarks.html.default。<br>
+　２．Konqからエクスポートしてきたのをbookmarks.html.kde。<br>
+　３．<tt>$ iconv -f EUC-JP -t UTF-8 -o bookmarks.html.utf-8 bookmarks.html.kde</tt><br>
+　４．lessとかcatとかで、ちゃんとUTF-8になってそうなのをチェックした後、<tt>$ copy bookmarks.html.utf-8 bookmarks.html</tt>でbookmarksファイルを上書き。<br>
+　さて。ネスケを起動してみましょう。<b>やっぱ、それでもNGだと思われます。</b><br>
+<br>
+<b><a name="main_05">ネスケのブックマークはチェックが厳しい</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　なーんででしょう？何度かbookmarks.htmlをデフォルトとかと取っ替えひっかえしてみた結果、どー考えてもネスケはコメント部分、或いはその他の部分までチェックしているっぽい。<br>
+　ネスケのデフォルトのbookmarks.htmlの冒頭はこんな感じです。<br>
+<pre>
+&lt;!DOCTYPE NETSCAPE-Bookmark-file-1&gt;
+&lt;!-- This is an automatically generated file.
+It will be read and overwritten.
+Do Not Edit! --&gt;
+&lt;META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"&gt;
+&lt;TITLE&gt;Bookmarks&lt;/TITLE&gt;
+&lt;H1&gt;Bookmarks&lt;/H1&gt;
+
+&lt;DL&gt;&lt;p&gt;
+    &lt;DT&gt;&lt;H3 PERSONAL_TOOLBAR_FOLDER="true" ID="NC:PersonalToolbarFolder"&gt;繝ｦ繝ｼ繧ｶ險ｭ螳壹ヤ繝ｼ繝ｫ
+繝舌�ｼ 繝輔か繝ｫ繝&lt;/H3&gt;
+    &lt;DL&gt;&lt;p&gt;
+</pre>
+　lessで見てるので、日本語の部分が文字化けてます。UTF-8だから。んで、Konqのエクスポートしてくれたファイルはどうなっているのかというと。<br>
+<pre>
+&lt;!DOCTYPE NETSCAPE-Bookmark-file-1&gt;
+&lt;!-- このファイルはKonquerorによって生成されました --&gt;
+&lt;META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=EUCJP"&gt;
+&lt;TITLE&gt;ブックマーク&lt;/TITLE&gt;
+&lt;H1&gt;ブックマーク&lt;/H1&gt;
+&lt;DL&gt;&lt;p&gt;
+&lt;DT&gt;&lt;A HREF="http://www.google.co.jp"&gt;Google&lt;/A&gt;
+&lt;DT&gt;&lt;H3 FOLDED &gt;TLXW8 Manual&lt;/H3&gt;
+</pre>
+　みたいな感じです。Konqの方はまだEUC-JPですので文字化けしてません。<br>
+　最初はTITLEタグが日本語だからいけないのかな？と思ってNetscape7デフォルトの"Bookmarks"に書き換えてみても、それでも駄目。<b>なんか、ネスケが起動してブックマークが読み込まれるとき、読み込みエラーですっからかんのブックマークとして上書きされているっぽいし。</b><br>
+　ショーがないのでviやらEmacsやらKateやら使ってNetscape7デフォルトの冒頭部分、DOCTYPEからH1のBookmarksまでに入れ替えてようやくちゃんと読み込んでくれました。<br>　<b>というわけで、以上で変換作業完了。</b><br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　ふー・・・。何か、最近UTF-8がはやりになりつつあるようで。NKFが無力になる日も近いと思うと、悲しいものがあります。また、euc-jpやShift_JISからUTF-8へは特に警告もなく変換できたのですが、UTF-8からeuc-jp,Shift_JISへはいくつか無効文字の警告が出てしまいました。今後の発展と、NKFの改良に期待をします。<br>
+　また、Netscape7のブックマークに関しては冒頭部分までチェックしているのかと思うと「やりすぎだろ・・・」とか思ってしまいます。独自タグとは言え、文法はHTMLですからユーザーが編集できる余地が残されていても良いと思うんだけどな・・・。そうじゃないとブラウザ間でのブックマークの移転が難しくなるし。<br>
+　まあ、最近は特にデザインに凝っていないページに関してはKonquerorで十分。どうしてもデザイン通りに見たいページはNetscapeやIEを使うようにしていますので。まあ、いいかな、と。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

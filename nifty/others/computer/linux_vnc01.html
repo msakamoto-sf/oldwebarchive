@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VNCの使い方</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>VNCの使い方</h1>
+初版作成：2003/09/07<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<p>
+<h2><a name="preface">前書き</a></h2>
+　お仕事の関係で、どうしても外部サーバーに X Windows でもってリモートログインする必要ができてしまったわけです。<br>
+　んで、sshでは接続できるのでどうにかしてVNCを入れなければ非常にピンチな状態だったわけです。<br>
+　というわけで、VNC(Virtual Network Computing) を導入してみました。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+
+<p>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">VNC の入手先</a></li>
+	<li><a href="#main_02">VNC の使い方(vncserver, vncviewer)</a></li>
+	<li><a href="#main_03">VNC の使い方(vncconnect)</a></li>
+</ol>
+
+<p>
+<font size=+1><b><a name="main_01">VNC の入手先</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　Xだけでも、Xプロトコル（というのかな？）を使ってリモートのXプログラムをローカルで実行できたりする機能があります。<br>
+　が、はっきり言って今回は調べるのが面倒だったので。それは使いませんでした。<br>
+<br>
+　VNCの場合、「RFBプロトコル」という、「Remote FrameBuffer」とかいう仕組みを使ったプロトコルを利用しているそうです。<br>
+　ようするに、Xをそのまま使うのではなく、RFBプロトコルでいろいろと使いやすくしてから利用しよう、という二段構えのシステム？みたいな。<br>
+　んで、RFBプロトコルはオープンなので、Linux/Unix/Windows版とマルチに使えるそうです。んで、サーバープログラム・クライアントプログラムともにフロッピーディスク１枚に収まる程軽い。というわけで、Windows←→Linux/Unix が非常に簡単にできる仕組みだそうです。<br>
+<br>
+　とにかくVNCを入手しなければ始まりません。元々はAT&amp;Tで開発されているようで、現在では
+<a href="http://www.realvnc.com/" target=_blank>http://www.realvnc.com/</a>
+　から入手できます。<br>
+<br>
+　DownloadページからLinux x86版のtarボールを入手し、展開します。今回入手したのは vnc-3.3.7-x86_linux.tar.gz でわずか 747KB程度。軽い。<br>
+　んで、いつも通り「tar zxvf」あたりで解凍しますと・・・<br>
+<br>
+<pre>
+-r--r--r--    1 fenjin   fenjin      18000  5月 11日  2002 LICENCE.TXT
+-r--r--r--    1 fenjin   fenjin       8829  2月  7日  2003 README
+-r-xr-xr-x    1 fenjin   fenjin    1387941  3月  1日  2003 Xvnc*
+-r--r--r--    1 fenjin   fenjin       6548  3月  1日  2003 Xvnc.man
+drwxr-xr-x    2 fenjin   fenjin       4096  3月  1日  2003 classes/
+-r-xr-xr-x    1 fenjin   fenjin      13849  3月  1日  2003 vncconnect*
+-r--r--r--    1 fenjin   fenjin       2223  3月  1日  2003 vncconnect.man
+-r-xr-xr-x    1 fenjin   fenjin       1991  9月 20日  2002 vncinstall*
+-r-xr-xr-x    1 fenjin   fenjin      19835 11月  2日  2002 vncpasswd*
+-r--r--r--    1 fenjin   fenjin       1537  8月 15日  2002 vncpasswd.man
+-r-xr-xr-x    1 fenjin   fenjin      13819 10月 30日  2002 vncserver*
+-r--r--r--    1 fenjin   fenjin       4237  9月 23日  2002 vncserver.man
+-r-xr-xr-x    1 fenjin   fenjin     144329  3月  1日  2003 vncviewer*
+-r--r--r--    1 fenjin   fenjin      14590  9月 20日  2002 vncviewer.man
+</pre>
+　というように、すでにバイナリ形式のプログラムが入っていました。<br>
+<br>
+　あとは「README」ファイルの通りにインストールします。つまり、<br>
+# ./vncinstall /usr/local/bin /usr/local/man<br>
+　すればおしまいです。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_02">VNC の使い方(vncserver, vncviewer)</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　VNCを使ってログインしたいサーバーを「VNCサーバー」と呼ぶことにします。<br>
+　VNCを使うクライアントマシンを「VNCクライアント」と呼ぶことにします。<br>
+<br>
+　最初にVNCサーバー側でVNCのサーバープログラムを起動する必要があります。このサーバープログラムの本体ファイルは「Xvnc」です。しかし、これを制御するためのPerlスクリプトが「vncserver」という名前で提供されており、こちらを適切なオプションを与えて実行することにより、VNCサーバープログラムを制御することができます。<br>
+　READMEにも書いてありますが、通常は vncserver にオプションは必要ありません。<br>
+<br>
+　というわけで、まあ何はともあれ動かしてみましょう。<b>VNC関連のプログラムは(vncinstallを除いて)基本的にすべて一般ユーザーでも実行できます。</b><br>
+　まずは<b>VNCサーバー側で</b>サーバープロセス制御スクリプトである「vncserver」を実行します。<br>
+<pre>
+$ vncserver 
+<br>
+You will require a password to access your desktops.
+<br>
+Password: (パスワードを入力します。表示されません。)
+Verify:   (確認のためもう一度入力します。表示されません。)
+<br>
+New 'X' desktop is seisyuu:1
+<br>
+Creating default startup script /home/fenjin/.vnc/xstartup
+Starting applications specified in /home/fenjin/.vnc/xstartup
+Log file is /home/fenjin/.vnc/seisyuu:1.log
+</pre>
+　初めてvncserverを起動したときのみ、パスワードを要求します。<br>
+　「New 'X' desktop is seisyuu<b>:1</b>」に注目してください。コロンに続く整数値が、VNCサーバープロセスが利用するディスプレイ番号です。VNCクライアントからはVNCサーバーホスト名と、このディスプレイ番号を指定することにより接続することができます。<br>
+　ちょっと試しに・・・<br>
+<pre>
+$ ps ux
+...
+fenjin    1707  0.1  0.6  8108 6452 ttyp0    S    17:06   0:00 Xvnc :1 -desktop X -auth /home/fenjin/.Xauthority ...
+...
+</pre>
+　このように、VNCサーバープログラム本体である「Xvnc」が適当なオプションでもって起動していることがわかります。<br>
+<br>
+　サーバープロセスの確認ができれば、次はクライアントです。「vncviewer」を実行します。<br>
+<pre>
+$ vncviewer --help
+...
+usage: vncviewer [&lt;options&gt;] &lt;host&gt;:&lt;display#&gt;
+       vncviewer [&lt;options&gt;] -listen [&lt;display#&gt;]
+</pre>
+　だそうです。気になるのが「-listen」オプションですが、とりあえずこれは置いておきます。<br>
+　結局、<br>
+<pre>
+$ vncviewer hoge.hoge.com:1
+</pre>
+　みたく「ホスト名:VNCサーバー側のディスプレイ番号」みたいなオプションを指示すればどうにかなりそうです。<br>
+　今回はローカル上でサーバーを起動してみましたので、そのまま・・・<br>
+<pre>
+<b>$ vncviewer localhost:1</b>
+VNC viewer version 3.3.7 - built Feb 28 2003 18:25:22
+Copyright (C) 2002-2003 RealVNC Ltd.
+Copyright (C) 1994-2000 AT&T Laboratories Cambridge.
+See http://www.realvnc.com for information on VNC.
+VNC server supports protocol version 3.3 (viewer 3.3)
+<b>Password: </b>
+VNC authentication succeeded
+Desktop name "fenjin's X desktop (seisyuu:1)"
+Connected to VNC server, using protocol version 3.3
+...
+</pre>
+　といった具合です。Password: のところには初めてvncserverを起動したときに入力したパスワードを打ち込みます。<br>
+　認証に成功すれば、デフォルトではtwm+xtermの味気ない画面が表示されます。<br>
+<a href="vnc01.jpg"><img src="vnc01s.jpg"></a><br>
+<br>
+　終了するにはクライアント側のウインドウを強制終了すればとりあえず終了できます。<br>
+<br>
+　一通り作業が終われば VNCサーバー側のプロセスも終了しておきましょう。中でどうなっているのかはわかりませんが、SSH越しというわけでもないのでいつまでもポートをあけておくのは不安です。<br>
+　VNCサーバープロセスを終了するには、vncserverを「-kill :ディスプレイ番号」というオプションをつけて実行します。<br>
+<pre>
+$ vncserver -kill :1
+Killing Xvnc process ID 1707
+</pre>
+　「-kill」とコロンの間にスペース一個入ることに注意してください。<br>
+　この後念のため ps ux してみて、Xvncプロセスが消滅していれば、VNCサーバーは正常に終了しました。<br>
+<br>
+　基本的な使い方は以上です。<br>
+<br>
+
+<p>
+<font size=+1><b><a name="main_03">VNC の使い方(vncconnect)</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　最後に「vncconnect」コマンドの使い方を説明します。<br>
+　これはちょっと特殊なコマンドで、「サーバー側から」クライアントの vncviewer を叩くためのコマンドです。<br>
+<br>
+　試してみます。まずはVNCサーバー側で vncserver を実行します。<br>
+<pre>
+$ vncserver 
+<br>
+New 'X' desktop is seisyuu:1
+<br>
+Starting applications specified in /home/fenjin/.vnc/xstartup
+Log file is /home/fenjin/.vnc/seisyuu:1.log
+</pre>
+　続いてVNCクライアント側で、先ほど無視した「-listen」オプションをつけて vncviewer を実行します。<br>
+<pre>
+$ vncviewer -listen
+...
+vncviewer -listen: Listening on port 5500 (flash port 5400)
+vncviewer -listen: Command line errors are not reported until a connection comes in.
+</pre>
+　ここまでで一旦、vncviewerの出力するメッセージは停止します。この状態は<b>いわゆる待機状態</b>といえる状態です。<br>
+　というわけで、<b>VNCサーバー側から</b>VNCクライアントを呼び起こすわけです。<br>
+<br>
+　VNCサーバー側で、vncconnect コマンドを実行します。オプションは「-display :ディスプレイ番号 ホスト名:待ち受けポート番号」の順番です。<br>
+　この場合なら VNCサーバーではディスプレイ番号１番、VNCクライアント側ではvncviewerの表示メッセージに基づき、待ち受けポート番号は5500番となります。<br>
+<pre>
+$ vncconnect -display :1 127.0.0.1:5500
+</pre>
+　こうすると、クライアント側でウインドウが開き、VNCの画面が表示されます。<br>
+　サーバー側から呼び出しているので<b>パスワードは要求されません。</b><br>
+<br>
+　vncconnectコマンドの基本的な使い方は、まあこんな感じだと思います。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+
+<p>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　サーバーの設定だけならSSHで全然問題ないんですよ。CUIベースでどうにかなりますから。ところが、今回は<font size=+3>ブロードバンド・ルータ(BB)の設定を変更する必要があった</font>んです。使ったことのある人ならご存じの通り、BBの設定変更は基本的にWebブラウザから行います。んで、外部から不正に変更されないよう、外部ネットワークからは設定変更のWebページを表示できないような設定になっています（というかするし、デフォルト）。<br>
+　というわけで、今回はどうしても X を利用したリモートアクセスを行い、LAN内部からBBの設定変更Webページを呼び出す必要があったわけです。<br>
+<br>
+　まあ、X が利用できるだけで御の字ですが。できればもうちょっと勉強して、twmとかじゃなくてもっと気の利いたWMを使いたいところですね。まあ必要になれば勉強することでしょう。<br>
+　というわけで今回はこの辺で失礼します。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

@@ -1,0 +1,239 @@
+#############################################################################
+##
+##
+## Menus Configurations.
+##
+##
+#############################################################################
+#
+# MenuStyle
+#
+# メニュー外見の設定を行います。
+# メニュー外見は「MenuStyle」コマンドを使って行います。
+# MenuStyle <MenuName> <Options>...
+# <MenuName>はAddToMenuコマンドで指定するメニュー名のことです。これによりサブ
+# メニュー毎、或いはメニュー毎に外見と振る舞いを変えることさえ可能です。「*」
+# をMenuNameに指定すると全メニューが対象になります。
+#
+
+# メニュー項目が選択されているとき、3D風に浮き上がらせる、枠の太さ
+MenuStyle * Hilight3DThickness 1
+
+MenuStyle * PopupDelayed, PopupDelay 100, PopdownDelayed, PopdownDelay 100
+MenuStyle * PopupOffset -3 100, TitleWarpOff
+MenuStyle * TitleUnderlines1, SeparatorsLong, TrianglesSolid
+MenuStyle * Animation, AutomaticHotkeysOff, DoubleClickTime
+
+# メニューを縁取る境界線の厚さは1ピクセル。メニューの左に縦長に画像を表示したり、
+# 色を設定することを可能とする。
+MenuStyle * BorderWidth 1, SidePic, SideColor
+MenuStyle * PopupAsSubmenu, HoldSubmenus, SubmenusRight
+MenuStyle * ItemFormat "%.1s%|%1.4i%1.4l%1.4l%1.4r%1.4i%2.3>%|"
+MenuStyle * VerticalItemSpacing, VerticalTitleSpacing
+MenuStyle * MenuFace, ActiveFore, HilightBack
+
+# メニューのカラー設定（背景画像の指定も含めて）はMenuColorsetオプションで指定
+# できます。MenuColorset に続いて、Colorsetコマンドで作ったColorset番号を指定し
+# ます。ここで指定している5, 6, 7番のColorsetは.fvwm2rcで定義していて、タイトル
+# バーなどで使われているものです。
+# ActiveColorset, GreyedColorsetも同様です。意味はman fvwm参照。
+MenuStyle * MenuColorset 5, ActiveColorset 6, GreyedColorset 7
+
+# これだけ正体不明（←調べろよ！）。テーマから抜き出したとき、含まれていました。
+BusyCursor DynamicMenu True
+
+#
+#############################################################################
+#
+# FvwmRoot Menu
+#
+#############################################################################
+#
+
+#
+# メニューのコマンドで使う、FVWM関数です。引数の使用法の参考になると思います。
+# rxvt内で実行するプログラムの設定に使います。
+#
+DestroyFunc FuncRunInRxvt
+AddToFunc   FuncRunInRxvt
++ I exec rxvt -vb -sl 4096 -T "$0" -n "$0" -e $1
+
+#
+# 上記と同様、必ずDestroy{Func|Menu}を使ってからAddTo{Func|Menu}をして下さい。
+# というのも両方とも「+」により、存在する{Func|Menu}に項目を「追加」していって
+# しまうからです。故にFVWM再起動時などを考えると、Destroyしておかないとどんどん
+# 膨れてしまいます。
+#
+# 「スタートメニュー」の設定です。
+#
+DestroyMenu MenuFvwmRoot
+AddToMenu   MenuFvwmRoot "Root Menu" Title
++ "Rxvt%menu/xconsole.xpm" Exec exec rxvt -vb -sl 4096
++ "Emacs on Rxvt%menu/gnu.xpm%"		FuncRunInRxvt "Emacs" "emacs-nox"
++ "Emacs with X%menu/gnu.xpm%"		Exec exec /usr/bin/emacs
++ "VMware%menu/remote.xpm%"		Exec exec vmware
++ "" Nop
++ "マルチメディア%menu/multimedia.xpm%" Popup MenuMultiMedia
++ "ネットワーク%menu/network.xpm%" Popup MenuWwwUtils
++ "システム%menu/settings.xpm" Popup MenuSysUtils
++ "ワープロ／印刷%menu/wordprocessing.xpm%" Popup MenuDtpUtils
++ "開発／その他%menu/applications.xpm%" Popup MenuOthers
++ "" Nop
++ "FVWM &Modules%menu/modules.xpm%"		Popup MenuFvwmModules
++ "&Window Operations%menu/window.xpm%"		Popup MenuFvwmWindowOps
++ "Sc&reen Saver%menu/display.xpm%"		Popup MenuFvwmScreenSaver
++ "" Nop
++ "&Quit FVWM%menu/quit.xpm%"			Popup MenuFvwmQuit
+#
+# メニューの構築はほぼ、上記のようにします。
+# AddToMenu <MenuName> "TitleString" Title
+# + "ItemString" <Commands>
+# 又は
+# AddToMenu <MenuName>
+# + "TitleString" Title
+# + "ItemString" <Commands>
+# が可能です。
+# + "" Nop
+# は単なる区切り線になります。
+# "ItemString"中で「&」が前に付いたアルファベットはWindowsと同様、キーボード
+# ショートカットの対象となります。また「%」で挟んで、"ItemString"の左に表示
+# する画像ファイルを相対パスで指定できます。
+#
+# 何かプログラムを実行するときは、関数内でもメニュー内でもマウス・キーボード
+# バインド内でも、「Exec」FVWMコマンドを使います。
+# Exec exec <CommandLine>
+#
+# サブメニューを表示するときは
+# Popup <MenuName>
+# コマンドを使います。
+#
+# 他にも「+」行が長くなりそうな場合は、バックスラッシュ(\)で分割できます。
+# + <Commands> \
+#      <Commands>...
+#
+# 他のテクニックとして複数のコマンドやプログラムを実行したいとき、シェルと同様に
+# 「;」セミコロンでつなげることもできます。
+# + <Command1>;<Command2>;<Command3>
+#
+
+DestroyMenu MenuWwwUtils
+AddToMenu MenuWwwUtils
++ "Mozilla%menu/mozilla.xpm%"		Exec exec mozilla
++ "Konqueror%menu/konqueror.xpm%"		Exec exec konqueror
++ "KfmClinet%menu/home.xpm%"		Exec exec kfmclient openURL $HOME
++ "GFTP%menu/folder_ftp.xpm%"	Exec exec gftp
++ "Kppp%menu/kppp.xpm%"		Exec exec kppp
+
+DestroyMenu MenuOthers
+AddToMenu MenuOthers
++ "Qt Designer%menu/designer.xpm%" Exec exec designer
++ "GNUplot%menu/mathematica.xpm%"	FuncRunInRxvt "GNUPlot" "gnuplot"
+
+DestroyMenu MenuSysUtils
+AddToMenu MenuSysUtils
++ "XUtilities%menu/xapp.xpm%"	Popup MenuXUtilities
++ "Top%menu/monitoring.xpm%" FuncRunInRxvt "Top" "top"
++ "XOSView%menu/xosview.xpm%" Exec exec xosview
++ "KSysGuard%menu/ksysguard.xpm%" Exec exec ksysguard
+
+DestroyMenu MenuDtpUtils
+AddToMenu MenuDtpUtils
++ "Acroread%menu/acroread.xpm%"		Exec exec acroread
++ "GV%menu/ghostview.xpm%"	Exec exec gv
++ "GhostView%menu/ghostview.xpm%" 	Exec exec ghostview
++ "X PDF%menu/ghostview.xpm%"		Exec exec xpdf
++ "X DVI%menu/xapp.xpm%"		Exec exec xdvi
+
+DestroyMenu MenuMultiMedia
+AddToMenu MenuMultiMedia
++ "GQView%menu/image-viewer.xpm%"	Exec exec gqview
++ "Gimp%menu/gimp.xpm%"				Exec exec gimp
++ "XMMS%menu/xmms.xpm%"		Exec exec xmms
++ "KSnapshot%menu/ksnapshot.xpm%" Exec exec ksnapshot
++ "KColorChooser%menu/colorpicker.xpm%" Exec exec kcolorchooser
+
+DestroyMenu	MenuXUtilities
+AddToMenu	MenuXUtilities
++ "XLogo%menu/amusement.xpm%"		Exec exec xlogo
++ "Calculator%menu/calculator.xpm%"	Exec exec xcalc
++ "Magnifying glass%menu/viewer.xpm%" 	Exec exec xmag
++ "XClock%menu/clock.xpm%"		Exec exec xclock
++ "XFontSel%menu/font.xpm%"		Exec exec xfontsel
++ "Xclipboard%menu/unknown.xpm%"	Exec exec xclipboard
++ "XEyes%menu/amusement.xpm%"		Exec exec xeyes
+
+#
+#############################################################################
+#
+# Module Control Menus
+#
+#############################################################################
+#
+
+DestroyMenu MenuFvwmModules
+AddToMenu   MenuFvwmModules
++ "%menu/item.xpm%&TaskBar"     FuncFvwmRestartModule FvwmTaskBar
++ "Animation%menu/window-iconify.xpm%"	FuncFvwmRestartModule FvwmAnimate
++ "Banner%menu/display.xpm%"		Module FvwmBanner
++ "Console%menu/terminal-special.xpm%"		Module FvwmConsole
++ "Identify%menu/window-identify.xpm%"		Module FvwmIdent
++ "Auto Raise%menu/window-raise.xpm%"  \
+	FuncFvwmRestartModule 'FvwmAuto 100 "Silent Raise" Nop'
++ "" Nop
++ "%menu/quit.xpm%Stop TaskBar"	    KillModule FvwmTaskBar
++ "Stop Animation%menu/quit.xpm%"	KillModule FvwmAnimate
++ "Stop Console%menu/quit.xpm%"	KillModule FvwmConsole
++ "Stop Identify%menu/quit.xpm%"	KillModule FvwmIdent
++ "Stop Auto Raise%menu/quit.xpm%"	KillModule FvwmAuto
+
+#
+#############################################################################
+#
+# WindowOperations Menus
+#
+#############################################################################
+#
+
+# NOTE: Window operation menu items are very strongry dependant for core 
+#      configurations of window manager. So, these menu items are written in
+#      main resource file of fvwm (.fvwm2rc) at ESOX.
+
+#
+#############################################################################
+#
+# XScreenSaver Menus
+#
+#############################################################################
+#
+
+DestroyMenu MenuFvwmScreenSaver
+AddToMenu   MenuFvwmScreenSaver "Screen Saver" Title
++ "Screen Saver%menu/display.xpm%" Exec xlock -nolock -nice 19 -mode random
++ "Screen Locker%menu/lock.xpm%"   Exec xlock -nice 19 -mode random
++ "" Nop
++ "(Re)start XscreenSaver%menu/display.xpm%" Exec xscreensaver-command -exit ; exec xscreensaver -no-splash
++ "Stop XscreenSaver%menu/choice-no.xpm%" Exec exec xscreensaver-command -exit
++ "XscreenSaver Demo%menu/display.xpm%" Exec xscreensaver-command -exit ; exec xscreensaver; exec xscreensaver-command -demo
++ "" Nop
++ "Locked XscreenSaver%menu/lock.xpm%" Exec exec xscreensaver-command -lock
++ "Activate XscreenSaver%menu/display.xpm%" Exec exec xscreensaver-command -activate
+
+#
+#############################################################################
+#
+# Quit and Restart (Other) WindowManager Menu
+#
+#############################################################################
+#
+
+DestroyMenu MenuFvwmQuit
+AddToMenu   MenuFvwmQuit "Really Quit FVWM?" Title
++ "&Restart%menu/restart.xpm%"		Restart
++ "Re&fresh Screen%menu/refresh.xpm%"	Refresh
++ "Re&capture Screen%menu/refresh.xpm%"	Recapture
++ "" Nop
++ "&Yes, Really Quit%menu/choice-yes.xpm%" Quit
++ "&No, Don't Quit%menu/choice-no.xpm%"    Nop
+
+#
+#############################################################################

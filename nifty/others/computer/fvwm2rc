@@ -1,0 +1,463 @@
+########################
+#######################
+#
+# CORE FUNCTIONS
+#
+######################
+######################
+
+DestroyFunc FuncFvwmStopModule
+AddToFunc   FuncFvwmStopModule
++ I KillModule $0
+
+DestroyFunc FuncFvwmStopModuleByAlias
+AddToFunc   FuncFvwmStopModuleByAlias
++ I KillModule $0 $1
+
+DestroyFunc FuncFvwmRestartModule
+AddToFunc   FuncFvwmRestartModule
++ I FuncFvwmStopModule $0
++ I Module $0
+
+DestroyFunc FuncFvwmRestartModuleByAlias
+AddToFunc   FuncFvwmRestartModuleByAlias
++ I FuncFvwmStopModuleByAlias $0 $1
++ I Module $0 $1 $2
+
+DestroyFunc FuncFvwmRemoveAllButtons
+AddToFunc   FuncFvwmRemoveAllButtons
++ I Style "*" NoButton 1, NoButton 3, NoButton 5, NoButton 7, NoButton 9
++ I Style "*" NoButton 2, NoButton 4, NoButton 6, NoButton 8, NoButton 0
++ I TitleStyle Height 5
+
+
+##########################
+#########################
+#
+# Fvwm Start, Stop, and other "Re-" Functions
+#
+########################
+########################
+
+# Rest and Init 
+
+DestroyFunc FuncFvwmResetInitFunctions
+AddToFunc   FuncFvwmResetInitFunctions
++ I Module FvwmBanner
++ I DestroyFunc StartFunction
++ I DestroyFunc InitFunction
++ I DestroyFunc RestartFunction
++ I DestroyFunc SessionInitFunction
++ I DestroyFunc SessionRestartFunction
++ I AddToFunc StartFunction
++ I Module FvwmAnimate
++ I FvwmTaskBar
++ I	FuncFvwmRemoveAllButtons
+
+# Mouse Configuration
+Exec exec xset m 5 1
+
+# Note: Require blackbox tool.
+#Exec exec bsetbg -full $HOME/.fvwm/esox/images/sky_esox2_1024.xpm
+# Note: Require ImageMagick
+#Exec exec display -geometry +0+20 -window root +contrast $HOME/images/tsuki-hime/20030801294541.jpg
+#Exec exec display -geometry +0+20 -window root +contrast $HOME/images/tsuki-hime/20031006801665.jpg
+Exec exec display -window root +contrast $HOME/images/tsuki-hime/20031006801665.jpg
+
+FuncFvwmResetInitFunctions
+
+#Exec exec fvwm-themes-images \
+#	--sky \
+#	--sky-colors black,rgb:62/85/b7,rgb:70/95/c2,rgb:48/6c/aa,rgb:21/44/91 \
+#	 --setroot --pattern-type altern:1,5,4
+
+ImagePath $HOME/.fvwm/esox/images
+ImagePath +
+
+#
+#############################################################################
+#
+# Colorset (Colour set)
+#
+# Basic FVWM Colorset
+Colorset 0 fg black, bg rgb:98/B0/C8, Plain, NoShape
+# window title, inactive and active
+Colorset 1 fg black, bg rgb:98/B0/C8, Plain, NoShape
+Colorset 2 fg black, bg white, Plain, NoShape
+# window borders, inactive and active
+Colorset 3 fg black, bg rgb:98/B0/C8, Plain, NoShape
+Colorset 4 fg black, bg rgb:98/B0/C8, Plain, NoShape
+
+#
+#################
+# Menu Colorsets
+#
+# inactive menu item fg+bg and menu face
+Colorset 5 fg rgb:20/20/20, bg white, \
+	sh rgb:30/30/30, hi rgb:50/50/50, TiledPixmap decor/face.xpm, NoShape
+# active menu item fg+bg
+Colorset 6 fg black, bg rgb:6f/a9/e5, Plain, NoShape
+# greyed menu item fg
+Colorset 7 fg grey, bg grey, Plain, NoShape
+
+#
+###################
+# Module Colorsets
+#
+# Common Colorsets
+
+# Normal TaskBar Button
+Colorset 10 fg rgb:20/20/20, bg white, \
+	sh white, hi white, TiledPixmap decor/face.xpm, NoShape
+# Focused TaskBar Button
+Colorset 11 fg rgb:20/20/20, bg white, \
+	sh black, hi black, TiledPixmap decor/face.xpm, NoShape
+# Iconified TaskBar Button
+Colorset 12 fg rgb:20/20/20, bg white, \
+	sh white, hi white, TiledPixmap decor/title-iconified.xpm, NoShape
+
+# -------------------------- Focus and Placement --------------------------
+Emulate FVWM
+HideGeometryWindow Never
+BugOpts FlickeringMoveWorkaround Off
+SnapAttraction 10 SameType Screen
+SnapGrid 1 1
+XorValue
+
+# ---------------------- Paging and Mouse Parameters ----------------------
+DeskTopSize 2 2
+# Warp between each edges.
+#EdgeScroll 100000 100000
+EdgeScroll 0 0
+EdgeResistance 500  1
+EdgeThickness 1
+ClickTime 300
+MoveThreshold 3
+
+BugOpts ModalityIsEvil on
+BusyCursor Read on, Wait on, ModuleSynchronous on
+BugOpts MixedVisualWorkaround off
+BugOpts RaiseOverNativeWindows off
+Style * SaveUnderOff, BackingStoreOff
+ModuleTimeout 30
+
+DefaultColorset 0
+Style * Colorset 1
+Style * HilightColorset 2
+Style * BorderColorset 3
+Style * HilightBorderColorset 4
+
+# Opaque or Non opaque Resizing and Moving Policy
+OpaqueMoveSize 0
+Style * ResizeOutline
+
+# Title Bar buttons and Frame Border Policy
+Style * Button 1, Button 2, Button 3, Button 5
+Style * FvwmButtons
+Style * BorderWidth 2, HandleWidth 2
+Style * FvwmBorder, FirmBorder
+
+# Other Policy
+Style * WindowShadeSteps 25, WindowShadeScrolls
+SetAnimation  10  -.01 0 .01 .03 .08 .18 .3 .45 .6 .75 .85 .90 .94 .97 .99 1.0
+Style * MwmDecor, OLDecor, NoOverride, MwmFunctions
+
+# Window Placement Policy
+Style * TileCascadePlacement
+Style * NoPPosition
+
+# Iconifying Policy
+Style * NoIcon
+
+# Focus Policy
+Style * ClickToFocus
+Style * ClickToFocusRaises
+Style * MouseFocusClickRaises
+# "Transient" -- temporaly window. in Windows, say, "Dialog Box"
+Style * DecorateTransient
+# "StackTransietnParent" has no effect if Raise/LowerTransient are not used.
+Style * RaiseTransient
+Style * LowerTransient
+Style * StackTransientParent
+Style * GrabFocusTransient
+
+Style * IndexedWindowName
+Style * IndexedIconName
+
+#
+##############################################################
+#
+# Button and Title and Border Styles and Decorations
+#
+##############################################################
+#
+
+TitleStyle ActiveUp   TiledPixmap decor/title-active.xpm
+TitleStyle ActiveDown TiledPixmap decor/title-active.xpm
+TitleStyle Inactive   TiledPixmap decor/title-inactive.xpm
+TitleStyle Height 20
+TitleStyle Centered
+TitleStyle -- Flat
+BorderStyle Simple -- HiddenHandles NoInset
+
+ButtonStyle All Pixmap decor/empty.xpm
+ButtonStyle All ToggledActiveUp   Pixmap decor/title-active.xpm
+ButtonStyle All ToggledActiveDown Pixmap decor/title-active.xpm
+ButtonStyle All ToggledInactive   Pixmap decor/title-inactive.xpm
+ButtonStyle All -- UseTitleStyle
+ButtonStyle	All -- Flat
+
+AddButtonStyle 1 \
+	ActiveUp   (Pixmap decor/close-activeup.xpm   -- flat) \
+	ActiveDown (Pixmap decor/close-activedown.xpm -- flat) \
+	Inactive   (Pixmap decor/inactive.xpm   -- flat)
+AddButtonStyle 2 \
+	ActiveUp   (Pixmap decor/options-activeup.xpm   -- flat) \
+	ActiveDown (Pixmap decor/options-activedown.xpm -- flat) \
+	Inactive   (Pixmap decor/inactive.xpm   -- flat)
+AddButtonStyle 3 \
+	ActiveUp   (Pixmap decor/iconify-activeup.xpm   -- flat) \
+	ActiveDown (Pixmap decor/iconify-activedown.xpm -- flat) \
+	Inactive   (Pixmap decor/inactive.xpm   -- flat)
+AddButtonStyle 5 \
+	ActiveUp   (Pixmap decor/maximize-activeup.xpm   -- flat) \
+	ActiveDown (Pixmap decor/maximize-activedown.xpm -- flat) \
+	Inactive   (Pixmap decor/inactive.xpm   -- flat)
+
+ButtonStyle 1 - Clear
+ButtonStyle 2 - Clear MWMDecorMenu
+ButtonStyle 3 - Clear MWMDecorMin
+ButtonStyle 5 - Clear MWMDecorMax
+
+#
+##############################################################
+#
+# Fvwm Modules Configuration
+#
+
+Style "Fvwm*"		Sticky, Title, Handles, WindowListHit, CirculateSkip
+Style "FvwmBanner"	NoTitle, StaysOnTop, WindowListSkip, NeverFocus
+Style "FvwmButtons"	NoTitle, NoHandles, WindowListSkip
+Style "FvwmIdent"	NoTitle, NoHandles, WindowListSkip
+Style "FvwmTaskBar"	NoTitle, NoHandles, WindowListSkip
+Style "FvwmIconMan"	NoTitle, NoHandles, WindowListSkip
+Style "FvwmWinList" NoTitle, NoHandles, WindowListSkip
+Style "FvwmConsole"	CirculateHit, GrabFocus
+Style "FvwmForm"	CirculateHit
+Style "FvwmScript"	Slippery, CirculateHit
+
+*FvwmIdent: Colorset 5
+
+Colorset 100 Transparent
+
+#Style "FvwmPager"	NoTitle, WindowListSkip, CirculateHit, Sticky, StayOnTop, ParentalRelativity
+Style "FvwmPager"	Title, WindowListHit, CirculateHit, Sticky, StayOnTop, ParentalRelativity
+Style "FvwmPager"  BorderWidth 0, NoHandles
+#*FvwmPager: Geometry $[vp.width]x$[vp.height]+0+0
+*FvwmPager: Geometry 512x384
+*FvwmPager: WindowColorsets 100 100
+*FvwmPager: Colorset * 100
+*FvwpPager: HilightColorset * 100
+*FvwpPager: Balloons
+*FvwpPager: BalloonColorset 100
+*FvwmPager: NoSeparators
+*FvwmPager: Miniicons
+*FvwmPager: Font none
+
+#
+#############################################################################
+#
+# FvwmTaskBar Configration
+#
+
+Style "FvwmTaskBar" NoTitle,Sticky,WindowListSkip,\
+	CirculateSkip,NoHandles,TitleAtBottom
+
+DestroyModuleConfig FvwmTaskBar: *
+# defined in the option
+*FvwmTaskBar: Geometry +0+0
+*FvwmTaskBar: Rows 1
+*FvwmTaskBar: Colorset 10
+*FvwmTaskBar: FocusColorset 11
+*FvwmTaskBar: IconColorset 12
+*FvwmTaskBar: TipsColorset 10
+
+*FvwmTaskBar: Action Click1 FuncFvwmDeiconifyFocusAndRaise
+*FvwmTaskBar: Action Click2 Popup MenuFvwmWindowOps Mouse c c
+*FvwmTaskBar: Action Click3 Iconify
+*FvwmTaskBar: NoBrightFocus
+*FvwmTaskBar: UseSkipList
+*FvwmTaskBar: AutoStick
+*FvwmTaskBar: StartName
+*FvwmTaskBar: StartMenu MenuFvwmRoot Root +0 +25p
+*FvwmTaskBar: StartIcon start_a.xpm
+*FvwmTaskBar: ShowTransients
+*FvwmTaskBar: DeskOnly
+*FvwmTaskBar: MailCheck 0
+*FvwmTaskBar: NoIconAction SendToModule FvwmAnimate animate
+*FvwmTaskBar: ClockFormat %m/%d %R
+*FvwmTaskBar: ShowTips
+
+#
+#############################################################################
+#
+# Window Operation Functions and Menus
+#
+# Binding Functions
+#
+# "I" stands for Immediate
+# "M" stands for Motion
+# "C" stands for Click
+# "H" stands for Hold
+# "D" stands for Double Click
+
+DestroyFunc FuncFvwmDeiconifyFocusAndRaise
+AddToFunc   FuncFvwmDeiconifyFocusAndRaise
++ I Iconify off
++ I Focus
++ I Raise
+
+DestroyFunc FuncFvwmRestore
+AddToFunc   FuncFvwmRestore
++ I ThisWindow (!Iconic !Shaded Maximized) Maximize    false
++ I ThisWindow (!Iconic  Shaded          ) WindowShade false
++ I ThisWindow ( Iconic                  ) Iconify     false
+
+# This defines all window operations
+DestroyMenu MenuFvwmWindowOps
+AddToMenu   MenuFvwmWindowOps "Window Operations" Title
++ "Move%menu/window-move.xpm%"                 Move
++ "Resize%menu/window-resize.xpm%"             Resize
++ "(De)&Iconify	(F2)%menu/window-iconify.xpm%"       Iconify
++ "(Un)&Shade	(F3)%menu/window-shade.xpm%"            WindowShade
++ "Ma&ximize	(F5)%menu/window-maximize.xpm%"        Maximize On grow grow
++ "Maximize &Vert.	(F6)%menu/window-maximize.xpm%"  Maximize On    0 grow
++ "Maximize &Horiz.	(F7)%menu/window-maximize.xpm%" Maximize On grow    0
++ "&Restore	(F8)%menu/window.xpm%"              FuncFvwmRestore
++ "(Un)Stick%menu/window-stick.xpm%"            Stick
++ "Raise%menu/window-raise.xpm%"               Raise
++ "Lower%menu/window-lower.xpm%"               Lower
++ "Identify%menu/window-identify.xpm%"          Module FvwmIdent
++ "Switch to...%menu/windows.xpm%"              WindowList
++ "" Nop
++ "Delete%menu/window-delete.xpm%"             Delete
++ "Close (F4)%menu/window-close.xpm%"               Close
++ "Destroy%menu/window-destroy.xpm%"            Destroy
++ "" Nop
++ "Right	Page%menu/window-move.xpm%"	AnimatedMove w+100 w
++ "Left	Page%menu/window-move.xpm%"	AnimatedMove w-100 w
++ "Down	Page%menu/window-move.xpm%"	AnimatedMove w w+100
++ "Up	Page%menu/window-move.xpm%"	AnimatedMove w w-100
++ "" Nop
++ "%menu/window.xpm%TitleAtTop"    Pick (CirculateHit) Style $n TitleAtTop
++ "%menu/window.xpm%TitleAtBottom" Pick (CirculateHit) Style $n TitleAtBottom
++ "%menu/window.xpm%Title"         Pick (CirculateHit) Style $n Title
++ "%menu/window.xpm%NoTitle"       Pick (CirculateHit) Style $n NoTitle
++ "" Nop
++ "Other Operation%menu/refresh.xpm%"	Popup MenuFvwmOtherWindowOps
+
+DestroyMenu MenuFvwmOtherWindowOps
+AddToMenu   MenuFvwmOtherWindowOps "Other Operation" Title
++ "%menu/refresh.xpm%RefreshWindow"    RefreshWindow
++ "%menu/refresh.xpm%RecaptureWindow"  RecaptureWindow
++ "%menu/refresh.xpm%PlaceAgain"       PlaceAgain anim
++ "" Nop
++ "%menu/refresh.xpm%&Cascade" FvwmRearrange -cascade -m 3 3 -incx 2
++ "%menu/refresh.xpm%&PlaceAgain" All (CurrentPage !Sticky) PlaceAgain anim
++ "%menu/refresh.xpm%Tile &horizontally" FvwmRearrange -tile -h -m 2 2 98 98
++ "%menu/refresh.xpm%Tile &vertically"   FvwmRearrange -tile    -m 2 2 98 98
++ "%menu/refresh.xpm%Arrange Icons" All (CurrentDesk Iconic) RecaptureWindow
+
+#
+#############################################################################
+#
+# Read Key and Mouse Configurations.
+#
+
+Read "esox/bindings"
+
+#
+#############################################################################
+#
+# Read Menu Configurations
+#
+
+Read "esox/menus"
+
+#
+#############################################################################
+#
+# FvwmBanner Module Configuration
+#
+
+DestroyModuleConfig FvwmBanner: *
+*FvwmBanner: NoDecor
+*FvwmBanner: Pixmap banner.xpm
+*FvwmBanner: Timeout 3
+
+#
+#############################################################################
+#
+# Cursors Style Configuration
+#
+
+CursorStyle ROOT         left_ptr		black	white
+CursorStyle POSITION     top_left_corner	black	white
+CursorStyle TITLE        top_left_arrow		black	white
+CursorStyle DEFAULT      top_left_arrow		black	white
+CursorStyle SYS          hand2			black	white
+CursorStyle MOVE         fleur			black	white
+CursorStyle RESIZE       sizing			black	white
+CursorStyle WAIT         watch			black	white
+CursorStyle MENU         top_left_arrow		black	white
+CursorStyle SELECT       crosshair		black	white
+CursorStyle DESTROY      pirate			black	white
+CursorStyle TOP          top_side		black	white
+CursorStyle RIGHT        right_side		black	white
+CursorStyle BOTTOM       bottom_side		black	white
+CursorStyle LEFT         left_side		black	white
+CursorStyle TOP_LEFT     top_left_corner	black	white
+CursorStyle TOP_RIGHT    top_right_corner	black	white
+CursorStyle BOTTOM_LEFT  bottom_left_corner	black	white
+CursorStyle BOTTOM_RIGHT bottom_right_corner	black	white
+CursorStyle TOP_EDGE     top_side		black	white
+CursorStyle RIGHT_EDGE   right_side		black	white
+CursorStyle BOTTOM_EDGE  bottom_side		black	white
+CursorStyle LEFT_EDGE    left_side		black	white
+CursorStyle STROKE       plus			black	white
+
+#
+#############################################################################
+#
+# Xinerama Off
+#
+
+Xinerama False
+XineramaSls False
+
+#
+#############################################################################
+#
+# Application Specific Styles
+#
+
+Style "XMMS" MiniIcon menu/xmms.xpm, UsePPosition
+Style "rxvt" MiniIcon menu/xconsole.xpm
+Style "Emacs" MiniIcon menu/gnu.xpm
+Style "VMware*" MiniIcon menu/remote.xpm
+Style "Mozilla*" MiniIcon menu/mozilla.xpm
+Style "gFTP*" MiniIcon menu/folder_ftp.xpm
+Style "kppp" MiniIcon menu/kppp.xpm
+Style "GQview" MiniIcon menu/image-viewer.xpm
+Style "Gimp" MiniIcon menu/gimp.xpm
+Style "KSnapshot" MiniIcon menu/ksnapshot.xpm
+Style "*KColorChooser*" MiniIcon menu/colorpicker.xpm
+Style "GNUPlot" MiniIcon menu/mathematica.xpm
+Style "Acro*" MiniIcon menu/acroread.xpm
+Style "gv*" MiniIcon menu/ghostview.xpm
+Style "xpdf" MiniIcon menu/ghostview.xpm
+Style "xdvi" MiniIcon menu/xapp.xpm
+Style "Top" MiniIcon menu/monitoring.xpm
+Style "xosview*" MiniIcon menu/xosview.xpm
+Style "FvwmPager" MiniIcon menu/xapp.xpm
+Style "Glade" MiniIcon menu/modules.xpm

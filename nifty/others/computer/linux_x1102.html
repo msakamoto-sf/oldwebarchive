@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>startxの軌跡</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>startxの軌跡</h1>
+初版作成：2002/12/13<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　とりあえずですね。まあ、KDEの他にもいろいろWindowManager（といってもどーせblackboxかfvwmなんだけどさ）を試してみたいわけですよ。TLXW8で。<br>
+　ところが。ホームディレクトリをあさってみても、RHL7.2で通用していた.xinitrcだのが無いみたい。<b>startxに絡んでくるXの起動スクリプト周りはディストリビューションによってずいぶん違うみたいです。</b>ここら辺をきっちり納めるにはやはりstartxスクリプト周りを調べた方が良いでしょう。<br>
+　Linuxの世界ほど<b>参考書の丸写しが通用しない</b>世界もおもしろいと思います。迷惑かどうかは別として。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">startxの身元調査</a></li>
+	<li><a href="#main_02">startxの中身</a></li>
+	<li><a href="#main_03">「man xinit」の要約</a></li>
+	<li><a href="#main_04">xinitrcの中身</a></li>
+	<li><a href="#main_05">予備実験（teeコマンド）</a></li>
+	<li><a href="#main_06">改造</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">startxの身元調査</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて、まずはstartxがどこにあるのかを探し出してみませう。まあ、単純に「whereis startx」とコマンドラインからぶったたきます。<br>
+<pre>
+[fenjin@seisyuu template]$ whereis startx
+startx: /usr/X11R6/bin/startx /usr/bin/X11/startx
+</pre>
+　・・・二つでてきちゃいましたね。しょうがないので、どちらが呼び出されるかPATHを覗くことにしませう。<br>
+<pre>
+[fenjin@seisyuu template]$ echo $PATH
+/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/lib/qt/bin:/home/fenjin/in_vitro/tmake-1.8/bin:/home/fenjin/in_vitro/tmake-1.8/bin
+</pre>
+　・・・どうも/usr/X11R6/bin/startxの方にパスが通っているみたいですね。<br>
+<pre>
+[fenjin@seisyuu template]$ rpm -qf /usr/X11R6/bin/startx 
+XFree86-4.2.0-11
+[fenjin@seisyuu template]$ rpm -qf /usr/bin/X11/startx 
+XFree86-4.2.0-11
+[fenjin@seisyuu template]$ ll /usr/X11R6/bin/startx /usr/bin/X11/startx 
+-rwxr-xr-x    1 root     root         3195  4月 24日  2002 /usr/X11R6/bin/startx*
+-rwxr-xr-x    1 root     root         3195  4月 24日  2002 /usr/bin/X11/startx*
+[fenjin@seisyuu template]$ diff /usr/X11R6/bin/startx /usr/bin/X11/startx 
+[fenjin@seisyuu template]$ 
+</pre>
+　どうやら両方とも、Xの提供によるものでサイズも一致していますね。んでもって中身もそっくり同じみたいです。<br>
+　まずはstartxの身元が確認とれました。勝負はこっからです。<br>
+<br>
+<font size=+1><b><a name="main_02">startxの中身</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　startxの身元確認がとれましたので、ここらで一発startxの中身をぶちまけてみましょう。<br>
+<pre>
+#!/bin/sh
+
+# $Xorg: startx.cpp,v 1.3 2000/08/17 19:54:29 cpqbld Exp $
+#
+# This is just a sample implementation of a slightly less primitive
+# interface than xinit.  It looks for user .xinitrc and .xserverrc
+# files, then system xinitrc and xserverrc files, else lets xinit choose
+# its default.  The system xinitrc should probably do things like check
+# for .Xresources files and merge them in, startup up a window manager,
+# and pop a clock and serveral xterms.
+#
+# Site administrators are STRONGLY urged to write nicer versions.
+#
+# $XFree86: xc/programs/xinit/startx.cpp,v 3.12.2.2 2002/01/28 18:27:34 tsi Exp $
+
+# ユーザー側のXの設定ファイルのデフォルト指定です。ちなみに
+# TLXW8ではこの二つのファイルは存在しません。
+userclientrc=$HOME/.xinitrc
+userserverrc=$HOME/.xserverrc
+
+# システムデフォルトの設定ファイルの指定です。
+# 結局TLXW8ではこいつらが起動プログラム「xinit」により読み出されます。
+# んで、後で詳解しますがそんなかにatokxの起動だのKDEの起動プログラム
+# startkdeの呼び出しなんかが書かれているわけです。
+sysclientrc=/usr/X11R6/lib/X11/xinit/xinitrc
+sysserverrc=/usr/X11R6/lib/X11/xinit/xserverrc
+
+# 言ってしまうとxserverrcもTLXW8には存在しませんでした。
+# いったい何が書かれていたのか。
+# 結局両ファイルともXの起動後、どんなプログラムを実行するかを記述したシェルスクリプトらしいです。
+
+defaultclient=/usr/X11R6/bin/xterm
+defaultserver=/usr/X11R6/bin/X
+defaultclientargs=""
+defaultserverargs=""
+
+clientargs=""
+serverargs=""
+
+# ここのところでclient側の設定ファイルのチェックを行っています。
+if [ -f $userclientrc ]; then
+    defaultclientargs=$userclientrc
+elif [ -f $sysclientrc ]; then
+    defaultclientargs=$sysclientrc
+fi
+
+# こっちではserver側の設定ファイルのチェックをしてます。
+if [ -f $userserverrc ]; then
+    defaultserverargs=$userserverrc
+elif [ -f $sysserverrc ]; then
+    defaultserverargs=$sysserverrc
+fi
+# TLXW8では.xserverrcもxserverrcも無いから、結局defaultserverargsは何も代入されないことになります。
+# この段階で
+# defaultclientargs=/usr/X11R6/lib/X11/xinit/xinitrc
+# defaultserverargs=""
+# が代入されています。
+
+# ・・・どうやら引数の調整を行っているみたいです。
+whoseargs="client"
+# このwhileの最後でshiftを行っています。引数を順番にチェックしているみたいですね。
+while [ x"$1" != x ]; do
+# startxは通常引数なしで呼ばれますので、問答無用で最後の)に入ります。
+    case "$1" in
+    # '' required to prevent cpp from treating "/*" as a C comment.
+    /''*|\./''*)
+	if [ "$whoseargs" = "client" ]; then
+	    if [ x"$clientargs" = x ]; then
+		client="$1"
+	    else
+		clientargs="$clientargs $1"
+	    fi
+	else
+	    if [ x"$serverargs" = x ]; then
+		server="$1"
+	    else
+		serverargs="$serverargs $1"
+	    fi
+	fi
+	;;
+    --)
+	whoseargs="server"
+	;;
+    *)
+	# この段階でwhoseargs="client"です。
+	if [ "$whoseargs" = "client" ]; then
+		# というわけでこいつが通ります。
+	    clientargs="$clientargs $1"
+		# clientargsは""のままなので、相変わらずclientargsは""のままです。
+	else
+	    # display must be the FIRST server argument
+	    if [ x"$serverargs" = x ] && 		 expr "$1" : ':[0-9][0-9]*$' > /dev/null 2>&1; then
+
+		display="$1"
+	    else
+		serverargs="$serverargs $1"
+	    fi
+	fi
+	;;
+    esac
+    shift
+done
+
+# process client arguments
+# そのまんまです。設定ファイルの最終調整を行っている、といったところですか。
+if [ x"$client" = x ]; then
+	# client変数は、今までのスクリプトによると設定されていません。よって、必ずここにきます。
+    # if no client arguments either, use rc file instead
+    if [ x"$clientargs" = x ]; then
+	# clientargsは相変わらず""のままなので、ここでようやくdefaultclientargsが代入されます。
+	# defaultclientargsには/usr/X11R6/lib/X11/xinit/xinitrcが指定されています。
+	client="$defaultclientargs"
+    else
+	client=$defaultclient
+    fi
+fi
+
+# process server arguments
+# サーバー側の設定の最終調整です。
+if [ x"$server" = x ]; then
+	# server変数は今までのスクリプトによると設定されていません。よって、必ずここにきます。
+    # if no server arguments or display either, use rc file instead
+    if [ x"$serverargs" = x -a x"$display" = x ]; then
+	# serverargsも相変わらず""のまんまで、しかもdisplay変数なんてセットされてません。
+	server="$defaultserverargs"
+	# というわけで、serverにはやっぱりdefaultserverargs=""が代入されるわけです。
+    else
+	server=$defaultserver
+    fi
+fi
+
+# この段階で
+# client=/usr/X11R6/lib/X11/xinit/xinitrc
+# clientargs=""
+# server=""
+# serverargs=""
+# がセットされています。
+
+# TLXW8にはきちんと$HOME/.Xauthorityファイルが存在します。
+# んで、XAUTHORITYは設定されていないので必然的にXAUTHORITY=$HOME/.Xauthorityファイルに指定されます。
+if [ x"$XAUTHORITY" = x ]; then
+    XAUTHORITY=$HOME/.Xauthority
+    export XAUTHORITY
+fi
+
+removelist=
+
+# set up default Xauth info for this machine
+case `uname` in
+# unameの結果は見事に"Linux"でした。
+Linux*)
+	if [ -z "`hostname --version | grep GNU`" ]; then
+	# 上のコマンドを試した結果、やっぱりここに来ちゃうみたいです。
+		hostname=`hostname -f`
+		# hostname変数にはFQDNが代入されることになりました。
+	else
+		hostname=`hostname`
+	fi
+	;;
+*)
+	hostname=`hostname`
+	;;
+esac
+
+# ここら辺は外部からXサーバーにつないできたときの認証チェックみたいです。
+# が、今はこの部分は考えないので無視しましょう。（ワークステーション使用といことから。）
+authdisplay=${display:-:0}
+mcookie=`mcookie`
+for displayname in $authdisplay $hostname$authdisplay; do
+    if ! xauth list "$displayname" | grep "$displayname " >/dev/null 2>&1; then
+	xauth add $displayname . $mcookie
+	removelist="$displayname $removelist"
+    fi
+done
+
+# ここでようやくXの起動にはいるわけですが。この段階で
+# client=""
+# clientargs=/usr/X11R6/lib/X11/xinit/xinitrc
+# server=""
+# display=""
+# serverargs=""
+# 結局「xinit /usr/X11R6/lib/X11/xinit/xinitrc」を実行するみたいです。
+xinit $client $clientargs -- $server $display $serverargs
+
+if [ x"$removelist" != x ]; then
+    xauth remove $removelist
+fi
+
+# deallocvtってーのは・・・
+#  deallocvt - deallocate unused virtual terminals
+# みたい。ちょっとよくわかりません。
+if command -v deallocvt > /dev/null 2>&1; then
+    deallocvt
+fi
+</pre>
+　上の起動スクリプトの著作権はTurbolinux Japan K.Kに属します。<br>
+　うーん・・・それにしても、ファイルチェックが多くてなかなか最終的な姿形が見えてきませんでした。でも結局のところ、<b>X11のxinitrcを引数としてxinitを呼び出しているだけ</b>らしいです。<br>
+　では次にxinitの中身を・・・って、xinitはバイナリプログラム。しかもソースコードを読もうなんて、今の私には無理な話。というわけで、xinitのmanページをちょこっと要約してみましょう。<br>
+<b>参考資料</b><br>
+・「man xinit」<br>
+<br>
+<font size=+1><b><a name="main_03">「man xinit」の要約</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　というわけで「man xinit」の冒頭部分です。<br>
+<pre>
+XINIT(1)                                                 XINIT(1)
+
+NAME
+	xinit - X Window System initializer
+
+SYNOPSIS
+	xinit [ [ client ] options ] [ -- [ server ] [ display ] options ]
+
+DESCRIPTION
+	The  xinit  program is used to start the X Window System server and a first
+ client program
+	on systems that cannot start X directly from /etc/init or in environments t
+hat use  multiple  window  systems.  When this first client exits, xinit will k
+ill the X server and then terminate.
+
+	If no specific client program is given on the command line, xinit will look
+ for a file  in the user's home directory called .xinitrc to run as a shell scr
+ipt to start up client programs.  If no such file exists, xinit will use the fo
+llowing as a default:
+	xterm  -geometry  +1+1  -n  login  -display  :0
+
+	If no specific server program is given on the command line, xinit will look
+ for a file  in the  user's  home  directory  called  .xserverrc  to run as a s
+hell script to start up the server.  If no such file exists, xinit will use the
+ following as a default:
+	X  :0
+</pre>
+　ここでようやく、startxスクリプトが何をしていたのか分かりました。SYNNOPSISにあるようにxinitは第一オプションとしてクライアントオプション、第二オプションとしてサーバーオプションを指定する。んで、クライアントオプションって言うのは結局は何かのクライアントプログラムを指定する。サーバーオプションって言うのはXサーバーの動作を指定する。という区分みたいです。<br>
+　サーバーオプションは今は分かりません。画面番号とかなんとかが関わってくるみたいですが・・・Xクライアントを使ってないので今のところ興味ないですし。<br>
+　注目したいのはクライアントオプションの方です。クライアントオプションは結局はプログラムを指定するわけですが、後で分かることですが<b>ウインドウマネージャ自身もごく普通のプログラムだった</b>訳です。何をするのかというと、結局は「ウインドウを管理するプログラム」だったんですね。<br>
+　とゆーか、それって<b>常識</b>的な事柄なんですが、ここまで調べてやっと合点がいった次第です。<br>
+<br>
+　TLXW8に戻ります。さて、結局startxは「xinit /usr/X11R6/lib/X11/xinit/xinitrc」を実行していました。改めて確認しますが・・・<br>
+<b>１．xinitはXサーバーを制御する。</b><br>
+<b>２．xinitは起動時にクライアントオプションとサーバーオプションを指定できる。</b><br>
+<b>３．クライアントオプションとは、Xが立ち上がった後に動かすプログラムに関連するオプションである。</b><br>
+<b>４．サーバーオプションとは、Xサーバーの動作に関連するオプションである。</b><br>
+　さて。/usr/X11R6/lib/X11/xinit/xinitrcは<br>
+<pre>
+[fenjin@seisyuu fenjin]$ file /usr/X11R6/lib/X11/xinit/xinitrc
+/usr/X11R6/lib/X11/xinit/xinitrc: Bourne shell script text executable
+[fenjin@seisyuu fenjin]$ ls -l /usr/X11R6/lib/X11/xinit/xinitrc
+-rwxr-xr-x    1 root     root         2168 Sep 10 08:14 /usr/X11R6/lib/X11/xinit/xinitrc*
+</pre>
+　といった具合で、実行権がつけられたシェルスクリプト。<b>つまり立派なXクライアントプログラムです。</b>つまりstartxはxinitにこのファイルを実行するように指示したことになるわけです。<br>
+　では、早速このxinitrcの中身を見てみましょう。<br>
+<br>
+<font size=+1><b><a name="main_04">xinitrcの中身</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　というわけで中身を参照してみます。<br>
+<pre>
+#!/bin/sh
+# (c)2001 TurboLinux by GO!
+# Please do not modify this file by hand.
+# default xinitrc
+
+# リソースの設定をしています。今回は取り上げません。
+userresources=$HOME/.Xresources
+usermodmap=$HOME/.Xmodmap
+sysresources=/etc/X11/xinit/Xresources
+sysmodmap=/etc/X11/xinit/Xmodmap
+
+# merge in defaults and keymaps
+# キーマッピングを設定したり、Xのリソースを読み込んでいます。
+# 結構コマンドとか、勉強になりますね。
+if [ -f $sysresources ]; then
+    xrdb -merge $sysresources
+fi
+if [ -f $sysmodmap ]; then
+    xmodmap $sysmodmap
+fi
+if [ -f $userresources ]; then
+    xrdb -merge $userresources
+fi
+if [ -f $usermodmap ]; then
+    xmodmap $usermodmap
+fi
+# xrdbでXのリソースを読み込ませるのは知っていましたが、
+#追加するのには「-merge」オプションが使えるのは初耳でした。
+
+# setup Open Window env.
+# ここは・・・無視して、良さそう。
+if [ -d /usr/openwin ] ; then
+        OPENWINHOME=/usr/openwin
+        export OPENWINHOME
+fi
+
+# 言語環境の設定ですね。
+if [ -f ~/.lang/langrc.sh ]; then
+    . ~/.lang/langrc.sh set
+elif [ -f /etc/sysconfig/lang ] ; then
+   export LANG=`cat /etc/sysconfig/lang`
+#   export LANGUAGE=$LANG
+fi
+
+# TLXW8製品版のウリの一つ、ATOKXの設定が始まります。XIMの調整部分。
+if [ -f ~/.xim ]; then
+    . ~/.xim
+elif [ "${LANG%%.*}" = "ja_JP" ]; then
+  if   [ -f /var/lock/subsys/atokx ] &&
+       [ -x /usr/lib/im/locale/ja/atokserver/atokx_client ]; then
+      . /usr/lib/im/locale/ja/atokserver/atokx_client
+  # ATOKXがインストールされていれば、結局ここにたどり着くわけです。
+  # atokx_clientはシェルスクリプトで、XMODIFIERSなどの設定を肩代わり
+  # してくれています。
+
+  elif [ -f /var/lock/subsys/wnn7 ] &&
+       [ -x /usr/X11R6/bin/xwnmo ]; then
+      export XMODIFIERS="@im=_XWNMO"
+      /usr/X11R6/bin/xwnmo -g 1x1-0-50
+  elif [ -f /var/lock/subsys/atok12x ]; then
+      /usr/X11R6/bin/kinput2x -atok -server localhost &
+      alias kinput2=kinput2x
+      export XMODIFIERS="@im=kinput2"
+  elif [ -f /var/lock/subsys/jserver.wnn6 ] ||
+       [ -f /var/lock/subsys/jserver ]; then
+      /usr/X11R6/bin/kinput2 -wnn -jserver localhost &
+      export XMODIFIERS="@im=kinput2"
+  elif [ -f /var/lock/subsys/canna ]; then
+      /usr/X11R6/bin/kinput2 -canna &
+      export XMODIFIERS="@im=kinput2"
+  # Cannaがインストールされていて、なおかつこれまで出てきたIMが入って
+  #いなければここでCannaによるkinput2が起動するみたいですね。
+
+  fi
+elif [ "${LANG%%.*}" = "zh_CN" ] || [ "${LANG%%.*}" = "zh_TW" ]; then
+  if [ -x /usr/bin/chinput ]; then
+    /usr/bin/chinput &
+    export XMODIFIERS="@im=Chinput"
+  fi
+elif [ "${LANG%%.*}" = "ko_KR" ]; then
+  if [ -x /usr/bin/ami ]; then
+    /usr/bin/ami &
+    export XMODIFIERS="@im=Ami"
+  fi
+fi
+
+#START_STARTUP_APPS
+# ここはユーザーのカスタマイズ用みたいです。
+#END_STARTUP_APPS
+
+#START_BACKGROUND
+# ここも同じくユーザーのカスタマイズ用みたいです。
+#END_BACKGROUND
+
+if [ -f /etc/X11/xdm/xdmreinit ]; then
+    . /etc/X11/xdm/xdmreinit
+fi
+# 上のxdmreinitファイルは存在しました。
+# 中身はどうもセッション関連を設定しているらしいです。
+# シェルスクリプトで、「.」で単に展開され、解釈されています。
+
+#START_WINDOWMANAGER
+/usr/bin/startkde
+#END_WINDOWMANAGER
+# やっときました。ついにKDEが起動します。
+# startkdeは長くて、かなり複雑なシェルスクリプトです。その中身を調べるのは
+# 今回の目的とはあまり関係ないので省略します。
+</pre>
+　・・・といった具合。XIMの設定部分がちょっと長いけど、全体としては非常に簡単なシェルスクリプトになっていました。<br>
+　最終的には/usr/bin/startkdeを変更してしまえば、起動するウインドウマネージャが変更されるみたいです。では、ちょっと実験・・・<b>の前に。</b><br>
+　<b>予備実験です。</b>まず、本当に「xinit /usr/X11R6/lib/X11/xinit/xinitrc」でKDEが立ち上がるかどうか試してみましょう。さらに「xinit」を直接実行するとどうなるかも確認してみます。引数無しなら、manによればxtermが一つ立ち上がるだけのはずです（或いは素直に/usr/X11R6/lib/X11/xinit/xinitrcを読み込んでしまう）。<br>
+<br>
+<font size=+1><b><a name="main_05">予備実験（teeコマンド）</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　実験項目は二つ。<br>
+１．「xinit」の実行。予想としては、デフォルトのxtermが一つ立ち上がっただけの画面になるはず。<br>
+２．「xinit /usr/X11R6/lib/X11/xinit/xinitrc」の実行。予想としては、startxと全く同じ動作でKDEが立ち上がるはず。<br>
+　結論から言いますと<b>二つとも予想大当たり。</b>では、それぞれのコマンドの実行結果をteeで落としてみたのを示します。<br>
+<br>
+１．「xinit」の実行<br>
+　「xinit 2>&1 | tee xinit_su.txt」<br>
+　下に示すのがxinit_su.txtです。<br>
+<pre>
+XFree86 Version 4.2.0 / X Window System
+(protocol Version 11, revision 0, vendor release 6600)
+Release Date: 23 January 2002
+        If the server is older than 6-12 months, or if your card is
+        newer than the above date, look for a newer version before
+        reporting problems.  (See http://www.XFree86.Org/)
+Build Operating System: Linux 2.4.18-0.10smp i686 [ELF]
+Module Loader present
+Markers: (--) probed, (**) from config file, (==) default setting,
+         (++) from command line, (!!) notice, (II) informational,
+         (WW) warning, (EE) error, (NI) not implemented, (??) unknown.
+(==) Log file: "/var/log/XFree86.0.log", Time: Wed Dec 11 02:27:49 2002
+(==) Using config file: "/etc/X11/XF86Config"
+
+waiting for X server to shut down
+</pre>
+　で、お楽しみの画面です。唯一動いているxtermからksnapshotを起動して画面をキャプチャしました。<br>
+<a href="snapshot1.png" target=_blank>これがその画面です。</a><br>
+　見事にxterm一個のみの実に味気ない画面となりました。<br>
+<br>
+２．「xinit /usr/X11...（以下略）」の実行<br>
+　「xinit /usr（以下略） 2>&1 | tee xinit.txt」<br>
+　下に示すのがxinit.txtです。<br>
+<pre>
+XFree86 Version 4.2.0 / X Window System
+(protocol Version 11, revision 0, vendor release 6600)
+Release Date: 23 January 2002
+        If the server is older than 6-12 months, or if your card is
+        newer than the above date, look for a newer version before
+        reporting problems.  (See http://www.XFree86.Org/)
+Build Operating System: Linux 2.4.18-0.10smp i686 [ELF]
+Module Loader present
+Markers: (--) probed, (**) from config file, (==) default setting,
+         (++) from command line, (!!) notice, (II) informational,
+         (WW) warning, (EE) error, (NI) not implemented, (??) unknown.
+(==) Log file: "/var/log/XFree86.0.log", Time: Wed Dec 11 02:26:03 2002
+(==) Using config file: "/etc/X11/XF86Config"
+libpng warning: Incomplete compressed datastream in iCCP chunk
+libpng warning: Profile size field missing from iCCP chunk
+libpng warning: Ignoring gAMA chunk with gamma=0
+libpng warning: Incomplete compressed datastream in iCCP chunk
+libpng warning: Profile size field missing from iCCP chunk
+libpng warning: Ignoring gAMA chunk with gamma=0
+libpng warning: Incomplete compressed datastream in iCCP chunk
+libpng warning: Profile size field missing from iCCP chunk
+libpng warning: Ignoring gAMA chunk with gamma=0
+libpng warning: Incomplete compressed datastream in iCCP chunk
+libpng warning: Profile size field missing from iCCP chunk
+libpng warning: Ignoring gAMA chunk with gamma=0
+_KDE_IceTransmkdir: Owner of /tmp/.ICE-unix should be set to root
+DCOPServer up and running.
+kdecore (KLibLoader): WARNING: library=/usr/local/netscape/plugins/libjavaplugin_oji.so: file=/usr/local/net
+scape/plugins/libjavaplugin_oji.so: libnspr4.so: ¶???\?\?\?\§\?\?\?\?\?\??????±??????: ??????????\?\?\?\?
+??\?\￡\?\?\?\????￠????????/netscape/plugins/raclass.zip: ??????ELF\?\?\?ed symbol: NP_GetValue
+</pre>
+　以下WARNINGが怒濤のごとく続き、最後が<br>
+<pre>
+libpng warning: Incomplete compressed datastream in iCCP chunk
+libpng warning: Profile size field missing from iCCP chunk
+libpng warning: Ignoring gAMA chunk with gamma=0
+kdeinit: Fatal IO error: client killed
+kdeinit: sending SIGHUP to children.
+KLauncher: Exiting on signal 1
+
+waiting for X server to shut down X connection to :0.0 broken (explicit kill or server shutdown).
+X connection to :0.0 broken (explicit kill or server shutdown).
+Gdk-ERROR **: X connection to :0.0 broken (explicit kill or server shutdown).
+Gdk-ERROR **: X connection to :0.0 broken (explicit kill or server shutdown).
+Gdk-ERROR **: X connection to :0.0 broken (explicit kill or server shutdown).
+
+
+kdeinit: sending SIGTERM to children.
+kdeinit: Exit.
+</pre>
+　でした。<br>
+<br>
+　結局、予備実験は予想通りに成功しました。こうしてみると、ブラックボックスだった「startx」も非常に透明になります。おそらくどのディストリビューションでも多少の差はあれどxinitを呼び出しているに違いありません。ディストリビューション毎にウインドウマネージャの変更が変わってくるのは、xinitのクライアントオプションのカスタマイズに依るものでしょう。<br>
+　TLXW8だと非常にシンプルにデフォルトのxinitrc中にstartkdeをべた書きしてしまっています。<br>
+　RHL7.2の場合はxinitrcがもうちょっと凝っていて、もしも指定（或いは期待）通りのウインドウマネージャが存在しなかった場合のフェールセーフとしてcase文とかでfvwmとかtwmとか起動するようになっていたりします。<br>
+　他にもxinitrc中でホームディレクトリにある.wm_hogehogeとか、そんな感じのファイルを展開してその中で起動するウインドウマネージャを指定しているとか。とにかく凝っているディストリビューションもいっぱいあります。<br>
+<br>
+　まあ・・・でも・・・いつかみたいにRHL7.2でfvwm使ったときみたくxinitrcとかで引きずり回されるよりはTLXW8の用にべた書きで一発起動してくれた方が・・・カスタマイズの面では楽と言えば楽なんだけど・・・ね。<br>
+　凝ったstartx-xinit-xinitrcだといろいろなファイルの存在をチェックしたり、展開したりしていてそれらを追っかけるので疲れてしまうわけです。<br>
+　とはいえ、これも「Workstation」としてのTLXならではの設定でしょう。幾人もが使用することを前提としていれば、全体設定に関わるファイルで一発設定するわけにも行きません。あくまでも個人一人のみが使用することを予想されたWorkstationでのみ許される（？）設定方法なのかな、と思いました。<br>
+<br>
+　さて。この時点で本ページタイトルの「startxの軌跡」はトレースし終わったことになります。じゃあこれでお仕舞いか？いえいえ。そんなつもりは全くありません。<b>blackboxを動かすと言う最終目標があります。</b><br>
+　え？startkdeじゃなくてblackboxを指定すれば良いだけじゃないか？<b>甘い。</b><br><br>
+　せっかくここまでstartxを調べたのですから、一丁<b>「ウインドウマネージャを自由に追加＆選択できるスクリプト」</b>にxinitrcを改造してしまいましょう。<br>
+<br>
+<font size=+1><b><a name="main_06">改造</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて。その前にもう一つ予備実験を片づけておきましょう。xinitのクライアントオプションに直接blackboxを指定してみましょう。<br>
+　blackboxはたいていのディストリビューションには<b>含まれていない</b>ので、自分でダウンロードしてコンパイル、インストールしておく必要があります。<br>
+blackboxオフィシャルサイト：<a href="http://blackboxwm.sourceforge.net/" target=_blank>http://blackboxwm.sourceforge.net/</a><br>
+　コンパイルは細かいこと抜きにして、tar zxvf でblackboxのtarボールを解凍し、できたディレクトリに移って<br>
+<pre>
+$ ./configure
+$ make
+$ su
+$ make install
+</pre>
+　すればデフォルトで/usr/local/bin/に<br>
+blackbox<br>
+bsetroot<br>
+bsetbg<br>
+　の三つの実行ファイルがインストールされます。blackboxがウインドウマネージャの本体。詳細はman参照（ほんといい加減な・・・）。
+<br>
+　んで。では早速コンソールから打ち込んでみましょう。「xinit /usr/local/bin/blackbox」・・・<br>
+<a href="snapshot2.png" target=_blank>結果オーライ。</a><br>
+　というわけで実験は見事成功。予想道理素直にblackboxちゃんが動いてくれました。さあ、ンじゃあ本番の改造に移りましょう。<br>
+　まず、何をしたいのかを決めます。ここではこんな動きを実現することにしました。<br>
+１．startx --help で簡単な使い方が分かる。<br>
+２．第一引数($1)でUSERWM変数を独自にセットし、xinitrc側で利用する。<br>
+３．xinitrc側ではcase文でUSERWMを判別し、起動するウインドウマネージャを選択する。<br>
+　・・・何だか「自由に追加＆選択」できるのは管理者のみになってしまいました。まあ今の私の技術レベルではこんなモンです。とはいえ、とりあえずこれでユーザー側としては（管理者の趣味による押しつけであっても）ウインドウマネージャを選ぶことができるようになります。<br>
+　で、まずは/usr/bin/X11/startxの改造です。以下のコードを先頭に埋め込みます。<br>
+<pre>
+# Site administrators are STRONGLY urged to write nicer versions.
+#
+# $XFree86: xc/programs/xinit/startx.cpp,v 3.12.2.2 2002/01/28 18:27:34 tsi Exp $
+
+# ここからが独自の改造コードです。
+case "$1" in
+    --help)
+    echo "startx <window-manager> <startx-arguments...>"
+    echo     window-manager : you can specify... kde, blackbox
+    echo     startx-arguments : refer "man xinit" or read startx script
+    exit
+    ;;
+esac
+
+if [ "x$1" == "x" ]; then
+    USERWM=default
+else
+    USERWM=$1
+    shift
+fi
+echo USERWM=$USERWM
+export USERWM=$USERWM
+# ここまでが改造コードです。
+
+userclientrc=$HOME/.xinitrc
+...
+</pre>
+　xinitのクライアントオプションとかに渡すべき本来の引数をきちんと渡せるようにshiftで一つ進めておきます。とはいってもここに関してはあまり巧い処置とは言えないかもしれません。問題は"x$1" == "x"の判定で、もしもウインドウマネージャを指定せずに速攻でクライアントオプションやらサーバーオプションやらを指定してしまった場合、やっぱりshiftされてしまうからで。<br>
+　ひょっとしたら、startxに関しては「USERWMという環境変数で起動できるWMを選択できますよ」と「--help」で表示するにとどめておいて、後はおのおののユーザーが各々のシェルでUSERWMを定義してしまえば上記の問題は避けられると思います。<br>
+<br>
+　んで、/usr/X11R6/lib/X11/xinit/xinitrcの改造です。$USERWM変数を判別するコードを最後のstartkde部分に上書きします。<br>
+<pre>
+変更前：
+#START_WINDOWMANAGER
+/usr/bin/startkde
+#END_WINDOWMANAGER
+
+変更後：
+#START_WINDOWMANAGER
+echo USERWM=$USERWM
+case "$USERWM" in
+    blackbox)
+    /usr/local/bin/blackbox
+    ;;
+    kde)
+    /usr/bin/startkde
+    ;;
+    *)
+    /usr/bin/startkde
+
+    ;;
+esac
+#END_WINDOWMANAGER
+</pre>
+　これで「startx --help」で使い方と利用できるウインドウマネージャが。「startx blackbox」でblackboxが。「startx kde」「startx」でKDEが立ち上がるようになりました。<br>
+　以上で改造は終了です。<br>
+　当初の目的は完全に達成することができました。とはいえ、もうちょっとサポートする必要があります。それは、<b>自分が管理権限を持っていない場合</b>どうするか、です。<br>
+　ウインドウマネージャのインストールまでは良いでしょう。$HOME/binとでも作って、blackboxの./configureでバイナリやらいろいろのインストール先を$HOME/binとか$HOME/shareにすれば良いのですから（たぶん。って無責任だなヲイ）。問題は今回紹介したような改造が不可能なことです。<br>
+　しかし安心してください。<b>逃げ道は$HOME/.xinitrcにあります。</b>もうバレバレになったと思いますが、ホームディレクトリに.xinitrcファイルがあるとxinitはそっちを参照してくれるわけです。つまり。<br>
+<b>１．システムのxinitrcを$HOME/.xinitrcにコピー。（いくら何でも読み出し権限はあるだろう。）
+２．思う存分.xinitrcをいじくりまくり＆ハッピーな人生。</b><br>
+　以上。健闘を祈る。<br>
+<br>
+　まあ、TLXW8を使っている人でマルチユーザなケースは珍しいと思いますので、このような手段はあまり使う必要はないかもしれません。それでもシステムいじくるのは怖いというか厭な方は上記手法で影響を個人に抑えることができます。<br>
+<br>
+　以上で今回のお話はとりあえず完。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　ふー。足かけ数週間に渡りぽつぽつと書いてきたのがようやく終わった。<br>
+　ウインドウマネージャを変更する・startxを追いかける。使いやすいデスクトップ環境としてGNOME2だのKDE3だのが主要ディストリビューションのデフォルトとして動いている現在、これらはもはや必要のないテクニックになりつつあるのかもしれません。<br>
+　それでも、ハード（特にCPUとメモリ）の制約によって最新のGNOME, KDEでは負担が重すぎる場合もあると思います。そうした場面において、「ディストリビューションは最新のものを使いたい。けど、KDE, GNOMEは重すぎる。<b>かといってXを捨てるのは嫌。</b>」といった時にこういった手法は大いに重宝します。<br>
+　初心者にとっても、GUIを立ち上げる際の「startx」が何をしているのか知ることは非常に楽しいと思います（もちろんXの基本システムをあらましで良いので知っていないと、そしてmanを引けないと全然分かりませんが）。<br>
+　それにしてもTLXW8は本当に素直な形でstartx、xinitrcが作られています。以前RHL7.2をいじくったときなどはstartxとxinitrcにいろいろフェールセーフ処理のためのスクリプトが施されていて、未熟者だったこともあるのでしょうが追っかけられませんでした。以前RHL7.2にfvwmを導入したときのごたごたを本HP上にも載せてありますが・・・<br>
+<pre>
+startx
+-----> /etc/X11/xinit/xinitrc
+-----> /etc/X11/xinit/xserverrc
+（もしホームディレクトリに.xinitrc, .xserverrcが存在すればそちらを優先）
+
+xinitrc（これもシェルスクリプト）
+-----> (Xのリソースをロード：すみませんよくわかりません。） 
+	-----> /etc/X11/xinit/xinitrc.d/の中身を実行
+-----> /etc/X11/xinit/Xclients
+（もしホームディレクトリに.Xclientsが存在すればそちらを優先）
+
+Xclients
+-----> ホームディレクトリに「.wm_style」があるか？
+-----> あればそこで指定されているウインドウマネージャを/usr/X11R6/bin/RunWM を使って起動。
+-----> 無ければRunWMで指定されているウインドウマネージャを起動。
+</pre>
+　・・・長い。startx追っかけるのにいくつlessを開けば良いのだ？<br>
+　混乱した私は挙げ句の果てに<br>
+<pre>
+　どーでもいーけど私個人は重要だと思っているポイントは、
+１．X11はサーバー。
+２．X11はユーザーの要求に応じて起動される。
+３．よって、X11はxinitに起動スクリプトが置かれるべきである。
+</pre>
+　・・・３．は何？ここまで勘違いしてたのか・・・。<b>スクリプトに振り回されて</b>（とさりげなく言い訳）xinitを理解していませんでした。<br>
+　ディストリビューションによっては大きく異なる「startx」、ここに著作権を完全無視してTLXW8のを丸裸にしたわけですが、綺麗なものだったようです。RHLは面倒くさい。というか分かりづらい。まあ、初心者のみなさんはここで予備練習を体験したと思って本番の自分のマシンに向かってみてください。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux小咄（FAT32 mount、VMware、Samba動作確認）</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>Linux小咄（FAT32 mount、VMware、Samba動作確認）</h1>
+初版作成：2002/09/11<br>
+二版作成：2002/10/20（構成変更）<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　ここ数日の間にLinux関連でfstabやらsmb.confやらを設定しなおす状態が続いていました。<br>
+　というか。１からインストールアンド設定し直し状態でした。<br>
+　んで。結局デスクトップ機にWin2k+SP3（ちょっと危ないかな？でもまーWinCDR6.0動いてるからいーや。）<br>
+を/dev/hdaに（よーするにプライマリマスタHDD）、TurboLinuxW8（プロモ版）を/dev/hdbに（よーするにプライマリセカンドHDD）につっこむことになりました。<br>
+　んで、さらにVMware上にWin2kを構築して、そこからSambaでホストLinuxにアクセス、マウントしてあるWin2k+SP3のFAT32パーティションにSamba越しにアクセスする、という。それどころかディスク容量節約のため実際問題VMwareの設定ファイルや仮想ディスクファイルは当のFAT32パーティションに配置するという。（つまりSamba越しに自分自身が見えてしまうし、やろうと思えば削除すらもできてしまうなんだか気持ち悪くて落ち着かない組み合わせ）<br>
+　まあ、いろいろメモで書き散らしましたんで、見苦しい点もあるかなと。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">Win2k+SP3アンドTLXW8のインストール</a></li>
+	<li><a href="#main_02">FAT32の日本語文字化けしないマウント</a></li>
+	<li><a href="#main_03">VMwareのワンポイント</a></li>
+	<li><a href="#main_04">Samba動作確認最低限度の手順書</a></li>
+</ol>
+<br>
+<a name="main_01"><font size=+1><b>Win2k+SP3アンドTLXW8のインストール</b></font></a><br>
+<a href="#main"><font size=-1>「本題」に戻る</font></a><br>
+　Win2kの方のインストールはあまりにも簡単に終わりました。SP3も、インストールする順番が良かったのか
+今のところ変な動きはしてません。今までずっとWin98SEだったのですが。Win2kも結構使いやすいですね。
+インストールが簡単です。<br>
+　肝心のTLXW8のインストールも簡単に終わりました。もとより、直前までRHL7.2が動作していたハードウェア
+構成でしたし、RAIDとかも入れてなかったので。LANカードもRTL8139で素直に認識してくれまして、すぐに
+インターネットができました。<br>
+<br>
+<a name="main_02"><font size=+1><b>FAT32の日本語文字化けしないマウント</b></font></a><br>
+<a href="#main"><font size=-1>「本題」に戻る</font></a><br>
+　さて。ここからが大変、というか。参考資料を探すのが骨の折れる分野です。<br>
+　すでにFATのあるHDDにインストールするたびに苦労するのが、「FAT32パーティションのマウント」です。<br>
+　サーバー用途ならいざ知らず、自宅のデスクトップマシンにワークステーション目的でLinuxをインストールした手合い
+の方々ならその苦労がわかるはず。<br>
+　というわけで。後の楽のため、<b>ひっじょーに定型的でたった一行追加するだけなのに探すのに苦労していた</b>
+FAT32の日本語解決版マウントをここに載せときます。<br>
+　あらかじめ。参考資料は日経Linux2001/06号です。<br>
+　まーよーするに、/etc/fstabに以下の行を付け足すだけでおしまいなんですわ。<br>
+<br>
+/dev/hda1	/mnt/win2k	vfat	noauto,user,rw,codepage=932,iocharset=euc-jp	0	0<br>
+<br>
+　ちこっと解説しときます。<br>
+　<b>codepage=932,iocharset=euc-jp</b>とゆーのがFAT32上のSJISファイル・フォルダ名を端末上で表示
+するための指定です。んで。これを使うには/lib/module/[kernelとかバージョンとか。]/fs/nls/以下に
+「nls_cp932.o」が入っている場合。あるいは、make menuconfigの設定で「Native Language Support」→
+「Codepage932」を有効にしていた場合のみ。NLSとゆーのは文字コード変換機能のことらしー。<br>
+　一応、Kernel 2.2.18以降あるいは2.4系ではだいたい有効になっているみたい。<br>
+　とゆーか。RedHatLinux7.x系列あるいはTLXW8では間違いなく有効になってます。<br>
+<br>
+　おまけですが。VMware用には大容量のFAT32フォーマットのHDDを利用しています。<br>
+　で、以前躓いて判明したことですがVMwareっつーのは、設定ファイルか仮想ディスクファイルをchmodしておる
+らしーのですよ。これはログをみてみれば絶対にわかります。<br>
+　ところが、上記の設定のままではたぶん、/mnt/win2kはrootユーザーのものになっているはず。<br>
+　ファイルシステムの都合上、ファイルの属性をchmodできるのはファイルのオーナーだけです。<br>
+　ということはこの状態では/mnt/win2k上に保存してあるVMware（の設定）を一般ユーザーで実行しようと
+してもchmodできなくてエラーが発生してしまうのです。<br>
+　ということで、オーナーユーザーやオーナーグループを指定してマウントできるようにしときましょう。<br>
+　<b>っつっても、こんなことサーバー上でやったら殺されますがな。</b>あくまでも、利用者が一人だけという
+ワークステーション目的に限ってということで了承願います。<br>
+<br>
+/dev/hda1	/mnt/win2k	vfat	auto,user,rw,uid=500,gid=500,umask=000,codepage=932,iocharset=euc-jp	0	0<br>
+<br>
+　<b>vfatのオプション、uid, gid, umaskがポイント</b>です。uid,gidでオーナーを指定しています。
+umask=000でよーするに777を指定しています。詳しくはman mountのvfatオプションの項でもみてください。<br>
+　まあとにかく。これによってls /mnt/win2kすると、全部<b>一般ユーザID500, そのグループID500</b>の所有となる
+わけです。これでVMwareも動きます。<br>
+　何でこんなことするかというと、単純にWin2k用のHDDの方が空き容量はLinux用の３倍は有るからです。<br>
+　autoオプションは・・・まあ、VMware動かしたときに忘れずにWin2kがマウントされているように、という
+ことです。<br>
+　あ、<b>NTFSパーティションじゃたぶん無理ですよ。</b>確か現時点ではNTFSは読みしかできないはず。(02/09/10)<br>
+　自信がなければmountでしばらく実験してからをお勧めします。まあ、書き込みさえしなければ滅多にふっとぶ
+ことは・・・ないんじゃない？<br>
+<br>
+　あ、もう一つ言い忘れてた。Win2k+GRUBは大丈夫か、という話。<br>
+/dev/hda1→Win2k<br>
+/dev/hdb→TLXW8<br>
+　という形でインストールしたんだけど。結論から言ってGRUBを/dev/hdaのMBRにインストールして
+一切支障は有りませんでした。今のところ。<br>
+<br>
+<a name="main_03"><font size=+1><b>VMwareのワンポイント</b></font></a><br>
+<a href="#main"><font size=-1>「本題」に戻る</font></a><br>
+　これも、毎回毎回本を引っ張ってしまう部分です。ので、とっととHPにアップしときます。<br>
+　ブリッジネットワークモードは[yes]でしょう。というか、eth一つだけなら訊かれません。<br>
+　NATネットワークモードに関しては、将来的に十分利用することは考えられなくもないような気がするような
+しないような感じもするので、一応。<br>
+Do you want this script to probe for an unused private subnet?<br>
+　と訊かれてきたらyesとしときます。<br>
+　次が問題。<br>
+Do you want this script to automatically configure your system to allow your Virtual Machines
+to access the host's filesystem?<br>
+　これ、よーするにVMware版Sambaを使いますか？と訊いてきてるわけ。<br>
+　<b>自前でSamba立てるつもりなので、当然noを選んどきます。</b><br>
+　以上、注意する点終わり。<br>
+<!-- for Lin for 3.0以上かも 625AX-8DE40-46RA3-30HUM -->
+<!-- for Lin for 3.1 2AJ2R-FAJ0A-G377L-3T2L1 -->
+<!-- for Win for 3.0以上かも 60N88-8DW44-16H77-32KT4 -->
+<br>
+<a name="main_04"><font size=+1><b>Samba動作確認最低限度の手順書</b></font></a><br>
+<a href="#main"><font size=-1>「本題」に戻る</font></a><br>
+　Sambaって、VMware使う際にも非常に便利なんだけど。設定が込み入っています。<br>
+　というわけで、日経Linux2001/06掲載のSamba動作確認の最低限度の手順書を元にして、マウントしたFAT32
+をSambaで共有してみます。<br>
+　なんかすっげー回りくどい事してるよーな・・・。でも。WinLinデュアルブートにしたマシンがあって、
+そこのディスクに、Winが動いていても、Linが動いていても。そして、万が一のバックアップや修復用に
+Winをメインに使うとなると、どうしてもこんな変な。<b>まさにWin併用のワークステーション目的ならではの
+Sambaの使い方</b>をせざるを得ない方も多いかと思われます。<br>
+　というわけで、始めましょう。<br>
+<ol>
+	<li><a href="#main_04a">序盤戦　ネットワークの確認</a></li>
+	<li><a href="#main_04b">中盤戦　必要最低限の設定での実行確認</a></li>
+	<li><a href="#main_04c">終盤戦　実際にLinおよびWinからアクセス</a></li>
+	<li><a href="#main_04d">延長戦　全角ユーザー名とプリンタ</a></li>
+</ol>
+<br>
+<b><a name="main_04a">序盤戦　ネットワークの確認</a></b><br>
+<br>
+　まず、仮定するネットワーク環境を挙げます。<br>
+<ul>
+	<li>Sambaが動作するLinuxマシンのホスト名：BIGSERVER
+	<li>Linuxマシンのアドレス：10.1.0.10
+	<li>Windowsマシン：ACLIENT
+	<li>WindowsマシンのIPアドレス：10.1.0.20
+	<li>LinuxとWindowsマシンはともに「TESTGROUP」という名前のワークグループに所属
+	<li>サブネットマスクは255.255.0.0
+</ul>
+　ではいきますです。<br>
+<br>
+<b>１．Linux上で自マシンにIPアドレスでPING</b><br>
+　これが通らなかったらTCP/IP環境の設定段階でのエラーがある。<br>
+<b>２．Linux上で自マシンにホスト名でPING</b><br>
+　Linuxマシンbigserverから自分に、ホスト名でping(ping bigserver)。<br>
+　自ホストのIPが127.0.0.1となる場合は/etc/hostsファイルの設定ミス。<br>
+（誤った/etc/hosts設定例）<br>
+127.0.0.1	bigserver	localhost.localdomain localhost<br>
+<br>
+（正しい/etc/hosts設定例）<br>
+127.0.0.1	localhost.localdomain localhost<br>
+10.1.0.10	bigserver bigserver.yourdomain<br>
+<br>
+　FQDN(Fully Qualified Domain Name)を忘れないよーに。<br>
+　DHCPを使う場合はDNSと連携させてね。つっても、やったことないからわかりませんが。<br>
+<b>３．LinuxマシンからWindowsマシンにIPアドレスでPING</b><br>
+　Linuxマシン上からping 10.1.0.20 でWindowsマシンにIPでPING。コレが通らなければTCP/IP
+ネットワークに異常有り。<br>
+<b>４．LinuxマシンからWindowsマシンにホスト名でPING</b><br>
+　Linuxマシン上からWindowsクライアントACLIENTへPING（ping aclient）。<br>
+　通らないときはクライアントの名前解決が失敗している。/etc/hostsかDNSの設定を疑うこと。<br>
+　一応Sambaにアクセスできる場合もあるらしいが、SWATでのアクセスが異常に遅いときはこれが原因
+の場合もある。<br>
+<br>
+<b><a name="main_04b">中盤戦　必要最低限の設定での実行確認</a></b><br>
+<br>
+<b>５．必要最低限の設定</b><br>
+　SWATを使って以下のように設定します。<br>
+<pre>
+[global]
+	coding system = euc
+	client code page = 932
+	encrypt passwords = Yes
+	map to guest = Bad User
+
+[tmp]
+	path = /tmp
+</pre>
+　/etc/smb.confまたは/etc/samba/smb.confまたは/usr/local/samba/lib/smb.confに上記設定が
+保存される。<b>設定の確認にはtestparmコマンドを実行する。</b><br>
+<br>
+<b>６．Linux上でsmbclientを実行</b><br>
+　Linuxにログオンする。<b>あらかじめsmbpasswdコマンドでログオンユーザーをSambaに登録しておくこと。</b>
+パスワードの注意点として、ユーザー名には大文字のアルファベットか含まれない方が良い。パスワードも同じ。<br>
+　結局ログオンした後、「smbclient -L bigserver」を実行する。<br>
+　使用できる共有サービス名の一覧が表示されるはず。<br>
+　ここで「Bad password」などが表示されたら、smb.confで不適切な「hosts allow」「hosts deny」
+「valid users」設定のため、あるいはゲスト・アカウントが無効であるかのいずれか。というわけで、
+testparmコマンドを使ってゲスト・アカウントの確認やhosts, valid userなどの設定をコメントアウト
+したりして実験してみる。<br>
+　「connection refused」ときたら、単純に接続に失敗している。smbdが起動していないか、inetd経由で
+起動するようにしたはいいが設定に失敗しているか、など。<br>
+　とりあえず「netstat -a」コマンドでnetbios-ssnポートが「LISTEN」状態になっていることを確認。
+この段階で「session request failed」とかきたらサーバーが接続拒否状態。「Your server software is 
+being unfriendly」ときたらそもそもsmbdが実行時に無効なパラメータがつけられたか、起動時に致命的な
+ミスがあったかも。<br>
+　とにかくtestparmを実行してsmb.confの文法ミスがないか確認し、ログファイルの中身もしっかり確認
+すること。ひょっとしたらTCP/IP設定、特にネットマスクとかがおかしくなってるかも。VMware版Sambaが
+動いてるかどうかもチェック。ポート139を使った何かがすでに動いている場合はSambaはうまく動きません。<br>
+　代表的なセッション要求の拒否の原因としては。smb.confで以下の１つ以上を設定している場合NG。<br>
+hosts deny = ALL<br>
+hosts allow = xxx.xxx.xxx.xxx/yy<br>
+bind interfaces only = Yes<br>
+　これだと、127.0.0.1からつなげられない。<br>
+hosts allow = xxx.xxx.xxx.xxx/yy 127.<br>
+　という風に直す。あとSambaがローカルな資源にアクセスする場合。よーするにフツーに使う場合、「
+binde interfaces only」パラメータは使用不可。<br>
+<br>
+<b>７．nmbdの動作確認</b><br>
+　Linuxマシン上で次のコマンドを実行。「nmblookup -B BIGSERVER __SAMBA__」<br>
+　LinuxマシンのIPを得られるはず。失敗したらnmbdが動いているか、ポート137/udpがLISTENになっているか。
+そしてnmbdがinetd経由になっていないかどうか確認すること。<br>
+<b>８．クライアントのNetBIOSによる名前解決</b><br>
+　Linuxマシン上で次のコマンドを実行。「nmblookup -B ACLIENT」<br>
+　このコマンドが動作しないなら、「nmblookup -B 10.1.255.255 ACLIENT」（ブロードキャストとNetBIOS
+名でlookup）を実行。<br>
+　WindowsマシンのIPアドレスを得られるはず。失敗したらWindowsのTCP/IPのミスか、マシン名のミスか。
+DNSを利用してのACLIENTの名前解決ができてないなら、ACLIENTのIPを使って上記のコマンドを実行してみる。<br>
+<b>９．nmbdの確認その２</b><br>
+　Linuxマシン上で「nmblookup -d 2」を実行。よーするにデフォルトのブロードキャストアドレスに
+対してブロードキャストの確認を行うわけ。WindowsマシンとLinuxマシンが同じサブネットの上に存在
+しないときは-Bオプション付きで試してみる。<br>
+　これに失敗した場合は、smb.confに「interface」オプションを設定し、IPアドレス、ブロードキャスト
+アドレス、ネット・マスクを指定してみる。それでもだめならとにかくネットマスクやサブネットマスク
+の設定周りにミスがありそう。<br>
+<br>
+<b><a name="main_04c">終盤戦　実際にLinおよびWinからアクセス</a></b><br>
+<br>
+<b>１０．Linuxマシン上での共有アクセス</b><br>
+　Linuxマシン上で次のコマンドを実行。「smbclient //BIGSERVER/TMP」<br>
+　パスワード入力プロンプトが表示されればsmbpasswdで設定したパスワードを叩く。そのほかのユーザー
+でテストするなら「-U username」をくっつける。あるいはパスワードも一緒に指定して。<br>
+　「smbclient //bigserver/tmp -U username%password」<br>
+　smb&gt;プロンプトが表示されない場合はエラー。「invalid network name」なら[tmp]共有の設定ミス。
+「bad password」というエラーなら、次のような原因が考えられる。<br>
+・smbpasswdコマンドにパスワードを設定していない。<br>
+・smb.confに「encrypt password = Yed」を設定していない。<br>
+・smb.confの「valid users」の設定がミス。<br>
+・大文字小文字混在パスワードを使用している。<br>
+・smb.confの「path=」が設定ミス。testparmで確認。<br>
+・smbpasswdと/etc/passwdでUIDが異なっている。<br>
+　これに該当しなければとにかくログを参照する。<br>
+<br>
+　とにかく、接続できたなら「dir」「get」「put」などのコマンドが使えるはず。「help コマンド名」
+でコマンドの用例が表示。「dir」コマンドを実行した場合、空き容量がちゃんとしているかチェック。<br>
+<b>１１．WindowsマシンからLinuxへIPでPING</b><br>
+　WindowsマシンACLIENTでLinuxマシンへIPでPINGする。コレが通らなきゃネットワークダウンかWindowsの
+TCP/IP設定ミス。<br>
+<b>１２．WindowsマシンからLinuxマシンへ名前でPING</b><br>
+　これが通らなきゃDNSかWINSの設定ミス。といっても、DNSを使っていないときはhostsファイルの設定し忘れ。<br>
+　一応Windowsにも/etc/hostsに相当するファイルがある。Windows9xでは%windir%¥hosts、WindowsNT系列
+なら%windir%¥system32¥drivers¥etc¥hostsにある。書式も同じ。ひょっとしたらWin9xではhosts.*で検索しないと
+見つからないかも。<br>
+<b>１３．IPアドレスによるnbstat</b><br>
+　Windowsマシンから以下のコマンドを実行。「nbstat -A SambaサーバーのIPアドレス」<br>
+　これで応答がなけりゃ、Sambaが動いていないとゆーこと。<br>
+<b>１４．Linuxマシン名でnbstat</b><br>
+　Windowsマシンから以下のコマンドを実行。「nbstat -A Sambaサーバーのホスト名」<br>
+　今回の例なら「nbstat -A BIGSERVER」。ホスト名は大文字小文字区別無いので「nbstat -A bigserver」
+でも大丈夫。<br>
+　これで応答がなければNetBIOSの名前解決失敗か、nmbdのミス（こっちの方が殆ど）。解決するには
+以下のいずれか一つの方法を用いる。<br>
+・nmbd設定やり直し。<br>
+・BIGSERVERをWINSサーバにしてしまう。<br>
+・BIGSERVERとWindowsマシンで同一のWINSサーバーを使うようにする。<br>
+・TCP/IP設定のDNSで、DNSを利用してNetBIOS名前解決を可能にする。<br>
+・BIGSERVERのアドレスをWindowsマシンのlmhostsファイルに加える（hostsファイルと同様）。<br>
+<b>１５．Windowsマシンからnet viewコマンド</b><br>
+　Windowsマシンから以下のコマンドを実行。「net view ¥¥BIGSERVER」<br>
+　成功すればSambaで利用できる共有サービスの一覧が表示される。<br>
+　「network name not fount」：NetBIOSの名前解決失敗かsmbが起動してない。<br>
+　「invalid network name」「bad password error」：前述の「smbclient -L」のテストと同じ解決策。<br>
+　WindowsはSambaに接続するときWindowsにログオンしたユーザー名を使用して接続を試みる。よーするに
+このときのアカウントがSamba側で有効であることが大事。<br>
+　「specified computer is not receiving requests」：LinuxマシンがTCPサービス経由で接続でき
+てない。TCP_Wrappersを使用していないことを確認して、必要で有ればクライアントのアドレス、あるいは
+サブネットマスクを/etc/hosts.allowに追加しとく。<br>
+<b>１６．Windowsマシンからnet useコマンドの実行</b><br>
+　Windowsマシンから以下のコマンドを実行。「net use x: ¥¥BIGSERVER¥TMP」<br>
+　パスワードを入力すると「command completed successfully」が表示されるはず。<br>
+　でなければ、今までの設定をもう一度確認してみる。<br>
+　smb.confに「security=share」と設定していた場合、使用しているユーザー名で接続できないことがある。
+この場合はsmb.confの[tmp]セクションに「user = USERNAME」などとして、入力したパスワードに対応する
+ユーザー名を追加しておく。WindowsとLinuxとでユーザー名が異なる場合はユーザー名のマッピング・オプション
+(smb.confの「usernamemap」オプション)を用いる必要がある。<br>
+<b>１７．Linuxマシンからnmblookupコマンドを実行</b><br>
+　Linuxマシンから以下のコマンドを実行。「nmblookup -M TESTGROUP」<br>
+　対象ワークグループ（この例だとTESTGROUP）のマスター・ブラウザのIPが表示されるはず。<br>
+　表示されないときはマスター・ブラウザの選定過程で失敗。しばし待つ。<br>
+　それでもだめならsmb.confに「preferred master = yes」を指定すると起動時に優先的にマスター・ブラウザ
+になってくれる。<br>
+<b>１８．ブラウジング</b><br>
+　あとはネットワークコンピュータを参照すれば、だいたいアクセスできるはず。<br>
+　「invalid password」とかこの段階に至っても表示されてしまった場合は、おそらくWinNT系列でユーザー
+レベルのセキュリティ・モードを使用し、なおかつ暗号化されたパスワードを受け付けないサーバーのブラウズ
+を拒否しているのかも。<br>
+　そんなときはsmb.confに「security = server」と「password server = Windows_NT_Machine」と指定するか
+、暗号化されたパスワードを使用できるようsmb.confに「encrypt passwords = yes」と設定する。<br>
+<br>
+<br>
+・・・お疲れさまでした。ここまでくれば、手順通りに進んでいればTMPに難なくアクセスできたと思います。<br>
+　しかし。私の場合さらにもう一仕事有りました。<br>
+　使用しているノーパソはWin98SEなのですが、実はユーザー名を「風晶」としてログインしているのです。<br>
+　<b>これはまずい。</b><br>
+　全角文字じゃあ、smbpasswdに登録できない。usernamemapオプションも全角文字じゃあ不安。<br>
+　しかも、そもそもパスワードも使ってない。ESCか何も入力せずRETURNで起動してきた。<br>
+　<b>これではSambaに接続できない。</b><br>
+　というわけで、<b>延長戦です。</b><br>
+<br>
+<b><a name="main_04d">延長戦　全角ユーザー名とプリンタ</a></b><br>
+　まず、そもそもの最終目標は「Linux上でマウントしたFAT32パーティション(NLS対応済み)をSambaで
+共有かける」です。<br>
+　何はともあれ、パスワードなしでも。変なユーザー名でもSambaに接続できるようにしなければなりません。<br>
+　というわけで、guest okを追加します。<br>
+<pre>
+[win_data]
+	comment = Windows Partition
+	path = /mnt/data
+	read only = No
+	guest ok = Yes
+</pre>
+　/mnt/dataとゆーのがFAT32パーティション、すなわち/dev/hda1です。<br>
+　んで、さらに[global]で、<b>良く分かりませんが</b>「security = SHARE」にします。<br>
+　<b>パスワードなしでもguestにマッピングしましょう</b>（注意：ちゃんとした場所では絶対に
+やっちゃいけません）、「map to guest = Bad Password」！！<br>
+　念のため、「encrypt passwords = Yes」。<br>
+<pre>
+サンプル例です。
+[global]
+	coding system = EUC
+	client code page = 932
+	workgroup = HAGANE
+	netbios name = SEISYUU
+	server string = Samba Server %v at %h
+	security = SHARE
+	encrypt passwords = Yes
+	map to guest = Bad Password
+	log file = /var/log/samba/%m.log
+	max log size = 0
+	socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+	dns proxy = No
+</pre>
+　これでようやく接続できました。<br>
+　ちなみに、もう解決してしまっているのですが、たとえFAT32でも、なぜかcoding system = EUC、
+client code page = 932で正常に（全く正常に。つまり、Win2kの方で起動して確認をとって。）SJISで
+ファイルのやりとりができていました。<br>
+<br>
+<br>
+・・・ふう。長かったがようやく今までインストールするたびにあさっていた資料をまとめ上げてWebに
+紹介できる。疲れた。<br>
+・・・え？プリンタの設定？うううんんん・・・。いや、やりましたよ。<br>
+　ポイントはプリンタについてくるWindows用のプリンタドライバを使いたければRaw queueとして
+フィルタを介さず生で出力するようにprintcapなりCUPSで設定しておくというところですか。<br>
+　あとはお定まりのユーザー名問題さえguest okにしちまえば、たぶん大丈夫かな、と。<br>
+　実際、自分も適当にやってたらプリンタに関しては問題なく動いてしまったので。<br>
+　一応[printers]周り、載せときます。<br>
+<pre>
+[printers]
+	comment = All Printers
+	path = /var/spool/samba
+	printable = Yes
+	browseable = No
+[DeskJet840c]
+	path = /var/spool/samba
+	read only = No
+	guest ok = Yes
+	printable = Yes
+	printer name = DeskJet840c
+</pre>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　なんだか、ちゃんとしたネットワークで運用するには禁じ手のような設定ばかり延長戦で行ったような気もしますが。<br>
+　まあ、自宅で細々とWinLinデュアルマシン＋VMwareを使ったりする人には、そしてすでに全角ユーザー名
+でログオンして使っているパソコンからもSambaにつなぎたいときは。<br>
+　まあ役に立つのではないかな、と。<br>
+<br>
+今回はコレでおしまいです。お疲れさまでしたー。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

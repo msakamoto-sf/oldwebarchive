@@ -1,0 +1,179 @@
+#############################################################################
+##
+##
+## Menus Configurations.
+##
+##
+#############################################################################
+#
+# MenuStyle
+
+MenuStyle * Hilight3DThickness 1
+MenuStyle * PopupDelayed, PopupDelay 100, PopdownDelayed, PopdownDelay 100
+MenuStyle * PopupOffset -3 100, TitleWarpOff
+MenuStyle * TitleUnderlines1, SeparatorsLong, TrianglesSolid
+MenuStyle * Animation, AutomaticHotkeysOff, DoubleClickTime
+MenuStyle * BorderWidth 1, SidePic, SideColor
+MenuStyle * PopupAsSubmenu, HoldSubmenus, SubmenusRight
+MenuStyle * ItemFormat "%.1s%|%1.4i%1.4l%1.4l%1.4r%1.4i%2.3>%|"
+MenuStyle * VerticalItemSpacing, VerticalTitleSpacing
+MenuStyle * MenuFace, ActiveFore, HilightBack
+MenuStyle * MenuColorset 5, ActiveColorset 6, GreyedColorset 7
+
+BusyCursor DynamicMenu True
+
+#
+#############################################################################
+#
+# FvwmRoot Menu
+#
+#############################################################################
+#
+
+DestroyFunc FuncRunInRxvt
+AddToFunc   FuncRunInRxvt
++ I exec rxvt -vb -sl 4096 -T "$0" -n "$0" -e $1
+
+DestroyMenu MenuFvwmRoot
+AddToMenu   MenuFvwmRoot "Root Menu" Title
++ "Rxvt%menu/xconsole.xpm" Exec exec rxvt -vb -sl 4096
++ "Emacs on Rxvt%menu/gnu.xpm%"		FuncRunInRxvt "Emacs" "emacs -nw"
++ "Emacs with X%menu/gnu.xpm%"		Exec exec /usr/local/bin/emacs
++ "xman%menu/xapp.xpm%"				Exec exec xman
++ "FvwmPager(DialogBox)%menu/xapp.xpm"		Module FvwmPager -transient *
++ "FvwmPager(App)%menu/xapp.xpm"		Module FvwmPager *
++ "" Nop
++ "マルチメディア%menu/multimedia.xpm%" Popup MenuMultiMedia
++ "ネットワーク%menu/network.xpm%" Popup MenuWwwUtils
++ "システム%menu/settings.xpm" Popup MenuSysUtils
++ "ワープロ／印刷%menu/wordprocessing.xpm%" Popup MenuDtpUtils
++ "開発／その他%menu/applications.xpm%" Popup MenuOthers
++ "" Nop
++ "FVWM &Modules%menu/modules.xpm%"		Popup MenuFvwmModules
++ "&Window Operations%menu/window.xpm%"		Popup MenuFvwmWindowOps
++ "Sc&reen Saver%menu/display.xpm%"		Popup MenuFvwmScreenSaver
++ "" Nop
++ "&Quit FVWM%menu/quit.xpm%"			Popup MenuFvwmQuit
+
+DestroyMenu MenuWwwUtils
+AddToMenu MenuWwwUtils
++ "Mozilla%menu/mozilla.xpm%"		Exec exec mozilla
++ "Konqueror%menu/konqueror.xpm%"		Exec exec konqueror
++ "KfmClinet%menu/home.xpm%"		Exec exec kfmclient openURL $HOME
++ "GFTP%menu/folder_ftp.xpm%"	Exec exec gftp
++ "Kppp%menu/kppp.xpm%"		Exec exec kppp
+
+DestroyMenu MenuOthers
+AddToMenu MenuOthers
++ "Glade%menu/modules.xpm%" Exec exec glade
++ "Qt Designer%menu/designer.xpm%" Exec exec designer
++ "GNUplot%menu/mathematica.xpm%"	FuncRunInRxvt "GNUPlot" "gnuplot"
+
+DestroyMenu MenuSysUtils
+AddToMenu MenuSysUtils
++ "XUtilities%menu/xapp.xpm%"	Popup MenuXUtilities
++ "Top%menu/monitoring.xpm%" FuncRunInRxvt "Top" "top"
++ "XOSView%menu/xosview.xpm%" Exec exec xosview
++ "KSysGuard%menu/ksysguard.xpm%" Exec exec ksysguard
+
+DestroyMenu MenuDtpUtils
+AddToMenu MenuDtpUtils
++ "Acroread%menu/acroread.xpm%"		Exec exec acroread
++ "GV%menu/ghostview.xpm%"	Exec exec gv
++ "GhostView%menu/ghostview.xpm%" 	Exec exec ghostview
++ "X PDF%menu/ghostview.xpm%"		Exec exec xpdf
++ "X DVI%menu/xapp.xpm%"		Exec exec xdvi
+
+DestroyMenu MenuMultiMedia
+AddToMenu MenuMultiMedia
++ "GQView%menu/image-viewer.xpm%"	Exec exec gqview
++ "Gimp%menu/gimp.xpm%"				Exec exec gimp
++ "XMMS%menu/xmms.xpm%"		Exec exec xmms
++ "KSnapshot%menu/ksnapshot.xpm%" Exec exec ksnapshot
++ "KColorChooser%menu/colorpicker.xpm%" Exec exec kcolorchooser
+
+DestroyMenu	MenuXUtilities
+AddToMenu	MenuXUtilities
++ "XLogo%menu/amusement.xpm%"		Exec exec xlogo
++ "Calculator%menu/calculator.xpm%"	Exec exec xcalc
++ "Magnifying glass%menu/viewer.xpm%" 	Exec exec xmag
++ "XClock%menu/clock.xpm%"		Exec exec xclock
++ "XFontSel%menu/font.xpm%"		Exec exec xfontsel
++ "Xclipboard%menu/unknown.xpm%"	Exec exec xclipboard
++ "XEyes%menu/amusement.xpm%"		Exec exec xeyes
+
+#
+#############################################################################
+#
+# Module Control Menus
+#
+#############################################################################
+#
+
+DestroyMenu MenuFvwmModules
+AddToMenu   MenuFvwmModules
++ "%menu/item.xpm%&TaskBar"     FuncFvwmRestartModule FvwmTaskBar
++ "Animation%menu/window-iconify.xpm%"	FuncFvwmRestartModule FvwmAnimate
++ "Banner%menu/display.xpm%"		Module FvwmBanner
++ "Console%menu/terminal-special.xpm%"		Module FvwmConsole
++ "Identify%menu/window-identify.xpm%"		Module FvwmIdent
++ "Auto Raise%menu/window-raise.xpm%"  \
+	FuncFvwmRestartModule 'FvwmAuto 100 "Silent Raise" Nop'
++ "" Nop
++ "%menu/quit.xpm%Stop TaskBar"	    KillModule FvwmTaskBar
++ "Stop Animation%menu/quit.xpm%"	KillModule FvwmAnimate
++ "Stop Console%menu/quit.xpm%"	KillModule FvwmConsole
++ "Stop Identify%menu/quit.xpm%"	KillModule FvwmIdent
++ "Stop Auto Raise%menu/quit.xpm%"	KillModule FvwmAuto
+
+#
+#############################################################################
+#
+# WindowOperations Menus
+#
+#############################################################################
+#
+
+# NOTE: Window operation menu items are very strongry dependant for core 
+#      configurations of window manager. So, these menu items are written in
+#      main resource file of fvwm (.fvwm2rc) at ESOX.
+
+#
+#############################################################################
+#
+# XScreenSaver Menus
+#
+#############################################################################
+#
+
+DestroyMenu MenuFvwmScreenSaver
+AddToMenu   MenuFvwmScreenSaver "Screen Saver" Title
++ "Screen Saver%menu/display.xpm%" Exec xlock -nolock -nice 19 -mode random
++ "Screen Locker%menu/lock.xpm%"   Exec xlock -nice 19 -mode random
++ "" Nop
++ "(Re)start XscreenSaver%menu/display.xpm%" Exec xscreensaver-command -exit ; exec xscreensaver -no-splash
++ "Stop XscreenSaver%menu/choice-no.xpm%" Exec exec xscreensaver-command -exit
++ "XscreenSaver Demo%menu/display.xpm%" Exec xscreensaver-command -exit ; exec xscreensaver; exec xscreensaver-command -demo
++ "" Nop
++ "Locked XscreenSaver%menu/lock.xpm%" Exec exec xscreensaver-command -lock
++ "Activate XscreenSaver%menu/display.xpm%" Exec exec xscreensaver-command -activate
+
+#
+#############################################################################
+#
+# Quit and Restart (Other) WindowManager Menu
+#
+#############################################################################
+#
+
+DestroyMenu MenuFvwmQuit
+AddToMenu   MenuFvwmQuit "Really Quit FVWM?" Title
++ "&Restart%menu/restart.xpm%"		Restart
++ "Re&fresh Screen%menu/refresh.xpm%"	Refresh
++ "Re&capture Screen%menu/refresh.xpm%"	Recapture
++ "" Nop
++ "&Yes, Really Quit%menu/choice-yes.xpm%" Quit
++ "&No, Don't Quit%menu/choice-no.xpm%"    Nop
+
+#
+#############################################################################

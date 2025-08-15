@@ -1,0 +1,326 @@
+#############################################################################
+##
+## Key and Mouse Bindings
+## Configurations and Functions for it.
+##
+##
+# ---------------------------------------------------------------------------
+# Contexts:
+#     R = Root Window                 rrrrrrrrrrrrrrrrrrrrrr
+#     W = Application Window          rIrrrrFSSSSSSSSSFrrrrr
+#     F = Frame Corners               rrrrrrS13TTTT642Srrrrr
+#     S = Frame Sides                 rIrrrrSwwwwwwwwwSrrrrr
+#     T = Title Bar                   rrrrrrSwwwwwwwwwSrrrrr
+#     I = Icon                        rIrrrrFSSSSSSSSSFrrrrr
+#                                     rrrrrrrrrrrrrrrrrrrrrr
+#
+# Context（コンテクスト）は、よーするに現在マウスポインタが指している場所の
+# 事です。見た感じ、上のアスキーアートもどきのような具合です。もう一つ特殊な
+# コンテクストがあります。"Any" の「A」です。これを指示すると、全てのコンテク
+# ストを指すことになります(A = R|W|F|S|T|I みたいな）。
+#
+# キーボードとマウスのイベントに、FVWMの機能（或いは関数）を割り当てることを
+# 「バインド」と言います(Bind)。キーボードのバインドは「Key」コマンド、マウス
+# は「Mouse」コマンドで行います。
+#
+# Numbers are buttons: 1 3 5 7 9   0 8 6 4 2
+#
+# 特殊なコンテクスト（主にマウス）としてタイトルバーの両脇にくっつくミニボタン
+# があります。これは番号によって表され、外側から内側に向かって1から9,0まであり
+# ます。詳しくは.fvwm2rcの方を参照して下さい。上のアスキーアートもどきが示して
+# いますが、実際は2, 4, ..., 0と偶数番号が右側。1, 3, 5, ..., 9と奇数番号が左
+# 側のボタンに割り当てられています。このうちesoxでは2, 1, 3, 5番だけ使い、残り
+# は非表示にしています。非表示にする方法は.fvwm2rcに書いてあります。
+#
+# Modifiers: (A)ny, (C)ontrol, (S)hift, (M)eta, (N)othing
+#
+# Modifier（モデファイア）とは、そのキー或いはマウスボタンが押されたとき、一緒
+# に押されている特殊キー（とその組み合わせ）の事です。Aだと、Ctrlが押されていよ
+# うがMeta(Alt)が押されていようがお構いなしです。他に「CM」と指定すると「Ctrl+
+# Meta(Alt)」という同時押しが対象になります。
+#
+#############################################################################
+#
+# ...Clean Up Bindings...
+#
+#############################################################################
+#
+# Key コマンドで、既存のバインド（ショートカット）をキャンセルします。
+# Key <KeyName> <Contexts> <Modifier> -
+# により、キャンセルできます。マウスについても、Mouseコマンドで同様にバインドを
+# キャンセルできます。
+#
+
+Key Left	A	C	-
+Key Right	A	C	-
+Key Up  	A	C	-
+Key Down	A	C	-
+Key Left	A	M	-
+Key Right	A	M	-
+Key Up  	A	M	-
+Key Down	A	M	-
+Key Left	A	SC	-
+Key Right	A	SC	-
+Key Up  	A	SC	-
+Key Down	A	SC	-
+Key Left	A	SM	-
+Key Right	A	SM	-
+Key Up  	A	SM	-
+Key Down	A	SM	-
+Key KP_1	A	C	-
+Key KP_2	A	C	-
+Key KP_3	A	C	-
+Key KP_4	A	C	-
+Key KP_5	A	C	-
+Key KP_6	A	C	-
+Key KP_7	A	C	-
+Key KP_8	A	C	-
+Key KP_9	A	C	-
+Key KP_1	A	CM	-
+Key KP_2	A	CM	-
+Key KP_3	A	CM	-
+Key KP_4	A	CM	-
+Key KP_5	A	CM	-
+Key KP_6	A	CM	-
+Key KP_7	A	CM	-
+Key KP_8	A	CM	-
+Key KP_9	A	CM	-
+Key KP_0	A	CM	-
+Key 1	A	SCM	-
+Key 2	A	SCM	-
+Key 3	A	SCM	-
+Key 4	A	SCM	-
+Key 5	A	SCM	-
+Key 6	A	SCM	-
+Key 7	A	SCM	-
+Key 8	A	SCM	-
+Key 9	A	SCM	-
+Key 0	A	SCM	-
+Key KP_1	A	SC	-
+Key KP_2	A	SC	-
+Key KP_3	A	SC	-
+Key KP_4	A	SC	-
+Key KP_5	A	SC	-
+Key KP_6	A	SC	-
+Key KP_7	A	SC	-
+Key KP_8	A	SC	-
+Key KP_9	A	SC	-
+Key KP_0	A	SC	-
+Key KP_1	A	SM	-
+Key KP_2	A	SM	-
+Key KP_3	A	SM	-
+Key KP_4	A	SM	-
+Key KP_5	A	SM	-
+Key KP_6	A	SM	-
+Key KP_7	A	SM	-
+Key KP_8	A	SM	-
+Key KP_9	A	SM	-
+Key 1   	A	CM	-
+Key 2   	A	CM	-
+Key 3   	A	CM	-
+Key 4   	A	CM	-
+Key 0   	A	CM	-
+Key 1   	A	SC	-
+Key 2   	A	SC	-
+Key 3   	A	SC	-
+Key 4   	A	SC	-
+Key 0   	A	SC	-
+Key F1  	A	M	-
+Key F2  	A	M	-
+Key F3  	A	M	-
+Key F4  	A	M	-
+Key F5  	A	M	-
+Key F6  	A	M	-
+Key F7  	A	M	-
+Key F8  	A	M	-
+Key F9  	A	M	-
+Key F10 	A	M	-
+Key F11 	A	M	-
+Key F12 	A	M	-
+Key Tab 	A	M	-
+Key Tab 	A	SM	-
+Key Tab 	A	CM	-
+Key Tab 	A	SCM	-
+Key Prior	A	M	-
+Key Next	A	M	-
+Mouse 1 	R	A -
+Mouse 3		R	A -
+Mouse 1 	T	A -
+Mouse 1		SF	A -
+Mouse 3		TSF	A -
+Mouse 1 	I	A -
+Mouse 3		I	A -
+Mouse 1 	1	A -
+Mouse 1 	2	A -
+Mouse 2		2	A -
+Mouse 3		2	A -
+Mouse 1 	3	A -
+Mouse 3 	3	A -
+Mouse 1 	5	A -
+Mouse 2 	5	A -
+Mouse 3 	5	A -
+Mouse 0 	1	A	-
+Mouse 1 	2	A	-
+Mouse 2 	2	A	-
+Mouse 3 	2	A	-
+Mouse 1 	3	A	-
+Mouse 2 	3	A	-
+Mouse 3 	3	A	-
+Mouse 1 	5	A	-
+Mouse 2 	5	A	-
+Mouse 3 	5	A	-
+Mouse 1 	5	S	-
+Mouse 2 	5	S	-
+Mouse 3 	5	S	-
+Mouse 0 	1	CM	-
+Mouse 0 	2	CM	-
+Mouse 0 	3	CM	-
+Mouse 0 	5	CM	-
+
+#
+# Clean up Finished. Bindings Start...
+#
+#############################################################################
+#
+# Mouse Binds
+#
+#############################################################################
+#
+# マウスは、「Mouse」コマンドでバインドします。
+# Mouse <ButtonNumber> <Context> <Modefiers> <operation>
+# という順番で指定します。<ButtonNumber>はマウスのボタンを1, 2, 3で表したもの
+# で、1番が左。2番が中央。3番が左となります。実際は2ボタンのマウスで、3ボタン
+# マウスのエミュレーションをしている場合は2番は左と右の同時押しになります。
+# <Context>は冒頭で説明したとおりです。文字の組み合わせか、タイトルバーボタン
+# 番号を指定します。
+# <operation>はFVWMのコマンドまたはFVWM関数を一つ、です。
+#
+# Mouseコマンドそれ自体は「プッシュ」→「ホールド」→「移動」→「リリース」
+# →「ダブルクリック」という一連の挙動とは関係有りません。単純に「どのマウス
+# ボタンが対象か」のみをMouseコマンドで設定できます。
+# クリックやドラッグ、ダブルクリックはFVWM関数で設定できます。
+#
+# FVWM関数では、「+ <Inspector> <Command>」という記述を使ってどの状態でどうい
+# った挙動を行うのかを指定できます。詳しくは以下の設定例を参照していって下さい。
+#
+
+# Root（ルート）とは、要するにウインドウの無い場所です。デスクトップです。
+# ここではデスクトップ上で左クリックするとスタートメニューが。右クリックだと
+# ウインドウ操作メニューが表示されるようにしています。
+Mouse 1 	R	A	Menu MenuFvwmRoot
+Mouse 3		R	A	Menu MenuFvwmWindowOps
+
+#
+# 関数を定義するときは必ずDestroyFuncで関数を破棄してから作り直すようにして下
+# さい。これをしておかないと、Restartしたときに既存の関数に「更に追加」されて
+# しまいます。
+#
+# 「+」の後に続く一文字が、状態を表します。H, M, C, Dはマウス関連の特殊なステ
+# ータスで、Hは「Hold」つまりボタンが押されたままの状態。Mが「Move」、つまり
+# マウスが動いている時。Cは「Click」クリック。Dがダブルクリックを意味します。
+#
+# それぞれの状態に応じてその後に続くコマンドを実行します。
+#
+DestroyFunc FuncFvwmMoveOrRaiseOrShade
+AddToFunc   FuncFvwmMoveOrRaiseOrShade
++ H	Move
++ M	Move
++ C	Raise
++ D	WindowShade
+Mouse 1 	T	A	FuncFvwmMoveOrRaiseOrShade
+# ここでは、タイトルバー上でマウスの左ボタンを対象に「押されたまま」「動いて
+# いれば」ウインドウのMove, 「クリック」でRaise（対象のウインドウをアクティブに
+# し、前面に移動します）。ダブルクリックでタイトルバーだけにします。
+#
+
+
+DestroyFunc FuncFvwmResizeOrRaiseOrShade
+AddToFunc   FuncFvwmResizeOrRaiseOrShade
++ H	Resize
++ M	Resize
++ C	Raise
++ D	WindowShade
+Mouse 1		SF	A	FuncFvwmResizeOrRaiseOrShade
+Mouse 3		TSF	A	Menu MenuFvwmWindowOps
+
+DestroyFunc FuncFvwmDeleteOrDestroy
+AddToFunc   FuncFvwmDeleteOrDestroy
++ H Nop
++ M Nop
++ C Delete
++ D Destroy
+Mouse 1 	1	A	FuncFvwmDeleteOrDestroy
+
+Mouse 1 	2	A	Menu MenuFvwmWindowOps
+Mouse 2		2	A	Menu MenuFvwmWindowOps
+Mouse 3		2	A	Menu MenuFvwmWindowOps
+
+Mouse 1 	3	A	Iconify
+Mouse 3 	3	A	Iconify
+
+Mouse 1 	5	A	Maximize On grow grow
+Mouse 3 	5	A	FuncFvwmRestore
+
+#
+#############################################################################
+#
+# Key Binds
+#
+#############################################################################
+#
+# キーボードのバインド設定です。
+# Key <KeyName> <Context> <Modefiers> <operation>
+# マウスのバインド設定とほぼ同じです。キーの名前についてはテーマからもってくる
+# なり、FVWMのManページを参照して下さい(man fvwm)。
+
+Key Left	A	M	Scroll -1 +0
+Key Right	A	M	Scroll +1 +0
+Key Up  	A	M	Scroll +0 -1
+Key Down	A	M	Scroll +0 +1
+
+Key Left	A	SM	Scroll -10 +0
+Key Right	A	SM	Scroll +10 +0
+Key Up  	A	SM	Scroll +0 -10
+Key Down	A	SM	Scroll +0 +10
+
+Key Left	A	C	Scroll -50 +0
+Key Right	A	C	Scroll +50 +0
+Key Up  	A	C	Scroll +0 -50
+Key Down	A	C	Scroll +0 +50
+
+Key Left	A	SC	Scroll -100 +0
+Key Right	A	SC	Scroll +100 +0
+Key Up  	A	SC	Scroll +0 -100
+Key Down	A	SC	Scroll +0 +100
+
+# keyboard accelerators
+# Shift is needed to let apps (xwe, dosemu, kcalc) to handle Alt-FN keys
+Key F1  	A	M	Menu MenuFvwmRoot
+Key F2  	A	M	Iconify
+Key F3  	A	M	WindowShade
+Key F4  	A	M	Close
+Key F5  	A	M	Maximize On grow grow
+Key F6  	A	M	Maximize On 0 grow
+Key F7		A	M	Maximize On grow 0
+Key F8		A	M	FuncFvwmRestore
+
+#
+# これはAlt+TABキー設定です。ListSkipオプションは至る所で使われています。
+# ListSkipとはすなわち、ウインドウのリストに含めないウインドウのスタイル（Style）
+# のことです。これを指定しているウインドウはウインドウリストに表示されません。
+# WindowListコマンドはその名の通り、ウインドウリストを表示するコマンドです。
+# 引数の「Root c c」はルート（デスクトップ）に大して縦横中央に表示という意味です。
+# その他の引数に関してはWindowListをman fvwmから引いて下さい。
+#
+Key Tab 	A	M	WindowList Root c c NoDeskSort, SelectOnRelease Meta_L
+Key Tab 	A	SM	WindowList Root c c OnlyListSkip, NoDeskSort, SelectOnRelease
+
+#
+# QuitでFVWMを終了、ひいてはXを終了します。Alt+Ctrl+Lでウインドウのロック。
+# Alt+Spaceでウインドウ操作メニューの中央表示です。
+#
+Key Delete	A	CM	Quit
+Key L		A	CM	Exec xlock -nice 19 -mode random
+Key Space	A	M	Menu MenuFvwmWindowOps Root c c
+#
+#############################################################################

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OLYMPUS MO643USBをTLXW8上で使って。</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>OLYMPUS MO643USBをTLXW8上で使って。</h1>
+初版作成：2002/10/18<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+<br>
+　先日OLYMPUSのUSBMO、mini３、MO643USBを購入しました。<br>
+　SCSIのMOが以前から調子がおかしいし、IO-DATAのSCSIはLinuxとは相性悪いしで、LinuxではMOが使えなかったのですが
+USBMOを思い切ってチャレンジしてみたら驚くほどあっさりと認識してくれました。<br>
+　マザーボードはIwillのKK-266です。またLet's note CF-B5XR8SのUSBでもきちんと認識してくれました。<br>
+　そのため、ここ二日間ほどUSBMOのマウント設定だの、各種ドキュメントやフリーソフトのバックアップなどに忙殺
+されておりました。<br>
+　で、まあその過程の超雑なメモ書き程度ですが書き留めておこうかな、といった次第でございます。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+　んで、最近のMOはとっくにWindows用フォーマットが済んでいるのでファイルシステムはautoでもいいです。<br>
+　肝心のデバイスファイルはこの場合どうなるかというと、USBのストレージ・デバイスはSCSI系になるみたいです。これに関してはUSBMOを接続したときに表示されるメッセージにsdaの文字が見えたことからも確認できます。そういうこともあるので、なるたけUSB機器の電源を入れて、接続してからパソコンを起動してあげてください。そうすればUSBの自動認識デーモンが起動するときに、きちんとメッセージが表示されるからです。Xが立ち上がった状態で認識させると、裏のコンソールの方に出力されてしまうのでCtrl+Alt+ファンクションキーで裏のコンソールをのぞく必要があります。あ、/var/log/messagesを見るのも良いですね。<br>
+　作者のturbolinuxW8では、USBにはこのMO一台だけつなげた状態で、/dev/sdaとして認識されていました。<br>
+　というわけで、rootになって以下のエントリを/etc/fstabに追加してしまえばOK。<br>
+<br><pre>
+/dev/sda /mnt/mo auto noauto,user,rw,uid=500,gid=500,umask=000,codepage=932,iocharset=euc-jp  0 0
+</pre><br>
+　んでもって/mnt/moは<br>
+<br><pre>
+drwxrwxrwx    2 fenjin   sleepy       4096 10月  9日 16:42 mo/
+</pre><br>
+　として作っとく。ちなみにユーザfenjinのUIDが500, グループsleepyのGIDも500。umask=000とすることによって一般ユーザーでも自由に読み書きできる。<br>
+　codepageとかiocharsetとかはまあ、FAT上の日本語ファイルを扱うときは必須と言うことです。<br>
+<br>
+<br>
+　・・・まあ、DOS用は何をせずとも認識されますよ。ただこうしてしまうと細かいファイルのumask値が失われてしまいます。パーミッションに至るまでなるべく忠実に移そうとなると。MO上にExt2FSを築くことになります。<br>
+　というわけでやってみましょう。実験台となるMOをつっこんで、mountはしないままで以下のコマンドをどうぞ。使用MOはSONY製でした。<br>
+<br>
+<pre>
+# fdisk /dev/sda
+n （新規領域作成）
+p （基本領域を作成）
+1 （領域番号を指定）
+1014 （終端ブロックを指定）
+w （作成した領域テーブルを書き込み、終了。これをしないでqすると、元のまんま。）
+（この時点で/dev/sdaの領域の一番目、/dev/sda1を通してアクセスする必要がでてくる）
+
+# mke2fs -b 2048 /dev/sda1 （セクタサイズ2048BytesでExt2FSを/dev/sda1上に構築）
+
+# mount /dev/sda1 /mnt/mo -t ext2 （Ext2でマウント実験）
+</pre>
+この段階ではrootしか読み書きできないが。<br>
+rootユーザでもって適当なディレクトリを作り、たとえば。<br>
+<pre>
+# cd /mnt/mo
+# mkdir hogehoge
+# chown hogehoge.hogegroup hogehoge
+</pre>
+などとすれば一般のext2と全く同様に、hogehogeユーザーはhogehogeディレクトリ内で自由に読み書き、実行できるようになる。<br>
+<br>
+余談だが。mke2fs, fdiskのコマンドメッセージからSONYの640MBMOは、<br>
+ヘッダ:20<br>
+セクタ:61<br>
+セクタサイズ:2048バイト<br>
+シリンダ:254<br>
+<br>
+・・・つまり。<br>
+20X61X2048X254=634,634,240Bytes<br>
+これを1024で二回除すると<br>
+(634,634,240/1024)/1024=605.234375<br>
+というわけでめでたく605MB、つまり一般的に正しいとされている値になりました。<br>
+結局640MBとゆーのは1024で除する前の634,634,240Bytesのことを言っていたんでしょう。<br>
+<br>
+さてこれを一般ユーザーからマウントできるようにするにはどうしたらよいか。<br>
+実際問題としてはFATのMOも利用するわけだから、/mnt/moの部分を書き換えるわけにもいかない。<br>
+そこで、/mnt/mo_ext2というディレクトリを新規にrootユーザーで作成し、以下のエントリを/etc/fstabに追加した。<br>
+<pre>
+/dev/sda1 /mnt/mo_ext2  ext2    noauto,user,rw  0 0
+</pre>
+Ext2の場合は日本語ファイル名はすべてeuc-jpとして処理されるのでcodepageを指定する必要は当然、無い。<br>
+これで一般ユーザーでも/mnt/mo_ext2をマウントでき、そこにそのユーザー権限で書き込めるディレクトリがあれば
+通常のHDDと同じ感覚で読み書きできる。<br>
+<br>
+結局2002/10/18時点で・・・<br>
+<br>
+/etc/fstab:<br>
+<pre>
+/dev/hda1               /mnt/win2k              vfat    auto,user,rw,uid=500,gid=500,umask=000,codepage=932,iocharset=euc-jp
+/dev/sda                /mnt/mo                 auto    noauto,user,rw,uid=500,gid=500,umask=000,codepage=932,iocharset=euc-jp  0 0
+/dev/sda1               /mnt/mo_ext2            ext2    noauto,user,rw  0 0
+</pre>
+<br>
+/mnt:<br>
+<pre>
+drwxrwxrwx    2 fenjin   sleepy       4096 10月 10日  1998 cdrom/
+drwxrwxrwx    2 fenjin   sleepy       4096  2月  7日  1996 floppy/
+drwxrwxrwx    2 fenjin   sleepy       4096 10月  9日 16:42 mo/
+drwxr-xr-x    2 root     root         4096 10月 18日 23:45 mo_ext2/
+drwxrwxrwx   22 fenjin   sleepy      32768  1月  1日  1970 win2k/
+</pre>
+こんな感じ。日常使っているKDEのデスクトップ画面もデバイスアイコンが５つも並んで壮観である。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　いやー。感想も何も、あまりにもすんなり認識してくれたので。それが最高にいいですね。ただ気になるのが、認識する際USBの自動認識プログラムみたいなもんですか？それが<br>
+<pre>
+class:0x6 Iprotocol:0x50kernel: usb.c: new USB bus registered, assigned bus numb
+er 1
+Oct 20 04:06:35 seisyuu kernel: usb-uhci.c: USB UHCI at I/O 0xd800, IRQ 9
+Oct 20 04:06:35 seisyuu kernel: usb-uhci.c: Detected 2 ports
+Oct 20 04:06:35 seisyuu kernel: usb.c: new USB bus registered, assigned bus numb
+er 2
+Oct 20 04:06:35 seisyuu kernel: usb-uhci.c: v1.275:USB Universal Host Controller
+ Interface driver
+Oct 20 04:06:35 seisyuu kernel: usb.c: USB device 2 (vend/prod 0x7b4/0x301) is n
+Oct 20 04:06:35 seisyuu kernel: usb.c: USB device 2 (vend/prod 0x7b4/0x301) is n
+ot claimed by any active driver.
+Oct 20 04:06:35 seisyuu kernel: usb.c: registered new driver usb-storage
+Oct 20 04:06:39 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 61
+Oct 20 04:06:49 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 1892
+Oct 20 04:06:54 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 761
+Oct 20 04:06:59 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 1678
+Oct 20 04:07:04 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 547
+Oct 20 04:07:09 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 1464
+Oct 20 04:07:14 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 333
+Oct 20 04:07:19 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 1250
+Oct 20 04:07:24 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 119
+Oct 20 04:07:29 seisyuu kernel: usb-uhci.c: interrupt, status 3, frame# 1036
+</pre>
+<br>
+　とか言ってるんですよ。これ、秒数みてもわかる通り一分近くなんか検査してるみたいなんです。まあ、これさえ目をつぶればというか、ふつうに使えることに比べれば何の不満もなくOLYMPUSのUSBMOは非常に使えるMOドライブと言うことになります。<br>
+　さて、これからはたまりにたまった各種データの整理に忙殺されそうです・・・。
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

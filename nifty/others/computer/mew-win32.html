@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mew on Win32 のインストール</title>
+<style>
+</style>
+</head>
+<body >
+<!-- i.e. -->
+<!-- $title := "タイトル" -->
+<!-- $toppage := "トップページ" -->
+<!-- $subtop := "いろいろ" -->
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>Mew on Win32 のインストール</h1>
+初版作成：2003/08/14<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　「誰でもできる　やさしいTEX入門」（土屋　勝：カットシステム）に
+くっついてきたEmacsで、WindowsでもEmacs+LaTeX環境が簡単に整います。<br>
+　んで、これに Mew をインストールしようと思ったのですよ。<br>
+<br>
+Mew on Win32 公式ページ：<a href="http://www.mew.org/Win32/index.html" target=_blank>http://www.mew.org/Win32/index.html</a><br>
+<br>
+　んで、上のHPからZIPファイルをとってきます。<br>
+　ところが・・・とってきて、解凍したはいいんですが。<br>
+　<font size=+3>インストールができねえ。</font><br>
+<br>
+　というわけで、今回はちょっくらこの、本にくっついてきた中途半端なEmacsにMewをインストールしてやろう、というお話でございます。<br>
+　いや、中途半端じゃなくて。きちんとした Version 21.2 の真新しいやつですよ。(2003/08/14)<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">なんで失敗するのか</a></li>
+	<li><a href="#main_02">解決策とインストール</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">なんで失敗するのか</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　これは、Mew on Win32付属のインストールプログラム「mew.exe」の動作が原因です。<br>
+　副次的に、「誰でもできる〜」本のインストールプログラムも原因かもしれません。<br>
+<br>
+　結論から言うと、「mew.exe」はシステムにインストールされているEmacsなりMeadowなりを<font size=+3>レジストリ設定から</font>取得する事が原因です。<br>
+　どうもGNUのEmacsなり、MeadowなりのWin32版を素直に入れるとレジストリ設定が施される様です。ところが「誰でもできる」添付のEmacs+LaTeXひっくるめインストールプログラムではレジストリ設定をしていないんですわ。<br>
+　そのため、mew.exeはレジストリ設定の取得に失敗し、「システムにEmacsがインストールされてないよう。」と泣きついてきたという訳です。<br>
+<br>
+　というわけで、解決策としては「mew.exeが調べるレジストリを手動設定する」が考えられます。まあ・・・これが一番スマートでせう。<br>
+<br>
+<font size=+1><b><a name="main_02">解決策とインストール</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　単刀直入に結論だけ述べます。<font size=+3>理由が知りたい人はMew on Win32のインストールプログラム「mew.exe」のソースコードを読んで下さい。</font>（mew-3.3¥bin¥instsrcディレクトリとかに納められています。）<br>
+<br>
+　「誰でもできる」本で、Emacsを「C:¥usr¥local¥21.2」ディレクトリにインストールしたとしておきます。というかこの本のインストールプログラム、インストール先訊いてこなかったような・・・まあいいや。<br>
+<br>
+　とりあえず、「00readme.w32」を読んで環境変数「TZ=JST-9」とかを追加してください。HOME環境変数は「誰でもできる」本のインストーラが設定済みです。<br>
+<br>
+　続いて、「mew.ini」ファイルを変更します。このファイルは「mew.exe」が使用する、インストール先だのコンパイルするソースファイルだのを指定するためのINIファイルです。<br>
+　[Make]セクションに「EMACS=Emacs」という行が無ければ、追加してください。「INFOPATH」のところを「INFOPATH=C:¥usr¥local¥21.2¥info」のようにして下さい。mew.exeの自動設定ではInfoファイルの格納ディレクトリが正しく設定されません。そのためこうして手動設定する必要があります。<br>
+　「mew.ini」の変更はこれでお仕舞いです。続いてレジストリ設定に入ります。<br>
+<br>
+　レジストリエディタを起動して下さい。<br>
+　次のキーを作成します。<br>
+<tt>HKEY_LOCAL_MACHINE¥SOFTWARE¥GNU¥Emacs</tt><br>
+　このキーの中に、次の三つの文字列を新規作成して下さい。値は（）の中のパスに設定します。<br>
+<tt>
+EMACSPATH（C:¥usr¥local¥21.2¥bin）<br>
+emacs_dir（C:¥usr¥local¥21.2¥bin）<br>
+EMACSLOADPATH（C:¥usr¥local¥21.2¥lisp）<br>
+</tt>
+<br>
+　Win2kでは再起動せずともいけましたが、不安ならこの時点で再起動をかけて下さい。<br>
+<br>
+　後はコマンドプロンプトを起動し、Mew on Win32 の解凍ディレクトリへCDし、「mew.exe」を起動すればおっけーな・・・はず。もし成功しなかった場合は、「mew.log」の確認を忘れないようにして、パス設定やレジストリ設定にミスがなかったかどうか確認して下さい。<br>
+<br>
+　特に問題なければ、気の利いたことに初期設定値を訊いてきてくれますので、動作確認様に適当なアカウントを設定しておきます。楽をするためにも、.emacsファイルの自動設定をさせておきましょう。よけいな部分は後で.mew.elにでも移しておけば良いのですから。<br>
+<br>
+　最後に。この状態では実はMewは動きません。これまでの設定だと、Mewはおそらく、「C:¥usr¥local¥21.2¥site-lisp¥mew」にインストールされるはずです。しかし、デフォルトのload-pathではこのディレクトリが指示されていません。ということで、.emacs.elのどこか適当なところに<br>
+<br>
+<tt>(setq load-path (cons "C:/usr/local/21.2/site-lisp/mew" load-path))</tt><br>
+<br>
+　とでも入れておく必要があります。<br>
+　あとWindows2000+NTFS使っている場合は<br>
+<tt>(setq mew-touch-folder-p nil)</tt><br>
+　付けとく必要がある旨、00readme.w32にありました。<br>
+<br>
+　とまあ、ここまでくれば「M-x mew」すれば猫さんが表示されることでしょう。さあ、ひねくれ者のメール生活をエンジョイして下さい。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　ふう・・・何ツーかこう、<font size=+3>ひねくれてますな。</font><br>
+　Windows環境なら潔くあきらめて、BeckyなりAL-Mailなり使えば？とか言われそうですし、実際言いたくなった瞬間もありましたよ、インストール問題を解決しようと頭をひねっている最中とか。<br>
+　まあでもメールプログラムはどれも使いようですからな。Outlook, Netscapeメーラ、Becky, AL-Mail, 鶴亀メール、Mew、Wanderlust、どれもこれもしっちゃかめっちゃかですからなあ。メールの保存形式こそ多少共通方式があるものの、基本的にどれも違うし、アドレス帳機能に至ってはWindows系は相互インポート・エクスポートがだいぶ整ってきたけどUNIX系列とは深い溝があるし。<br>
+<br>
+　つーか、いくらメール本文に仕掛けられたウィルスに対して強かろうが。添付してきたWordとかExcelファイルにマクロウィルスが感染してたら元も子もないことは当然だし。<br>
+<br>
+　それでもMewを使い続けるのは・・・つくづくひねくれてるなあ、と思わずにはいられない昨今でした。つーか、はっきり言ってMewのアドレス帳機能もうちょっとましな物にしてほしいなあ・・・だれかMSのOutlookアドレス帳か、CSV形式のインポート・エクスポート機能付けてくれよ。激しく貧弱で使う気にもならない・・・。<br>
+<br>
+　以上。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

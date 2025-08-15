@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S21+DJSA220(20GB)+DM+Win98SE+Linux</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>S21+DJSA220(20GB)+DM+Win98SE+Linux</h1>
+初版作成：2001/02/27<br>
+<STRONG>
+時代遅れな組み合わせ<BR>
+Windows98SE + RedHat Linux 7<BR>
+を、panasonic Let's note S21EJ8 + IBM DJSA220(20GB)で実現しました！<BR>
+</STRONG>
+<PRE>
+環境：
+panasonic Let's note S21EJ8
+--->>S21付属のFDドライブ
+--->>I-O DATA CBSC2 PCMCIA ＳＣＳＩカード
+--->>Logitec LCW-T4432 CD-R/RW、ＳＣＳＩ接続、ドライバ無し
+--->>BUFFALO IGM-PCM56k PCMCIA モデムカード
+母艦（PC/AT互換、自作機）
+--->>Duron 700
+--->>128MB DIMM
+--->>IDE 接続、HDD
+--->>IDE 接続、32倍速CDドライブ
+--->>フツーのFDドライブ
+インストールＯＳ：
+Windows 98 Second Edition（ちゃんと買った）
+「こんなにかんたん！Red Hat Linux 7 日本語版」
+Bob Rankin,羽山博、インプレス
+付属のRed Hat Linux 7 日本語版
+
+ファーストエイドFDは、ＦＡＦＤ
+Partition Magic は、PM
+Boot Magic は、BM
+Disk Manager は、DM
+と略しています。
+また、S21,母艦ともにＣＤはＤドライブとしています。
+
+ハードディスク換装の全貌、全記録
+
+○下準備
+・人づてにDiskManager 9.52を入手。IBMのHPに現在(01/02/27)あるDMのバージョンは
+9.54だが、これはS21ではなぜか動かない。従って、バージョンの古いDMを入手するこ
+とが絶対条件。
+・pfdisk.exeの入手。シリンダーやセクタレベルでパーティションテーブルを書き込む
+事が出来る。ハイバネ領域の確保には欠かせない。
+ftp://ftp.jp.freebsd.org/pub/FreeBSD/tools/
+から、ダウンロード。ＦＡＦＤにコピーしておく。
+・ＦＡＦＤの中に入っている「xcopy.exe」を、Win98起動ディスクにコピーしておく。
+これはHDDからインストールするためにWin98CDをHDDにコピーするために必要。
+
+○換装
+・新HDD（今回はDJSA220）をとりあえず取り付けちゃう。
+・ＦＡＦＤで起動。FDISKでみると、総容量は8056MBです、でｵｯｹｰ。
+とりあえずパーティションテーブルを作るために、FDISKで適当に基本領域を取って、
+再起動。この時作る領域はどうせ後で完全消去するので小さくて良い。要はテーブル
+が作成されればいい（らしい）。
+  FDISK /MBR
+　FORMAT C: /S
+
+　SHUTDOWN
+
+○Disk Manager 9.52の導入
+・DMのFDをセットして、起動する。
+ ---
+　DM Main Menu
+  (E)asy Disk installation を選択。enter
+ ---
+  右側　1) IBM DJSA220 の表示
+　左側　(Y) になってるのを確認
+  enter
+ ---
+　Select operating system you
+  are using or plan to install
+
+  Windows95osr2,98,98SE,2000(FAT16 or FAT32) を選んで、enter
+ ---
+  Would you like to install this drive using FAT32 ?
+
+  (Y) enter
+ ---
+  画面の色が変わって、
+　　1) Alt-c      は、continue
+    2) any other  は、cancel   なので、
+
+　Altキーと c を同時押し
+ ---
+　下の方に、Are you sure you want to continue ? の表示
+
+  (Y) を選んで、enter
+ ---
+　何かやってる(回ってる)ような画面表示があって・・
+ ---
+　Disk 1 has been successfully installed ! の表示
+
+  enter
+ ---
+  PLEASE READ CAREFULLY ! の表示
+
+　To create an Ontrack Boot Diskette,press Alt-C
+  Press any other key to skip diskette creation　ってことなので、
+
+　skip する意味で、enter
+ ---
+  Disk maneger compleated
+  Remove the diskette from drive A: and when ready...
+  Press Reset or CTRL-ALT-DEL to exit
+
+　ってことなので、DMのFDを抜いて、次の作業用にＦＡＦＤをセットして、
+　Ctrl Alt Del キーを押下。
+
+・ＦＡＦＤで立上がって、1(DOSで起動)enter
+FDISK 4 でみると、
+　領域　状態　種類　   ボリュームラベル　Mバイト　システム　使用
+　1     A     Non-Dos                    8056               100%
+
+  ディスクの総容量は、8056Mバイトです。
+
+になってるけど、これでｵｯｹｰ。
+
+○ハイバネ領域の設定
+そのままの状態から、FDISK 3 で、Non-Dos領域を削除。
+改めて、基本領域をとる。
+　領域のサイズの指定は、92% とする。
+この領域を、FDISK 2 で、アクティブにして、FDISK終了。
+
+ＦＡＦＤさしたまま、Ctrl Alt Del して、1(DOS起動)
+
+pfdisk 0 と入力してenter
+l と入力してenter
+  1   11   0  944  unknown
+  2    0   0    0  empty    って感じで表示される。
+
+1 132 0 21 unknown  と入力してenter (この21ってのがハイバネ領域になる)
+2 11 22 944 unknown と入力してenter（22〜944がC:となる。Linuxインストールの関係で、
+実際はこの半分くらいの500位でも良いかもしんない。）
+
+w と入力してenter（これを忘れずに！テーブルに設定が書き込まれない！）
+
+l と入力してenter
+  1  132   0   21  unknown
+  2   11  22  944  unknown  って感じで表示される。
+
+q! と入力してenter (pfdisk の終了)
+
+ＦＡＦＤぬいて、Ctrl Alt Del
+・HDDから立上がって、ブルーバー表示、すかさずspaceキー押下。
+ＦＡＦＤセットして立上げて、1(DOS起動)
+
+FDISK 4 でみると、
+    　領域　状態　種類　   ボリュームラベル　Mバイト　システム　使用
+    　1     A     Non-Dos                     173                 2%
+  C:  2           PRI DOS                    7240                35（位）%
+
+  ディスクの総容量は、19900（位）Mバイトです。
+
+って表示になってるので、
+FDISK 2 で、C: をアクティブにして、FDISK終了。
+
+ＦＡＦＤぬいて、Ctrl Alt Del
+・HDDから立上がって、ブルーバー表示、すかさずspaceキー押下。
+ＦＡＦＤセットして立上げて、1(DOS起動)
+
+HBUTIL I で確認。168M以下であれば、〜〜って表示でイイ。
+
+○C:のフォーマット
+ここまで来ればハイバネ領域も完全に確保されている。
+安心して、
+FORMAT C: /S
+とやる。
+
+○母艦に移動、Win98CDの内容をコピー
+・母艦に変換ケーブルを使ってつなぎ換え、電源投入。
+DMが立ち上がってからすかさずspaceバーを押し、Win98起動ディスクを
+挿入、起動させる。
+・ＣＤドライブが認識されたことを確かめる。以下は、ＣＤドライブがD:であると
+した場合。
+A:¥>C:¥
+C:¥>mkdir c:¥win98cd
+C:¥>mkdir c:¥util
+C:¥>mkdir c:¥panaapp
+C:¥>mkdir c:¥hdimage
+ここら辺りでWindows98のＣＤを入れて、
+C:¥>A:¥
+A:¥>xcopy d:¥ c:¥win98cd /s
+これで、Win98ＣＤの内容が全てHDDに写される。相当時間が掛かるので、コーヒ
+ーブレイクをおすすめする。次にファーストエイドＣＤを挿入。
+A:¥>xcopy d:¥util c:¥util /s
+A:¥>xcopy d:¥panaapp c:¥panaapp /s
+A:¥>xcopy d:¥ja¥hdimg c:¥hdimage /s
+
+・これでインストールに必要なファイルはHDDに写された。母艦の電源を落とし、S21に
+DJSA220を戻す。いよいよWin98のインストールだ。なお、インストール中にPCMCIAソ
+ケットを認識させたければ、何でも良いからPCカードとそのドライバを用意しておく。
+○Win98のセットアップ
+・HDDから立ち上げて、ブルーバー表示、すかさずspaceキー。ＦＡＦＤセットしてＤＯＳ
+起動。C: へ移動して、
+C:¥>cd c:¥win98cd
+C:¥win98cd>setup.exe
+これでいよいよセットアップが始まる。PCMCIAカードの認識に関してはS21の説明書を読
+むべし。「インストールにカードナントカを使ってますか？」みたいなことが出たら、「はい」
+を選んで、適当なPCカード挿してドライバをインストールする。その過程でPCMCIAカード
+ソケットも適切にインストールされる。
+・ビデオドライバはc:¥util¥drivers¥video
+・サウンドドライバはWin98SEの場合、Winが勝手にインストールした奴でいい。わざわざc:
+¥util¥drivers¥soundvxdを入れると、古いのが原因か、インストール中フリーズする。
+・赤外線通信ソフトもインストール忘れずに。
+・電源管理ソフトもインストール忘れずに。
+・c:¥hdimageの下にあるのは、起動時の画面とか、Let'note 特製壁紙とか。好みでコピー。
+
+○パーティションの調整及びLinux インストールの下準備の下準備。
+・この段階では、ｃドライブは7.9GBほどあるはず。Partition Magicをインストールして、
+パーティション調整を始めることにしましょう。なおBoot Magicは使わないのでインストール
+しなくて結構です。例えインストールしたとしても、いままで書いたとおりのDMの設定では
+Boot Managerは有効に出来ないので無意味です。Linuxでも充分Dual Boot出来ますから、
+あわてないで！
+・Partition Magic（以下PM）をインストールし終わったら早速起動しましょう。Win98だけ
+使いたい人は、後はC:をぐぐーっと広げればいいだけです。
+・しかし！！！Linux をインストールしたい人はC:を縮小しなければなりません！！！具体
+的には大体5G前後まで縮小して下さい。それも、ディスクの先頭方向に「詰めて」下さい。
+--->>なぜかというと、Linuxをブートさせるパーティションは「ディスクの先頭から8.4GB（
+正確には1024シリンダ内だったような。)以内にあること」が条件だからです。したがってC:
+を縮小して、8.4GB以内にLinuxのブートパーティションが収まるように「空き」を作る必要
+があるのです。
+・変更を適用し、再起動がかかります。再起動の際、「On Trackのディスクを入れて再起動
+して下さい」の様な英語のメッセージが出て止まります。恐がらないで、DMのディスクを入れて
+再起動。
+(A)dvanced....
+から、
+(U)pgrade.....
+を選んで、MBRを書き直します。
+--->>なぜこんな事が起こるのか。どうもPMはDMと相性が悪いらしく、「PMを起動しただけ
+でも」こういった事態が起こります。MBRをいじくってるのかな？DMはMBRの書き換えをチェ
+ックするので、MBRをいじくるソフトを動かすにはかなり無理があるのです。DMを入れると
+きの設定である程度回避できるようですが・・・。どちらにせよ、DMのメッセージ通りにす
+れば特に問題は起こりません。上の例でも、MBR書き換え後、リブートすると正常にDMが読
+み込まれ、PMの変更が適用されます。
+・これでC:の設定は終わりました。Linux を入れるにはさらなるステップが待っています。
+
+○Linux インストールの下準備
+・このページの冒頭に述べた、I-O DATAのCBSC2のLinuxドライバは今のところ無いみたいで、
+ＣＤＲＯＭからのインストールは不可能。従って、Win98上からあらかじめHDDにRedHat Li
+nux のＣＤ内にあるパッケージをコピーします。ＤＯＳ窓から
+c:¥>mkdir c:¥RedHat
+c:¥>mkdir c:¥RedHat¥base
+c:¥>mkdir c:¥RedHat¥RPMS
+と入力（エクスプローラを使ってもｵｯｹｰ）、ＣＤを写すフォルダを準備します。あとはエ
+クスプローラでＣＤ内のbaseとRPMS内のフォルダを単純にコピーします。
+・インストール用ブートフロッピーを作ります。RedHatのＣＤ一枚目の中に
+d:¥dosutils¥rawrite が入っています。これを利用します。同じく一枚目の中に「pcmcia.img」
+というファイルが入っているはずです。ＤＯＳフォーマット済のフロッピーを一枚用意し
+ます。ＤＯＳ窓から、
+d:¥>cd d:¥dosutils
+d:¥dosutils>rawrite
+と入力します。イメージファイルの入力を促されるので、pcmcia.imgをフルパスで入力します。
+次に、フロッピードライブを指定します。A:と入力すれば大丈夫です。pcmciaをインストール時
+にサポートする、インストール用ブートフロッピーが作成されました。
+
+○RedHat Linux のインストール
+・パソコンを再起動します。「DM が立ち上がった後」、先ほど作ったフロッピーを起動させます。
+・text と入力し、enter。テキストモードでインストールが始まります。
+・後は、画面の指示に従って進んでいけば特に問題はないはずです。途中、コピー元を聞かれ
+たら/dev/hda2（ＤＯＳで言うC:）を指示すれば大丈夫でしょう。パッケージに、「ラップトップ
+何とか」を含めるのを忘れないで下さい。
+・ハードディスクの設定は「DiskDruid」を使用。
+--->>最初に「Add」で/bootを20MB位でマウントする。Linux nativeで。
+--->>次にLinux swapを128MB位で追加する。
+--->>最後に/(ルート)を4GB位でマウントする。
+--->>好みで/dev/hda2のＤＯＳパーティションもマウントする。
+・X86の設定は、Neo Magicのドライバは自動認識されるはずです。
+--->>ディスプレイは「panasonic S21」（そのものどんぴしゃり！？）
+--->>ビデオメモリーはデフォルトでは「1mb」になってる。「2mb」がお薦め。
+--->>クロック何とかを聞かれるが、推奨設定でオッケー。
+--->>最後の画面サイズと色は、「24bit」「800x600」でテストすれば大丈夫（なはず）。
+
+○LILOのインストールと起動設定
+・インストール中、LILO の設定画面が出てくる。「ブートパーティションの最初のセクタ」
+に設定。間違っても、マスターブートレコードにインストールしては駄目！
+・Win98,Win95,dos いずれかの名前でOSが自動認識されてるはず。これでDual Bootが可能になる。
+・以上でおそらくインストールの殆どが終わるはず。後はパッケージのインストールが始まる。
+非常に時間がかかるので、ここらでコーヒーブレイクを勧める。
+
+○忘れないで！！
+・再起動すると、「絶対Windows98が動くはず」。なぜかというと、C:がアクティブになったまま
+だからです。あわてないで、PMを使ってパーティションの確認とアクティブパーティションの
+変更をしましょう。
+・まず、PMでLinux のブートパーティションに取ったはずの20MB前後のパーティションが
+ちゃんと先頭から数えて8.4GB以内に収まっているか確認して下さい。もし収まっていなければ、
+インストールし直しかPMで移動させる必要があります。
+・収まっていれば、そのブートパーティションをアクティブにして下さい。PMなら、マウスの
+右クリックメニューですぐ出来ます。そして変更の適用、PMの宿命であるDM->UpgradeでMBRを
+戻します。
+・一連の作業が終わって、パソコンを起動させると今度こそLILO画面が出てくるはずです。dos
+の名前が表示されていなければ、LILOがdos,winを認識していない証拠です。ドキュメントを
+調べて認識させて下さい。
+</PRE>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+</body>
+</html>

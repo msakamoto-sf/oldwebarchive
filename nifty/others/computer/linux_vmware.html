@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- for Lin for 3.0以上かも :625AX-8DE40-46RA3-30HUM -->
+<!-- for Lin for 3.1         :2AJ2R-FAJ0A-G377L-3T2L1 -->
+<!-- for Win for 3.0以上かも :60N88-8DW44-16H77-32KT4 -->
+<title>VMware小咄</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>VMware小咄</h1>
+初版作成：2002/10/20<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+<b>参考資料</b><br>
+<a href="http://www.networld.co.jp/products/vmware/Techinfo/index.htm" target=_blank>VMware テクニカル　インフォメーション</a><br>
+<a href="http://www.networld.co.jp/products/vmware/faq/index.htm" target=_blank>VMware FAQ</a><br>
+<a href="http://www.networld.co.jp/products/vmware/index.htm" target=_blank>VMware 日本語トップ</a><br>
+<br>
+<h2><a name="preface">前書き</a></h2>
+　Linux小咄（Samba周り）でもメモっておいたのですが、非常に便利なVMwareでも、うまく使いこなすにはちょっとしたTipsがやっぱり必要になってきます。<br>
+　まあ、マニュアルや市販のVMware解説本（「VMware3.0徹底活用ハンドブック」田口景介　ASCII）とかを参照すれば大体解決してしまうのであまり必要ないのですが。<br>
+　でもやっぱりいちいちあの分厚いマニュアルを参照したり、ハンドブックを引っ張り出すのは面倒くさいのでWeb上にメモっておくことにしました。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">VMwareの仮想マシン設定ファイル、仮想ディスクのパーミッション</a></li>
+	<li><a href="#main_02">VMwareの設定時(vmware-config.pl)の注意点</a></li>
+	<li><a href="#main_03">Win95,98のインストール時注意点</a></li>
+	<li><a href="#main_04">Win2k+SP3(VMware3.1)の注意点</a></li>
+	<li><a href="#main_05">Win2kとサウンドカード、MP3の注意点</a></li>
+	<li><a href="#main_06">CD-ROMの扱いに関して（with TLXW8）</a></li>
+	<li><a href="#main_07">ゲストOS上のスクリーンセーバーの注意点</a></li>
+	<li><a href="#main_08">ディスクアクセスが異様に遅い時</a></li>
+	<li><a href="#main_09">turbolinux Workstation 8の注意点</a></li>
+</ol>
+<br>
+<b><a name="main_01">VMwareの仮想マシン設定ファイル、仮想ディスクのパーミッション</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　以外と忘れやすい部分ですが。特に、FATフォーマットの大容量ディスクをvmwareの仮想マシンの置き場としているときはこれを処理しなくては仮想マシンが起動できません。<br>
+　VMwareっつーのは、設定ファイルか仮想ディスクファイルをchmodしておるらしーのですよ。これはログをみてみれば絶対にわかります。<br>
+　ところが、FATフォーマットのディスクをたとえば/mnt/win2kとかしてマウントしてある場合、パーミッションとかユーザー、グループの設定が適しておらず（具体的にはVMwareを使うユーザーの所有権が無い）、chmodできず起動に失敗する・・・というケースが場合によってはあり得ます。<br>
+　Linux系列のファイルシステムの都合上、ファイルの属性をchmodできるのはファイルのオーナーだけです。<br>
+　んで、体外のマウントオプションではFATパーティションのオーナーはrootでマウントされてしまっていると思うんですよ。
+　ということはこの状態では/mnt/win2k上に保存してあるVMware（の設定）を一般ユーザーで実行しようとしてもchmodできなくてエラーが発生してしまうのです。<br>
+　ということで、オーナーユーザーやオーナーグループを指定してマウントできるようにしときましょう。<br>
+　<b>っつっても、こんなことサーバー上でやったら殺されますがな。</b>あくまでも、利用者が一人だけというワークステーション目的に限ってということで了承願います。また、以下の例は私のマシン上での設定例です。参考程度にとどめて、実際にmountコマンドで実験して確認をとってから/etc/fstabに書き込みましょう。<br>
+<br>
+/dev/hda1	/mnt/win2k	vfat	auto,user,rw,uid=500,gid=500,umask=000,codepage=932,iocharset=euc-jp	0	0<br>
+<br>
+　<b>vfatのオプション、uid, gid, umaskがポイント</b>です。uid,gidでオーナーを指定しています。
+umask=000でよーするに777を指定しています。詳しくはman mountのvfatオプションの項でもみてください。<br>
+　まあとにかく。これによってls /mnt/win2kすると、全部<b>一般ユーザID500, そのグループID500</b>の所有となる
+わけです。これでVMwareも動きます。<br>
+　何でこんなことするかというと、単純にWin2k用のHDDの方が空き容量はLinux用の３倍は有るからです。<br>
+　autoオプションは・・・まあ、VMware動かしたときに忘れずにWin2kがマウントされているように、ということです。<br>
+　あ、<b>NTFSパーティションじゃたぶん無理ですよ。</b>確か現時点ではNTFSは読みしかできないはず。(02/10/20)<br>
+　自信がなければmountでしばらく実験してからをお勧めします。まあ、書き込みさえしなければ滅多にふっとぶことは・・・ないんじゃない？<br>
+<br>
+<b><a name="main_02">VMwareの設定時(vmware-config.pl)の注意点</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　これも、毎回毎回本を引っ張ってしまう部分です。ので、とっととHPにアップしときます。vmware-config.plで聞かれてくる部分でちょっと分かりづらい部分に関してのメモ書きです。<br>
+　ブリッジネットワークモードは[yes]でしょう。というか、eth一つだけなら訊かれません。<br>
+　NATネットワークモードに関しては、将来的に十分利用することは考えられなくもないような気がするようなしないような感じもするので、一応。<br>
+Do you want this script to probe for an unused private subnet?<br>
+　と訊かれてきたらyesとしときます。<br>
+　次が問題。<br>
+Do you want this script to automatically configure your system to allow your Virtual Machines
+to access the host's filesystem?<br>
+　これ、よーするにVMware版Sambaを使いますか？と訊いてきてるわけ。<br>
+　<b>自前でSamba立てるつもりなので、当然noを選んどきます。</b><br>
+　・・・といっても、ハンドブックなどを眺めてみるとVMware版と本家のSambaは設定次第によっては共存も可能みたいです。うーん・・・。まあ、面倒くさいし本家Sambaで全く正常に動いていますので良しとしましょう。<br>
+<br>
+<b><a name="main_03">Win95,98のインストール時注意点</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　これはハンドブックの方には掲載されていませんでした。ホストOSの例がWinXPしか載ってませんでしたので。そういうわけで、VMwareのマニュアルやVMwareのHPにはちゃんと載っています。以下はVMware workstation 3.2マニュアル、既知の問題からの引用です。<br>
+<pre>
+既知の問題
+Windows98のインストール後、COM5とCOM6デバイスがWindowsのデバイスマネージャに表
+示されることがあります。これらのデバイスは実際には存在せず、IRQなどのリソース
+を使用してもいません。気になる場合は、Windowsのデバイスマネージャを使って削除
+することができます。
+
+XFree86 3.x Xサーバーを持つLinuxホストではゲストOSでのスクリーンセーバーの使用
+を避けてください。ゲスト上のスクリーンセーバーは大量の処理能力を必要とするため
+、ホストのXサーバーがフリーズしてしまう可能性があります。
+
+EMM38.EXEを始めとするメモリマネージャに対しては、現在限られた範囲内でしかサポ
+ートを行っていません。カスタム化された標準以外のMS-DOSまたはWindows98ブートフ
+ロッピーを使用して最初の起動を行う場合は、EMM386.EXE（或いは他のメモリーマネー
+ジャ）が読み込まれないように注意してください。HIMEM.SYS及びRAMDRIVE.SYSは読み
+込まれても、問題なく使用できます。
+
+日本語版をインストールする場合、インストールプロセスの中の再起動時に画面が黒く
+なったままフリーズしてしまうことがあるかもしれません。その場合、仮想マシンをリ
+セットしWindows98起動時にF8キーを押して、Step-by-step confirmationを選択します
+。emm386.exe、jdisp.sys、winはスキップして、Windows98をコマンドプロンプトモー
+ドの英語画面で起動してください。以下の通りconfig.sysを修正後、仮想マシンをリセ
+ットしてインストールを再開してください。
+・emm386を無効にします。
+　rem C:¥Windows¥EMM386.EXE RAM
+・jdisp.sysにパラメータを追加します。
+　C:¥WINDOWS¥JDISP.SYS /HS=LC
+</pre>
+　肝心のconfig.sysの編集には、その段階ですでにインストールされているはずのc:¥windows¥command（かcommands）¥edit.exe（かedit.com）を利用できるはずです。どうしても仮想マシン上で編集できそうに無ければ、フロッピーディスクは利用できるはずですのでFATフォーマットのフロッピーにconfig.sysをコピーして、別のマシンで編集した後上書きコピーという手段もあり得ます。別マシンがなければ、いったんホストLinuxOSでフロッピー上のconfig.sysをnkfエンコードして編集して、もう一度nkfでSJISに戻すという面倒くさいけどそれしかない的技もあり得ます。<br>
+　これはWindows95, Windows98, Windows98SEが対象らしいですが、なぜかWindowsMeが入っていないのが不思議と言えば不思議です。<br>
+<br>
+<b><a name="main_04">Win2k+SP3(VMware3.1)の注意点</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　VMware 3.1において、Win2k+SP3は動きません。SP3を入れると「ログイン画面用のDLLリソースが無いだのかんだの・・・云々で、何とか言うファイルがないので管理者に連絡してください。」とかいうメッセージボックスがでて再起動しかなくなる。回復コンソールでDOSコマンドで件のファイルを見てみるとちゃんとあるし。<br>
+　これに関してはVMware <b>3.2</b>で修正が行われているようです。必要ならばアップデートしたほうが良いと思われます。以下はVMware 3.2のリリースノートからの引用です。<br>
+<pre>
+Windows 2000 SP3 Guests on a Linux Host 
+
+A Windows 2000 guest with Service Pack 3 installed may fail to boot on a Linux 
+host. A user interface failure message appears, saying "The Logon User Interfac
+e DLL msgina.dll failed to load." To work around this problem, be sure Workstat
+ion is not running, then use a text editor to add the following line to the vir
+tual machine's configuration file: 
+
+MAGICBOOT1 = 200 
+
+If a value of 200 (representing 200 microseconds) does not enable you to start 
+the guest operating system, experiment with higher values. Increase the number 
+to 300 for the second try, 400 for the third try and so on until the guest star
+ts. 
+
+For faster boot times, you may also experiment with values between 1 and 200 to
+ find the smallest value that allows the virtual machine to boot. 
+</pre>
+　まあ、インターネットはLinuxホスト上で。事務的なお仕事やWindowsでしかできないことはWin2k上で行うようにすればSPxがなくても別段困ることはないかも。私は今のところVMware 3.1ですのでこの手段は取れません。<br>
+<b>　2002/10/20時点、TLXW8はVMware 3.2に対応していません。vmwareを起動しても、仮想マシンが起動しません。無理です。</b>VMwareも、現時点では3.2が出たばっかりで情報が集まっておらず、FAQやテクニカルインフォメーションにも3.2に関する記述は見あたりませんでした。そういうわけで、しばらくアップグレードは据え置きです。<br>
+<br>
+<b><a name="main_05">Win2kとサウンドカード、MP3の注意点</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　VMwareでも当然サウンドが使えます。Soundを/dev/dspあたりでInstallしていただければ良いのではないかな、と。KDEを使っている場合は/dev/dspはすでにArtsサーバーが使用しているため衝突してエラーになってしまいます。しょうがないのでゲストOSでどうしてもサウンドが使いたければKDEのArtsの起動時自動実行を止めておきましょう。Artsが止まっていても、各種XWindowsやKDEのサウンド関連プログラムは素直に/dev/dspを使ってくれます。音がでます。<br>
+　ただ、ハンドブックではWinXPの例としてサウンドカードドライバを手動でインストールしていました。なんかWinXP以外はPlug アンド Playで自動認識してくれるのかな？と思ってWin2kで試したら結局自動認識はしてくれませんでした。手動でSound Blaster 16のドライバを入れてそれでようやく音がでるようになりました。<br>
+　で、結局マルチメディアは楽しめたかと言いますと。<br>
+　う〜ん・・・。まあ、WindowsMediaPlayer7でmpegムービーやAVIは「見苦しくない」程度のスピードで再生できましたよ。でもホストLinux上で再生した方がやっぱりスムーズに感じる。先入観もあるのかもしれないが、何となくVMware上では遅いような感じがする。しょうがないけど。<br>
+　WinampでのMP3再生は全滅です。元々VMware自体がマルチプロセスのホスト上で動いているわけですから、時分割されて処理されます。この上さらにゲストOS上で時分割処理されてMP3が再生されるわけですから、音が飛ぶ飛ぶ。まともに聞けたモンじゃあありませんでした。<br>
+　というわけで、結局サウンド機能は利用できますが、マルチメディアを楽しむには力不足ということです。マルチメディアは素直にふつうのWindowsを使いましょう。<br>
+<br>
+<b><a name="main_06">CD-ROMの扱いに関して（with TLXW8）</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて。VMwareにWindowsをつっこんだ場合、仮想マシンの作成WizardでCDROMを使用可能にしておけば大体、CDROMを素で使えるようになります。特にLinuxホストだと、マウントしなくてもVMware側でゲストＯＳに自動認識させてくれるので非常に助かります。<br>
+　ただし。CD-RとかDVD-ROM。或いは音楽CDなど、ディスクに対して直にアクセスする必要のあるメディアなどは扱えません。その場合はハンドブックにも載っていますが、ホストLinux側でまず該当ドライブをSCSIドライブと認識させ、その上でVMwareでRaw Accessモードにして認識させる必要があります。そうしないと、ディスクの操作コマンドを送れないとか何とかかんとか（よく分からない）。とにかく、Linuxホスト上で、本来IDEのCD-R/DVD-ROMドライブをSCSIとだますことによって、VMware上のマシンから直接SCSIコマンドを送ることができるらしい。ただし、IDEのままRaw Accessで使うとうまく認識されないそうだ。<br>
+　長ったらしくなりましたが、要はCD-RやDVD-ROM、音楽CDを扱いたければ、Linuxホスト上ではide-scsiモジュールを利用してIDEのドライブをSCSIドライブとして偽装し、その上でVMware上でSCSIドライブとしてRaw Accessとして設定すればよいわけです。<br>
+　んでー、TLXW8ではide-scsiモジュールは利用可能です。ハンドブックにも載っていますが、ここは本家TurboLinuxのサイトに載っている記事を参考にしませう。<br>
+<br>
+<a href="http://www.turbolinux.co.jp/knowledge/public/347.html" target=_blank>ハードウェアとドライバ No. 347 ATAPI 接続 CD-R ドライブの設定とCDイメージファイルの書き込み</a><br>
+<br>
+　まあ要するに。hdc=ide-scsiをカーネルパラメータとして渡し、<br>
+# cat /proc/scsi/scsi<br>
+　で接続位置の確認。<br>
+# cd /dev<br>
+# ln -sf scd0 cdrom<br>
+とかしてcdromドライブのリンクを適宜変更。/etc/modules.confに以下を追加して。<br>
+-------------------------------------<br>
+alias scsi_hostadapter ide-scsi<br>
+alias scd0 sr_mod<br>
+options ide-cd ignore=hdc<br>
+-------------------------------------<br>
+（hdc以外に接続されている場合は、適宜書き換えてください。）<br>
+　んでmodprobeで確認して。<br>
+# modprobe scd0<br>
+# lsmod<br>
+Module                  Size  Used by<br>
+sr_mod                 17172   0  (unused)<br>
+ide-scsi                7424   0 <br>
+　最後にcdrecordを利用してドライブがきちんと認識されたか最終チェック。<br>
+# cdrecord -scanbus<br>
+Cdrecord 1.8 (i686-pc-linux-gnu) Copyright (C) 1995-2000 Jg Schilling<br>
+Using libscg version 'schily-0.1'<br>
+scsibus0:<br>
+        0,0,0     0) 'LG      ' 'CD-RW CED-8080B ' '1.09' Removable CD-ROM<br>
+        0,1,0     1) *<br>
+        0,2,0     2) *<br>
+        0,3,0     3) *<br>
+        0,4,0     4) *<br>
+        0,5,0     5) *<br>
+        0,6,0     6) *<br>
+        0,7,0     7) *<br>
+　とか。<br>
+　まだ試してないけど、TLXW8ならこれでよさげ。あとはVMwareでSCSIのCDROMをRaw AccessでInstallすればいいわけ。<br>
+<br>
+<b><a name="main_07">ゲストOS上のスクリーンセーバーの注意点</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　vmware workstation 3.1 日本語版ユーザーマニュアルからの引用です。<br>
+<pre>
+XFree86 3.x Xサーバーを持つLinuxホストではゲストOSでのスクリーンセーバーの使用
+を避けてください。ゲスト上のスクリーンセーバーは大量の処理能力を必要とするため
+、ホストのXサーバーがフリーズしてしまう可能性があります。
+</pre>
+　まあ、せっかくホストLinuxが頑張ってくれているのですからゲストOSまでこき使うのは勘弁してあげましょう、っていうことですか。<br>
+<br>
+<b><a name="main_08">ディスクアクセスが異様に遅い時</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　私の場合、Windows98SEインストール時にこの現象が発生しました。Windows2000インストール時にはこの現象は発生しませんでした。<br>
+　おそらく、Windows98SEでは仮想ディスクがIDEモードで作成され、Windows2000ではSCSIディスクとして作成される違いによるものだと思われます。<br>
+　ディスクのパーティション設定の時とかで、ディスクアクセスが異様に遅い場合は十中八九、以下の対策が適用できます。ログファイルなどを参照して、DMA関連のエラーが大量に記録されていれば間違いなくこれです。以下はVMware FAQ 「ゲストOSに関するFAQ」からの引用です。<br>
+<pre>
+3 ：仮想マシンを作成後、ゲスト OS のインストールが全然進みません。 
+A:下記の手順を仮想マシンの BIOS 画面にて実行してください。
+
+Main/Primary Master から、[Type:]を User にしてください。 
+下の方にある、[Transfer Mode:]を Standard にしてください。 
+さらにその下の、[Ultra DMA Mode:]を Disable にしてください。 
+その後、ゲスト OS を再起動してください。 
+</pre>
+　これ、以外と陥りやすいミスかもしれないので気をつけてください。<br>
+<br>
+<b><a name="main_09">turbolinux Workstation 8の注意点</a></b><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　これが一番重要なのです。turbolinuxの本家サイトにもすでにアナウンスされていますが、TLXW8ではデフォルトのLinuxカーネルのACPIに関連した設定が原因でVMware上の仮装マシンがブートできません。<br>
+　TLXJapanの話だと対象はTLXW8+VMware3.1だとか。それ以外の組み合わせは不明。<br>
+　TurboLinux本家からパッチが公開されているので、これを適用する必要があります。<br>
+<a href="http://www.turbolinux.co.jp/update/" target=_blank>TurboLinuxJapanアップロードページ</a><br>
+<a href="conf.patch.gz">見あたらなかったらここからどうぞ。(秘密にしてネ）</a><br>
+　これに関するTLXJapanのknowledgeデータベースです。<br>
+<a href="http://www.turbolinux.co.jp/knowledge/public/504.html" target=_blank>既知の問題 No. 504 VMware Workstation for Linux が実行中に異常終了してしまう</a><br>
+　結局、conf.patch.gzを/usr/src/linuxに配置した後root権限で<br>
+# cd /usr/src/linux<br>
+# gzip -dc conf.patch.gz | patch -p1<br>
+　んで、vmware-config.plを実行すればいいわけ。<br>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　・・・ふー。TLXW8 + VMwareのコンビネーションは今のところ最高だね。<br>
+　あ、それとVMwareはマジでマニュアルあった方がいいから、金出した方がいいです。ふつうは金出して入手するんだけどさ。分厚いけどちゃんと読めばちゃんと載ってるから。<br>
+　でわ。頑張ってください。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

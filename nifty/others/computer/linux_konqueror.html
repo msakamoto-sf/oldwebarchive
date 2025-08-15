@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TLXW8+Konquerorのフォント設定</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>TLXW8+Konquerorのフォント設定</h1>
+初版作成：2002/12/16<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　えっとですね。TLXW8のkonquerorです。<br>
+　ここで何か挙動がおかしいような気がしている部分なんですが。リコーフォントをインストールしてみまして、HTMLドキュメントに従ってKonquerorのフォントを変更してみたのですが。<br>
+　<b>変更が反映されない。</b>何度やってもNG。konquerorの設定ファイルにちゃんと書き込まれていないようなのです。<br>
+　しょうがないので、バイト先ではきちんとフォントが変更されリコーフォントで表示されているTLXS7のkonquerorの設定ファイルを引っ張って必要な部分だけ切り貼りすることにしました。<br>
+　ですので、この話題は<b>製品版のTLXW8をインストールして、リコーフォントへの変更が一通り終わってからの話であることに注意してください。</b><br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">konquerorの場所、設定ファイルの場所</a></li>
+	<li><a href="#main_02">設定ファイルの書き換え</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">本題その１</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて、とりあえずkonquerorの場所とかパッケージを見てみましょう。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ whereis konqueror
+konqueror: /usr/bin/konqueror /usr/lib/konqueror.la /usr/lib/konqueror.so
+[fenjin@seisyuu fenjin]$ rpm -qf /usr/bin/konqueror
+kdebase-2.2.2-7
+</pre>
+　んでー、TurboLinuxのUpdateサイトにはkdebaseのアップデートが無いんですよ。TLXW8のは。アップデートでどうにかなるかなとも思ったのですが、止めときます。<br>
+　なので、当初の予定通り設定ファイルだけ引っ張ってきます。肝心の設定ファイルはどこかというと・・・。<br>
+<pre>
+[fenjin@seisyuu config]$ ll konquerorrc
+-rw-------    1 fenjin   sleepy       7280 Dec 16 01:32 konquerorrc
+[fenjin@seisyuu config]$ pwd
+/home/fenjin/.kde/share/config
+</pre>
+　というわけで、TLXW8上では（そしておそらくKDE2上では）/home/****/.kde/share/configディレクトリのkonquerorrcファイルっぽいです。<br>
+<br>
+<font size=+1><b><a name="main_02">設定ファイルの書き換え</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　viで編集します。[Colors]セクションが<br>
+<pre>
+[Colors]
+CurrentPalette=* 腋\~@菴~Q筐A?諧I 鴎
+</pre>
+　の様に文字化けしてしまうかもしれませんが知ったこっちゃあありません。フォントの見栄えの方が先です。<br>
+　[HTML Settings]セクションを以下のように丸ごと移し替えてしまってください。その後適当に直してください。<br>
+<pre>
+[HTML Settings]
+AutoLoadImages=true
+ChangeCursor=false
+DefaultEncoding=
+EnforceDefaultCharset=true
+FormCompletion=true
+HoverLinks=false
+MaxFormCompletionItems=10
+MediumFontSize=11
+MinimumFontSize=8
+UnderlineLinks=true
+UserStyleSheetEnabled=false
+big5-0=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+big5hkscs-0=TLGothic,TLGothic,times,helvetica,helvetica,helvetica,0
+cns11643.1986-*=helvetica,courier,times,helvetica,helvetica,helvetica,0
+gb18030-0=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+gb2312.1980-0=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+gbk-0=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso10646-1=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-1=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-10=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-13=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-14=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-15=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-2=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-3=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-4=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-5=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-7=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-8=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+iso8859-9=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+jisx0208.1983-0=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+koi8-r=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+koi8-u=helvetica,courier,times,helvetica,helvetica,helvetica,0
+ksc5601.1987-0=pgothic,ricoh-gothic,times,helvetica,helvetica,helvetica,0
+microsoft-cp1251=helvetica,courier,times,helvetica,helvetica,helvetica,0
+paratype-cp154=helvetica,courier,times,helvetica,helvetica,helvetica,0
+</pre>
+　以上です。
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　特に無いッス。まあ、フォントが変更できてよかったです。
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

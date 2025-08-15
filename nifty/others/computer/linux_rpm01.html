@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux初心者向けRPMコマンドの真髄</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>Linux初心者向けRPMコマンドの真髄</h1>
+初版作成：2002/06/02<br>
+二版作成：2002/10/22（後書き或いは感想追加）<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　RHL（RedHatLinux)、TLX（TurboLinux)などの、DebianやSlackware系列以外の
+主要ディストリビューションでは通常、アプリケーションのインストール・アンインストール管理にRPMというシステムを利用しています。<BR>
+　これは面倒なインストール・アンインストール作業を簡便にするものです。<BR>
+　では、よく使うインストール・アンインストールコマンドを見ていきましょう・・・。<BR>
+<br>
+・・・と言って解説されるのは大概-ivh だの-Uだの-eオプションである。<BR>
+<font size=+1><b>一体、インストール済の或るパッケージに含まれているファイル一覧を調べるのはどうすればよいのか。</b></font><br>
+　たった一つか二つのオプションで済むはずのこの話を載せている「入門書」は
+あまりない。<b>初心者がもっとも知りたい情報であるにも関わらず。</b><BR>
+　コマンドリファレンスや詳しい設定集等には大抵載っているが、初心者が手にする
+事の多い入門書にはあまり見かけない。というのも、普通は必要ないからだ。<BR>
+　とはいっても、Linuxのシステム上<b>「インストールするディレクトリ」を聞かずに
+勝手にファイルをコピーしてしまうRPM</b>は、特にWindowsから移ってきた初心者に
+とって下手なWindowsソフトのインストールよりも恐怖感が強いのではないだろうか。
+Windowsではプログラムの実行ファイルや設定ファイル、DLLなどが(VB等のラン
+タイムやシステム周りのプログラム、或いはオフィス系アプリケーションでない限り）
+大概プログラム専用のディレクトリにまとめられる。特にフリーソフトやシェアウェア
+などはプログラムの規模も小さいので大概の場合（レジストリ設定を無視すれば）インストール先のディレクトリを削除してしまえばアンインストールも完了である。<br>
+　ところがLinuxはそうはいかない。実行ファイルの置き場所は/bin, /usr/bin, /usr/sbin,/usr/local/bin,のどこかであるか、はたまたその中の更にプログラム専用のディレクトリのbin内か。WindowsでDLLにあたるモジュールもどこに何があるやら・・・。設定ファイルは？等々・・・分散してしまっているのだ。<BR>
+　これが初心者にとってRPMの最大の恐怖となる。<b>インストール先がわからないのだ。</b>これは恐ろしい。「ファイル検索のfind使えば良い。」とおっしゃられる方もいるだろうが、思い出してほしい。<b>初心者にとってはfindコマンドの使い方、或いはfindコマンドの存在さえも知らない場合がある</b>と言うことを。これは別に罪ではないが、初心者にとっては狂おしいほど困った状況である。<BR>
+　実はこれらはきちんと箱に入ったパッケージを買ってしまえばあまり出会うことは無い。というのも、そう言う場合大抵初心者向けに基本コマンドを網羅し、主要アプリケーションについて結構細かく解説してくれたマニュアルが付属してくるからだ。問題は雑誌の付録、或いはCDROM付き入門書などのFTP版のディストリビューションをインストールした初心者である。<b>自分もその一人だけど。</b>とにかく、この場合もっとも「RPM恐怖症」に陥りやすい。こればっかりはどうしようもなく、一種の通過儀礼と考えてほしい。<BR>
+<br>
+　長々と愚痴ってきたが、とにかく以下に示すコマンドを知っていれば随分とRPMに対する恐怖感も薄れるはずだ。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">第壱番：或るパッケージに含まれるファイルのリストは？</a></li>
+	<li><a href="#main_02">第弐番：或るパッケージに含まれるファイルのリストの詳細は？</a></li>
+	<li><a href="#main_03">第参番：インストールのシミュレーションをしてみたい（テストインストール）。</a></li>
+	<li><a href="#main_04">第四番：或るファイルが<b>含まれている</b>パッケージは？</a></li>
+	<li><a href="#main_05">第伍番：まだインストールされていないパッケージに含まれるファイルのリストは？</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">第壱番：或るパッケージに含まれるファイルのリストは？</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<tt>rpm -qil <i>&ltpackage_name&gt</i></tt><BR>
+もしも一画面に収まりきらなかったら、<BR>
+<tt>rpm -qil <i>&ltpackage_name&gt</i> | less </tt><br>
+<tt>rpm -qil <i>&ltpackage_name&gt</i> &gt <i>&ltoutput.txt&gt</i></tt><br>
+等とします。lessで、或いはテキストファイルに落として閲覧できます。<BR>
+<br>
+例：rpm -qil hogehoge-1.2.3-4<br>
+<br>
+<font size=+1><b><a name="main_02">第弐番：或るパッケージに含まれるファイルのリストの詳細は？</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+第壱番の応用です。以下のコマンドが便利です。<BR>
+<tt>rpm -qil --provides -R <i>&ltpackage_name&gt</i></tt><BR>
+<tt>rpm -qils --provides -R <i>&ltpackage_name&gt</i></tt><BR>
+　二つとも、パッケージの機能(--provides)と依存しているパッケージ名(-R)も
+含めて出力してくれます。<BR>
+　「s」オプションを付けると、パッケージに含まれるファイルの状態を表示します。
+なお、このオプションを付けると状態が「通常」など日本語表示されて出力される
+場合がありますのでkonかkterm, rxvtなど日本語表示ができる端末で行ったほう
+が良いでしょう。<BR>
+<br>
+<font size=+1><b><a name="main_03">第参番：インストールのシミュレーションをしてみたい（テストインストール）。</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<tt>rpm -ivv --test <i>&ltpackage_name&gt</i></tt><br>
+　vvオプションで進行状況の詳細表示。--testでファイルコピーの過程が
+表示されます。実際にファイルをコピーするわけではありません。<BR>
+<tt>rpm -ivv --test --verify <i>&ltpackage_name&gt</i></tt><br>
+　--verifyオプションでインストールの状況を検証します。<BR>
+　最初の内は、まずこれでシミュレーションを行い安心感を得てから本番に
+移っても良いでしょう。<BR>
+<br>
+例：rpm -ivv --test --verify /mnt/cdrom/rpm_pkgs/hogehoge.1.2.3-4.i386.rpm<br>
+<br>
+<font size=+1><b><a name="main_04">第四番：或るファイルが含まれているパッケージは？</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　恐らくこれも需要が大きいと思われます。例えば/usr/sbin/hogehogeというファイルはどのパッケージに含まれているのか知るには-fオプションを使います。<br>
+<tt>rpm -qf /usr/sbin/hogehoge</tt><br>
+<br>
+例：rpm -qf /sbin/ifconfig<br>
+<br>
+<font size=+1><b><a name="main_05">第伍番：まだインストールされていないパッケージに含まれるファイルのリストは？</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　これもよく使います。-pオプションをくっつけて、<br>
+<tt>rpm -qpl <i>&ltpakckage_file_name&gt</i> | less </tt><br>
+　とします。lessは単にリスト表示が長いのでくっつけました。<br>
+<br>
+例：rpm -qpl /mnt/cdrom/rpm_pkgs/hogehoge-1.2.3-4.i686.rpm<br>
+<br>
+　ここで<i>package_file_name</i>とあるのは、パッケージファイル名を指します。<br>
+　一般にRPMパッケージはhogehoge.version.i386.rpmなどというファイル名になっており、これがすなわち
+パッケージファイル名です。ではパッケージ名(<i>package_name</i>)とは何かというと、
+インストールされた後、RPMシステムに登録される名前で.i386.rpmを削ったhogehoge.versionと
+なるものが殆どです。実際rpm -qaで出てくるパッケージ名のリストには、.i386.rpmとかいうのは
+くっついていません。<br>
+　i386とは何かというと、使えるCPUの種類を示します。i*86とかくれば、大概Intel系列になります。
+ppcだとPowerPC、sparcだとSPARC系列のCPUでしか使えません。<br>
+<BR>
+<b>おまけ（依存関係無視付き定番コマンド）</b><br>
+・インストール<BR>
+<tt>rpm -ihv --nodeps aaa.rpm</tt><br>
+・アップグレード<br>
+<tt>rpm -U --nodeps aaa.rpm</tt><br>
+・削除<BR>
+<tt>rpm -e --nodeps aaa.rpm</tt><br>
+<BR>
+<b>参考資料</b><br>
+「Linux各種設定x活用徹底ガイド」海上忍　技術評論社<br>
+　非常に役に立つ本です。これが一冊有るだけで初心者にとっては随分な安心感を得られるでしょう。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　ふー・・・。実際初心者にとってはRPMコマンドなんて「開けゴマ」的なものですから、恐怖感を覚えても仕方ないと思われます。ですが、以上のコマンドを知っておけばだいぶ気分的に楽になるかな、と。<br>
+　あと、rpm -qfオプションはファイル名をフルパスで入力する必要があることに注意してください。たとえば、「hoge_binっていうコマンドはどのRPMかな？」と知るとき、<br>
+<tt>$ rpm -qf hoge_bin</tt><br>
+　とやっても駄目です。こういったときはあらかじめ<br>
+<tt>$ whereis hoge_bin</tt><br>
+　なり、<br>
+<tt>$ which hoge_bin</tt><br>
+　なりして、フルパスを入手してから（例：/usb/bin/hoge_bin）、<br>
+<tt>$ rpm -qf /usr/bin/hoge_bin</tt><br>
+　としてください。<br>
+<br>
+　RPMのぞくとおもしろいですよー。なんか、ライブラリしか入っていないパッケージがあったり。困ったときにドキュメントを調べるのにも役立つし（ほとんどの主要RPMは/usr/share/docあたりに簡便ではあるがHTMLやREADMEなどのドキュメントをつっこんでくれる。あとはrpm -qilで詳しい場所を調べるだけ。）。<br>
+　特にwhereisとrpm -qf, rpm -qilの組み合わせは、種々の問題解決にも非常に助けになりますので。ぜひいろいろ遊んでRPMを楽しんであげてください。<br>
+<br>
+　え？debはどうなったか？・・・僕ー、Debianユーザーじゃないんでー・・・（でもいつかは入れてみたい）。<br>
+2002/10/22<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップぺージ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

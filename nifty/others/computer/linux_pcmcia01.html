@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planex　FNW-3600-T/TXをRedHatLinux 7.2で使うには。</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>Planex　FNW-3600-T/TXをRedHatLinux 7.2で使うには。</h1>
+初版作成：不明。2002年の春前後。<br>
+二版作成：2002/08/05<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+<br><b>注意！！：</b>以下より報告する文章はVAIO-505Sに関して適用されます。<br>
+と言いますのは、先日PanasonicのLet's note CF-S21JにてRHL7.2のネットワークインストールを行った際、何のエラーもなくFNW-3600-TXが認識され全く正常に100Mbpsでリンクが確立したからです。おそらくVAIO-505SのPCMCIAコントローラ独特のエラーかもしれません。<br>
+　というわけで、VAIO-505S+FNW-3600-T(X)をご利用の方以外は恐らく、以下の記事はあまり参考にならないかもしれませんです。2002/08/04<br>
+<br>
+<h2><a name="preface">前書き</a></h2>
+　最近、お金が入ったのでVAIOのPCG-505Sを中古で購入しまして。でもって、HDDを4GBから20GBに換装しました（あ、換装方法はPCG-505やHDD, 換装なんかをキーワードにして検索すればたくさん引っかかってきますのでここでは説明しません。ごめんなさいm(_ _)m)。<br>
+　でもって、さらにさらに。BIOSがIDEと認識してくれる、PCG-505S用のCD-ROMまで中古で探しあて、「どれ、Windowsでも入れてみっか。」とやったら・・・<b>はいらねえ。</b><br>
+　どうやらBIOSレベルでは認識してくれるみたいでWindowsのCDを入れればいつものバッチメニューが立ち上がるのだが。肝心のセットアッププログラムがCDを認識しない。どうもDOSの問題らしい。<br>
+「じゃあ、Linuxでも行ってみっか。」とやったら・・・<b>入っちゃったよ。</b><br>
+　ケースバイケースで、RHLの7.2だからと言うこともあるかもしれない。ひょっとしたら、別のディストリビューションじゃ無理かもしれない。と言うわけで、あまり参考にならなかったかも。
+　なにしろ、なんの障害もなくすんなり入っちゃったんだもの。<br>
+<br>
+　pcmcia用のドライバイメージディスクを用意するまでもなく、RHLのCDを入れて電源を入れたら素直にグラフィカルインストール画面に突入。苦もなくインストール完了。なんじゃ、こりゃ。<br>
+　ちょっと心配だったのが。505Sは8GBOverなHDDを認識しないみたいなのでIBMのDiskManagerをインストールしたのだ。で、Linuxインストーラがちゃんとこの上で動いてくれたかが心配だったんだけど・・・リブート時もちゃんとDSOの画面が最初に出て、GRUBもMBRではなくブートパーティションにインストールしたから特にエラーもなく、うまくいったのだ。<br>
+<br>
+　そして・・・505Sにはモデムが内蔵されているのだが・・・<b>Winmodemではなかったために、苦もなく電話回線にコネクトできた。</b>これは凄いことだ。はっきり言って、「モデム？まあ、動くわけねーな。」とか思っていたのだが。これで（たった一つしかないが）PCカードスロットにLANカード挿せば<b>アナログ回線のサーバーを立てられる！！</b>とかいう妄想にとりつかれてしまった。と言うわけでPCMCIAのLANカードを探したのだ。<br>
+　前から使っていたLaneedのLD-10/100CDはすんなり動いてくれたのだが。10Mbpsはさすがにローカルネットワークの実験にしても今時遅すぎる。どうも100Mbpsで動かすのは面倒くさそうなので、Linux対応を謳っている100Mbps対応のLANカードを探すことにした。<br>
+　で、目を付けたのがバイト先でFWとして使っているPlanexが出しているFNW-3600-T/TX。Tはカップラ付き、TXは一体型の奴ね。Planexのホームページを見た限りでは、使っているチップセットは同一。RHL7.2でも動作確認済。設定もちゃんと載っていたので買ってみることにした。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+　ではここで簡単に設定をお見せします。まず第一にrpm -qa | grep pcmciaなどで、PCMCIAサポート
+がインストールされているかどうか確認しましょう。以下ではインストール済で、すでに動作しており、
+幾つかのPCカードの動作確認が済んでいるという方を想定しています。<br>
+　まず、PCG505Sの場合IRQの衝突がLD-10/100CDを動かす段階で発生してしまいました。そのため、
+/etc/pcmcia/config.optsで衝突が起きてしまいそうなIRQをexclude句で除外しておきます。<br>
+　念のため/etc/rc.d/init.d/pcmcia stopなどでサービスをストップしておいて下さい。<br>
+<br>
+<a href="pcmcia_files/config.opts">config.opts抜粋（ファイルはSJISコードです！！）</a><br>
+<pre>
+# System resources available for PCMCIA devices
+
+include port 0x100-0x4ff, port 0x800-0x8ff, port 0xc00-0xcff
+include memory 0xc0000-0xfffff
+include memory 0xa0000000-0xa0ffffff, memory 0x60000000-0x60ffffff
+include irq 11
+exclude irq 10
+
+# High port numbers do not always work...
+# include port 0x1000-0x17ff
+
+# Extra port range for IBM Token Ring
+include port 0xa00-0xaff
+
+# Resources we should not use, even if they appear to be available
+
+# First built-in serial port
+exclude irq 4
+# Second built-in serial port
+exclude irq 3
+# First built-in parallel port
+exclude irq 7
+</pre>
+　IRQ3等は殆どのディストリビューションではデフォルトでコメントアウトされているはずです。しかし
+PCG-505Sの場合、内蔵モデムがシリアルポートとして認識されますのでIRQが確保されてしまいます。
+そのためコメントアウトを外し、PCMCIAの使うIRQリストから除外しておきます。<br>
+　ここら辺は/procディレクトリ以下を調べて、ぶつからないIRQをリストアップしてそれに合わせていっ
+て下さい。<br>
+<br>
+　で、Planexのホームページにあるように/etc/pcmcia/configにFNW-3600のカードを定義します。<br>
+<br>
+<a href="pcmcia_files/config">config抜粋（ファイルはSJISコードです！！）</a><br>
+<pre>
+card "Planex FNW-3600T Fast Ethernet"
+  version "Fast Ethernet", "Adapter"
+  bind "pcnet_cs"
+
+card "Planex FNW-3600T PCMCIA Fast Ethernet Card"
+  version "Dual Speed","10/100 PC Card","*","*"
+  manfid 0x0149, 0xc1ab
+  bind "pcnet_cs"
+</pre>
+<br>
+　前者は元から定義されていたものです。一応これでも動きそうなのですが念のためPlanexの指示通りに
+後者の定義を付け足しました。<br>
+　それじゃあ、止めておいたpcmciaデーモンを起動します。/etc/rc.d/init.d/pcmcia startして・・・
+挿します！<br>
+　<b>（甲高い音で）ぴ！・・・（甲高い音で）ぴ！</b><br>
+<br>
+　よっしゃあ！！認識完了！！100Mbpsランプもついてる！<b>と思いきや。・・・動かない。</b><br>
+　いや、ハード的には特に問題ないのですよ。pingも一応帰ってきますし。ifconfigでも問題なく
+eth0として認識してます。が、FTPとかでファイル転送をかけたりすると動作が不安定になるのです。
+突然フリーズしたりするのです。<br>
+　ログファイルを見てみると<br>
+<pre>
+Apr 14 20:52:40 localhost kernel: eth0: MII is missing!
+</pre>
+　といったメッセージが出てしまう。ログを見ると一応カードはきちんと認識されています。<br>
+<pre>
+Apr 21 21:26:36 localhost kernel: cs: memory probe 0xa0000000-0xa0ffffff: clean.
+Apr 21 21:26:36 localhost cardmgr[466]: socket 0: Planex FNW-3600T PCMCIA Fast Ethernet Card
+Apr 21 21:26:36 localhost cardmgr[466]: executing: 'modprobe 8390'
+Apr 21 21:26:37 localhost cardmgr[466]: executing: 'modprobe pcnet_cs'
+Apr 21 21:26:37 localhost kernel: eth0: NE2000 (DL10022 rev 05): io 0x300, irq 11, hw_addr 00:90:CC:A6:B1:86
+Apr 21 21:26:37 localhost cardmgr[466]: executing: './network start eth0'
+Apr 21 21:26:38 localhost /etc/hotplug/net.agent: invoke ifup eth0
+</pre>
+　で、この直後あたりにMIIのエラーが出力されているのです。<br>
+　最初は全く原因が掴めませんでした。いろいろな雑誌をひっくり返したり、ネットを調べたりして
+みましたがどうも同じような症状に出くわしません。自力で解決するしかない。<br>
+<br>
+　で、一ヶ月くらい暇を見つけてはpcmciaとかhotplugのスクリプトを眺めたりしていましたが
+どーもkernelで何とかカントかmissingとかいうエラーメッセージを出すようなスクリプトが無いのです。<br>
+　<b>まさか、ドライバのソースコードいじくるんじゃねーだろーな</b>とか思いつつ、試しに
+/usr/src/linux-2.4/driver/net/pcmcia/pcnet_cs.cを調べてみたら・・・。<br>
+<br>
+<pre>
+#define IS_DL10022	0x20
+#define HAS_MII		0x40
+#define USE_SHMEM	0x80	/* autodetected */
+</pre>
+　とか、<br>
+<pre>
+static hw_info_t default_info = { 0, 0, 0, 0, 0 };
+static hw_info_t dl10019_info = { 0, 0, 0, 0, IS_DL10019|HAS_MII };
+static hw_info_t dl10022_info = { 0, 0, 0, 0, IS_DL10022|HAS_MII };
+</pre>
+　とか。下の方には<br>
+<pre>
+    if (info->flags & IS_DL10022) {
+	mdio_reset(nic_base + DLINK_GPIO, 0);
+	/* Restart MII autonegotiation */
+	mdio_write(nic_base + DLINK_GPIO, 0, 0, 0x0000);
+	mdio_write(nic_base + DLINK_GPIO, 0, 0, 0x1200);
+    }
+</pre>
+　とかあるし。<br>
+　そして・・・<b>ついに見つけました</b>。<br>
+<pre>
+    if (!(info->flags & HAS_MII))
+	goto reschedule;
+
+    link = mdio_read(dev->base_addr + DLINK_GPIO, 0, 1);
+    if (!link || (link == 0xffff)) {
+	printk(KERN_INFO "%s: MII is missing!¥n", dev->name);
+	info->flags &= ‾HAS_MII;
+	goto reschedule;
+    }
+</pre>
+　ここだったのです、あのMII missingとかいうエラーメッセージを出していたのは。<br>
+　PlanexのHPによると、FNW-3600-T/TXには汎用でpcnet_cs、DL10020とかいうのがうまく対応
+しているそうです。と言うことは、その最新バージョンであるDL10022が使われている可能性が
+大きい。で、ドライバ情報らしきdl10022_infoの定義部分ではHAS_MIIがOR定義されています。<br>
+　冒頭の#define句でHAS_MIIが定義されていますし、通常処理中でifでMII特有の処理がされ
+ています。<br>
+　エラーメッセージが出る原因は、どうもドライバから何らかの情報を読みとってきて（
+mdio_read関数）そこのフラグに何か異常があれば（if句）printkでメッセージを出力、
+rescheduleとか言うところにジャンプする部分にありそうです。<br>
+　しかしそもそもの原因は、本来FNW-3600-T/TXはHAS_MIIに対応したフラグを持たないのに、
+互換として定義されているDL10022にそのフラグが設定されていると言うところにありそうです。
+つまり、FNW-3600-T/TXを使った場合DL10022が使われます。で、いざ使う段になってMIIフラグを
+デバイスから読み出すとそもそもFNW-3600は対応していないのでエラーになります。それで
+MII missingのエラーメッセージが出力され、デバイスが止まる原因になったのでしょう。<br>
+<br>
+　と言うことは、DL10022を定義している部分からHAS_MIIフラグを外せば良さそうです。<br>
+　と言うわけで、非常におっかなびっくりでpcnet_cs.cを以下のように修正しました。<br>
+<br>
+<a href="pcmcia_files/pcnet_cs.c">pcnet_cs.c修正部分抜粋（ファイルはSJISコードです！！）</a><br>
+<pre>
+static hw_info_t default_info = { 0, 0, 0, 0, 0 };
+static hw_info_t dl10019_info = { 0, 0, 0, 0, IS_DL10019|HAS_MII };
+/*
+static hw_info_t dl10022_info = { 0, 0, 0, 0, IS_DL10022|HAS_MII };
+*/
+static hw_info_t dl10022_info = { 0, 0, 0, 0, IS_DL10022};
+</pre>
+　直したは良いがコンパイルはどうしましょう。めんどくさかったので、カーネルの再構築で
+モジュールだけコンパイルすることにしました。<br>
+<pre>
+# make menuconfig
+ここでPCMCIA関連をチェックし、モジュール化しておくように設定します。
+# make dep（依存関係の更新）
+# make clearn（以前造られたファイルの削除。と言っても今回が初めてだからそんなの無かった。）
+で、フツーはここでmake zImageとかやるのだけど今回はパス。
+# make modules
+これでいきなりモジュールをコンパイルね。
+幾つかエラーが出ましたが、肝心のpcnet_cs.oは無事生成されました。
+で、念のため元のモジュール、/lib/modules/2.4.7-10/kernel/drivers/net/pcmcia/pcnet_cs.oを
+バックアップしておきます。で、
+# cp pcnet_cs.o /lib/modules/2.4.7-10/kernel/drivers/net/pcmcia/pcnet_cs.o
+します。
+</pre>
+　あ、予めpcmciaはストップしておいて下さいよ。<br>
+<br>
+　で、やってみると・・・見事！！<b>MII missingのエラーはかき消えました。</b><br>
+　ようやくこれで100MbpsでのLAN実験の土台が整ったわけです。<br>
+<br>
+　まあ今回はそれほど面倒なわけではなかったのですが・・・。<b>原因がドライバのソースコード
+にあるとわかるまでに非常に時間をかけてしまった</b>のが悔しいです。この点に関しては特に
+不平不満があるわけではありません。元々LinuxというOSの性格に起因することで、良くも悪くも
+Linuxらしさの一つですから。と、ゆーか<b>デバイスドライバのソースコードに触れる機会なんて
+そうそうありませんし。</b><br>
+　精神的に楽だったのは、Interfaceというデバイス系の雑誌で最近Linuxデバイスドライバの作成
+がホットな話題になっていて、それをわからないなりに眺めていたせいか原因がデバイスドライバに
+あるとわかってもそれほど精神的プレッシャーにはならなかった、と言ったところです。<br>
+　世の中、どういう知識がどこで役に立つかわかったもんじゃあありませんね。<br>
+<br>
+<br>
+　今回のお話は、突っ込めば相当詳しく話さねばならない部分も全てはしょっちゃいました。<br>
+　本来はPCMCIAやホットプラグの説明もしなければ訳が分からない部分も多いかと思われます。
+そう言ったところは雑誌とかで勉強してみて下さい。また<b>今回の対処法が他の全てのディスト
+リビューションに適用されるとは限りません。あくまでも、PCG-505SにインストールしたRHL7.2
+のみに限定された対処法である</b>ことを了解しておいて下さい。<br>
+　またカーネルとモジュールの再構築に関してもご自身で詳しく調べてから取りかかって下さい。
+<b>Linuxの世界ほど、丸写しが危険な世界は無い</b>というのが最近の私の考えです。<br>
+<b>今回非常に参考になった本</b><br>
+「Linux各種設定×活用徹底ガイド」海上忍　技術評論社　2680円<br>
+　でした。カーネルの再構築やその後の設定に関して一般的に詳しく書かれています。また、RPMにかんしてもrpm -qlが載っていた点で尊敬に値します。<br>
+　PCMCIAやホットプラグに関してはIDGジャパンの「月刊リナックスワールド」2002・２月号の前後に詳しい連載があります。今回真っ先に参照したのはその記事でした。<br>
+<br>
+　あ、そうそう。言い忘れていましたが一旦pcmciaのパッケージを入れ直したんですよ。最新版に。ところがそのドライバのソースでもpcnet_cs.cの問題点はそのままでしたし、何よりpcmciaカードスロットのドライバが勝手に変更されてて。アップグレード当初はpcmciaを起動することさえできなかったのです。<br>
+<a href="pcmcia_files/pcmcia">一応、PCG-505S用の設定を載せておきます。(ファイルはSJISコードです！！）</a><br>
+<pre>
+注意：pcmcia-cs-3.1.33用の設定です。
+PCMCIA=yes
+PCIC=yenta_socket
+PCIC_OPTS=
+CORE_OPTS=
+CARDMGR_OPTS=（RHL7.2のデフォルト、3.1.27ではこの行はありません）
+</pre>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　同時にcoregaのCB-TXDも購入してみたのですが、チップセットのRealtekが最新のpcmciaパッケージにも入っていませんでした。あえなく断念。とはいっても、もともとWindows機でのみ動かす予定だったから良いんだけど。<br>
+　一応動作に成功した人もいるんだけど、コンパイルオプションがその人のと自分のでは違うらしくって成功しなかった。<br>
+<br>
+<b>余談：</b><br>
+　さっき、「世の中、どういう知識がどこで役に立つかわかったもんじゃあありませんね」と書きましたが私とLinuxの関わりもまさにその通りです。<br>
+　私がLinuxに関わりはじめたそもそもの原因はネットワークの勉強とプログラミングでした。<br>
+　高校生の頃、「serial experiments lain」というアニメをみてネットワークの不思議さに驚き、プログラミングとは独立して、全くの趣味で日経NETWORKの講読をはじめました。そこで基本的な（今でも基本的な）TCP/IPやIPネットワークの知識を知ります。<br>　プログラミングでも独立して、UNIXやLinuxに手を染める機会がありました。勉強に使っていた本にUNIXのパイプやプロセスを利用した例題が載っていたのです。このとき友達からTurboLinuxの6.5をもらってデスクトップ機にインストール、ちょっとだけやりました。<br>
+　この二つのきっかけが、部活の先輩からLinuxサーバーをいじくるバイトを紹介してもらう事に繋がり、身を乗り出してLinuxをいじくる現在に至ったわけです。<br>
+　よーするに、アニメとプログラミングがLinuxに触るきっかけだったのか。<br>
+<br>
+　というわけで、今回はこれでおしまい。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

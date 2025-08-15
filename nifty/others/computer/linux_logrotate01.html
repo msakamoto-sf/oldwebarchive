@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>logrotateと戯れて・・・。</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>logrotateと戯れて・・・。</h1>
+初版作成：2002/10/22<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　あー・・・。まあ、いい加減Workstationとして何度も電源切ったり入れたりしているうちにですね、ログファイルが気になってきたのですよ。<br>
+　んで、以前いじくったことのあるlogrotateとゆープログラムをカスタマイズしようと思い立った訳ですね。<br>
+　logrotateとゆーのは結構昔から使われているらしい、ログファイルの自動バックアップをしてくれるプログラムです。/var/logの中にmessageに続いてmessage.1, message.2, ...とあるでしょ？あんな風に、連番みたいにして自動的に長くなったログファイルを切り分け<b>（ログローテーション）</b>てくれるのがlogrotateです。<br>
+　これ、結構知ってると便利なので。んで、大抵はcronと組み合わせて使うので。<br>
+　cronの設定の復習もかねてlogrotateと戯れてみました。<br>
+　環境はturbolinux Workstation 8です。<br>
+　長くなりますけど、おつきあいください。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">logrotateについて</a></li>
+	<li><a href="#main_02">cronについて</a></li>
+	<li><a href="#main_03">cronのカスタマイズ</a></li>
+	<li><a href="#main_04">logrotateのカスタマイズ</a></li>
+	<li><a href="#main_05">資料：TLXW8のcron初期設定</a></li>
+	<li><a href="#main_06">資料：TLXW8のlogrotate初期設定</a></li>
+	<li><a href="#main_07">資料：logrotate実行時オプション（「man logrotate」より抜粋）</a></li>
+	<li><a href="#main_08">資料：logrotate設定ファイルオプション（「man logrotate」より抜粋）</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">logrotateについて</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　まず、logrotateはどこにあるのでしょうか。whereisで・・・<br>
+/usr/sbin/logrotate<br>
+　にありました。それではRPMはどれか？<br>
+<pre>
+[fenjin@seisyuu fenjin]$ rpm -qf /usr/sbin/logrotate
+logrotate-3.3.2-5
+</pre>
+　はい。それではコレのパッケージ情報を見てみませう。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ rpm -qil logrotate
+Name        : logrotate  Relocations: (not relocateable)
+Version     : 3.3.2      
+Vendor: Turbolinux Japan K.K <http://the.turbolinux.co.jp/bugzilla/>
+Release     : 5   Build Date: Sun Apr 28 21:15:17 2002
+Install date: Tue Sep 10 07:28:20 2002
+Build Host: y.jp.tlan
+Group       : System Environment/Base 
+Source RPM: logrotate-3.3.2-5.src.rpm
+Size        : 39076  License: GPL
+Packager    : Turbolinux Japan K.K <http://the.turbolinux.co.jp/bugzilla/>
+Summary     : Rotates, compresses, removes and mails system log files.
+Description :（省略）
+
+Install the logrotate package if you need a utility to deal with the
+log files on your system.
+/etc/cron.daily/logrotate
+/etc/logrotate.conf
+/etc/logrotate.d
+/usr/sbin/logrotate
+/usr/share/man/man8/logrotate.8.gz
+</pre>
+　・・・こんだけです。あっさりとしたもんだ。まあ、でもその分分かりやすくて好感が持てます。まあ大体見当がつくと思いますが、/etc/cron.daily/logrotateがcron用のシェルスクリプト。/etc/logrotate.confと/etc/logrotate.confが実行時の設定ファイル。と相成ります。ここら辺は資料として後ろの方に載っけときましたので、眺めてみてください。特にcron.daily/logrotateときたら・・・。あっさりしすぎ。<br>
+<br>
+　さて。結局/usr/sbin/logrotateに設定ファイルのフルパスを引数と渡して起動すればよさげです。オプションの詳細については後で<a href="#main_07">「資料：logrotate実行時オプション（「man logrotate」より抜粋）」</a>を眺めてみてください。<br>
+　例えば自分で創ったオリジナルの設定ファイルが /etc/logrotate_local.confとかにあれば、<br>
+<tt># /usr/sbin/logrotate /etc/logrotate_local.conf</tt><br>
+　とすれば良いわけです。んで、設定ファイルの文法をチェックしたり、実際にログを切り分けないけどどんな風に動くのかシミュレートだけしてみたいときは<br>
+<tt># /usr/sbin/logrotate -d 設定ファイル</tt><br>
+　実際の動作チェックもしたいし、強制的にログを切り分けたいときは<br>
+<tt># /usr/sbin/logrotate -f 設定ファイル</tt><br>
+<br>
+　・・・とまあ。logrotate自体の実行時オプションはそんなに難しくないです。<br>
+<br>
+　では・・・肝心の、「どのログファイルをどうローテーションさせるのか」についての設定を見てみますか。後ろの方に載っている、<a href="#main_08">「資料：logrotate設定ファイルオプション（「man logrotate」より抜粋）」</a>をちょっと眺めてきてください。（TLXW8ではcronの設定から、/etc/logrotate.confを設定ファイルとしてlogrotateは起動しています）<br>
+　・・・眺めてきました？それじゃあ、実際のファイル構成について簡単に概要を・・・。（<a href="#main_06">「資料：TLXW8のlogrotate初期設定」</a>）<br>
+　まず、グローバルな。つまり全体にとりあえず適用される設定はTLXS7, TLXW8, RHL7.2共に、/etc/logrotate.confファイルで行われています。んで。この中で<br>
+<pre>
+# RPM packages drop log rotation information into this directory
+include /etc/logrotate.d
+</pre>
+　っていうところがありますよね？includeによって、/etc/logrotate.dディレクトリ内のファイルが<b>全て</b>設定ファイルとして扱われるようになります。実際、apacheだのなんだのと、それっぽいのが詰まっています。<br>
+　んで。logrotate.confで全体設定が行われますが、各ログファイル個別の設定はどこで行われているのか。それは例えばlogrotate.conf内の<br>
+<pre>
+/var/log/wtmp {
+    monthly
+    create 0664 root utmp
+    rotate 1
+}
+</pre>
+　とか、各設定ファイル内の<br>
+<pre>
+[root@seisyuu logrotate.d]# cat apache
+/var/log/httpd/access_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+</pre>
+　で行われます。よーするに、<br>
+（ログファイル名）{<br>
+　　この中で必要なオプションだけ、個別に上書きできる。<br>
+｝<br>
+　という仕組みです。<br>
+<br>
+　ここまでくればカスタマイズの見当もついてきましたよー。<br>
+１．独自にカスタマイズした/etc/logrotate_local.confみたいなのを創る。<br>
+２．ついでに独自にカスタマイズした/etc/logrotate_local.d/を創って、そん中に個別のログファイル設定を突っ込んで、/etc/logrotate_local.confに読み込ませる。<br>
+３．最後にcronのlogrotateシェルスクリプトを変更するか、追加して、/etc/logrotate_local.confを読み込んで起動するようにする。<br>
+<br>
+　さあ、ほんじゃあやってみますか・・・って、<b>ちょっと待って。</b><br>
+　じつわ。TLXS7, TLXW8, RHL7.2共にcronに関して注意すべきワンポイントがあるのですよ。他にも、ワークステーション仕様のlogrotateの場合、夜中の4時に動き出すようなcron任せにもできませんし。<br>
+　というわけで、急がば回れでちょっとcronについて勉強、或いは復習します。<br>
+<b>参考資料</b><br>
+・「man logrotate」<br>
+<br>
+<font size=+1><b><a name="main_02">cronについて</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　初心者の方のために、「cron」について簡単に説明します。<br>
+　cronとはデーモン（サーバーじゃないな。ネットワークからの入力を受け付けないから。）として、バックグラウンドで動くプログラムです。んで、設定ファイル（大概は/etc/crontab）に従って、指定された時刻や曜日、日付になったら、これまた設定ファイルに指定されているスクリプトを実行していきます。<br>
+　よく、夜中の４時頃突然ハードディスクががりがり言い出したりしませんか？他にも久しぶりにrootでログインしてみたら、なんかログファイルのチェックみたいな内容のメールが大量にたまっていたり。これらがcronのお仕事です。別にパソコンがおかしくなった訳じゃあありません。<br>
+　これらはcronが多くのディストリビューションで毎日午前４時、いろいろなバックエンド処理を行うように設定されているからです。んで、それらの記録をroot宛にメールで知らせるよう、それぞれのバックエンド処理を行うプログラムが設定されているからです（例えばファイル改ざんのチェックだったり、logrotateだったり）。<br>
+<br>
+　これらは別にサーバーだったら何の害もないんですよ。常時稼働しますから。<br>
+　ところが、<b>夜中の４時過ぎまで電源を入れることなんて滅多にないワークステーション</b>ではこれら、Linuxが健全に保つように設定された各種バックエンドプログラム（シェルスクリプト）が動きません。これはちょっとまずい。（深夜業務に使われているワークステーションは別です）<br>
+　ファイル改ざん検知プログラムはまだ良いんです。ワークステーションで、自分一人しか使わなかったり、サーバーを立てたりはしてない場合はあんまり必要ないです。<br>
+　問題は、このページの本題でもあります「logrotateによるログの切り分け」です。<br>
+　気がつけば/var/log/messagesが数百KB、あるいはMBにまで膨らんでいた・・・なーんてことがまま、あり得ます。<br>
+　ログファイルは、各種ソフトの調子（機嫌とも言う）を見たり、何か問題が起こったりした場合に必須の情報源です。それが数百KBもあると、必要な情報を探すのも一苦労になります。lessコマンドも遅くなりますし。<br>
+　まあ、そういうお題でこのページが創られたわけです。この解決はもう少し先にして、先にcronについて確認しておきましょう。<br>
+<br>
+　cronの構成を確認しておきます。<br>
+[fenjin@seisyuu fenjin]$ rpm -qa | grep cron<br>
+crontabs-1.10-2<br>
+vixie-cron-3.0.1-50<br>
+<pre>
+[fenjin@seisyuu fenjin]$ rpm -qil crontabs
+Name        : crontabs                     Relocations: (not relocateable)
+（省略）
+/etc/cron.daily
+/etc/cron.hourly
+/etc/cron.monthly
+/etc/cron.weekly
+/etc/crontab
+/usr/bin/run-parts
+</pre>
+　/etc/crontabというのがcronの読み込むファイル。つまりこのパッケージはcronのTLXW8仕様の設定ファイル集と言うことですな。<br>
+　肝心のcron実行ファイルは？「less /etc/rc.d/init.d/crond」を眺めると、crondというのがdaemonとして実行されています。そこで・・・<br>
+[fenjin@seisyuu init.d]$ whereis crond<br>
+crond: /usr/sbin/crond /usr/share/man/man8/crond.8.gz<br>
+[fenjin@seisyuu init.d]$ rpm -qf /usr/sbin/crond<br>
+vixie-cron-3.0.1-50<br>
+<pre>
+[fenjin@seisyuu init.d]$ rpm -qil vixie-cron
+Name        : vixie-cron
+（省略）
+/etc/cron.d
+/etc/logrotate.d/cron
+/etc/rc.d/init.d/crond
+/usr/bin/crontab
+/usr/sbin/crond
+/usr/share/doc/packages/vixie-cron-3.0.1
+（省略）
+/usr/share/doc/packages/vixie-cron-3.0.1/THANKS
+/usr/share/man/man1/crontab.1.gz
+（省略）
+/var/spool/cron
+</pre>
+　ちょっと勉強不足で分からなかったのですが、/etc/cron.d/ディレクトリの中にはなーんも入っていなかったのです。何のためなんでしょ？今回はあくまでもlogrotateのカスタマイズでしたので、cronは基本的にcrontabで制御できることが分かれば十分なので。あまり調べませんでした。<br>
+　TLXW8のcrontabの詳細は<a href="#main_05">「資料：TLXW8のcron初期設定」</a>を参照してください。とりあえず、ここではman 5 crontab より日時指定をメインに抜粋しておきます。<br>
+<pre>
+フィールド 指定可能な値
+---------- --------------
+分         0-59
+時         0-23
+月内日     0-31
+月         0-12 (もしくは名前。下記を参照)
+曜日       0-7 (0 と 7 は日曜日。もしくは名前)
+・・・
+CRON ファイルの例
+       # (/etc/passwd の指定に関らず) コマンド実行に /bin/sh を使用する。
+       SHELL=/bin/sh
+       # (この crontab の所有者に関らず) あらゆる出力を `paul' にメールする。
+       MAILTO=paul
+       #
+       # 毎日、日付変更の 5 分後に実行する
+       5 0 * * *       $HOME/bin/daily.job >> $HOME/tmp/out 2>&1
+       # 毎月初日の 2:15pm に実行する -- 出力は paul にメールされる
+       15 14 1 * *     $HOME/bin/monthly
+       # 週末の午後 10 時に実行してジョーを心配させる
+       0 22 * * 1-5 mail -s "午後10時だ" joe%ジョー、%%お前の子どもはどこだい?%
+       23 0-23/2 * * * echo "毎日 0,2,4..時 23 分に実行する"
+       5 4 * * sun     echo "日曜 4 時 5 分に実行する"
+</pre>
+<b>参考資料</b>
+・「man cron」<br>
+・「man crontab」<br>
+<br>
+<font size=+1><b><a name="main_03">cronのカスタマイズ</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　え？いい加減疲れてきた？<br>
+　も、もうちょっと・・・！これやって、あとlogrotateのカスタマイズだけだから！<br>
+　疲れたら本HPのリンクページにあるCG系サイトにでも寄り道して、一休みしてくださいませ。<br>
+<br>
+　さて。ここは非常に簡単です。<br>
+　ワークステーション仕様で面倒なのは、「<b>root宛に毎時送られてくるファイル改ざんだのログファイルだののレポートメール</b>」だけです。<br>
+　つまり。<b>cron.hourlyが邪魔</b>なわけです。<br>
+　じゃあ後は簡単。crontab中の
+<pre>
+# run-parts
+
+01 * * * * root run-parts /etc/cron.hourly	#毎時間01分に実行
+02 4 * * * root run-parts /etc/cron.daily	#毎日午前四時02分に実行
+</pre>
+　を、<br>
+<pre>
+# run-parts
+
+#01 * * * * root run-parts /etc/cron.hourly	#毎時間01分に実行
+02 4 * * * root run-parts /etc/cron.daily	#毎日午前四時02分に実行
+</pre>
+　でお仕舞い。毎時間行う部分をコメントアウトしちゃう。<br>
+　あとは、お好みでcron.hourlyの毎時設定を変更して、cron.dailyと同じく毎日設定にしてしまうとか、毎日設定でも実行する時間を（ほぼ確実に電源が入っているだろうと思われる）適当な時間に変更するとか。<br>
+　そんなところでしょう。<br>
+　はい、cronのカスタマイズ終わり！いよいよlogrotateのカスタマイズだー！！<br>
+<br>
+<font size=+1><b><a name="main_04">logrotateのカスタマイズ</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　お待たせしました。いよいよlogrotateをカスタマイズして快適なログ生活を送りましょう。まず、今回私がカスタマイズしたポイントを説明します。<br>
+<br>
+１．cronに設定済みのlogrotate.confは依然として使い続けるので、いじらない。<br>
+２．独自の設定ファイル、/etc/logrotate_local.confと、ログファイル毎の設定ファイルを突っ込むための/etc/logrotate_local.d/ディレクトリを作る。<br>
+３．基本は/etc/logrotate.conf、/etc/logrotate.d/で。これらを上記ファイルやディレクトリにコピーして、カスタマイズする。<br>
+４．ローテーションは基本は9回まで。*.log,*.log.1,*.log.2,...*.log.9までローテーションさせる。古くなったログファイルの圧縮作業などはなし。<br>
+５．対象ログファイルが無くても無視して次のログファイルへ。つまり、missingok。<br>
+６．ローテーションさせる条件は、基本的にログファイルのサイズが200KBを越えたら。<br>
+<br>
+　以上の要求に従って、オリジナルのlogrotate.confやlogrotate.dから削ったり、付け足したりした結果を以下に示します。<br>
+<pre>
+[fenjin@seisyuu etc]$ cat /etc/logrotate_local.conf
+#
+# Default configuration is not proper for Workstation.
+# This configuration checkes the size of every log files.
+# And executed by /etc/rc.d/rc.local so, every time when machine start ups,
+# logrotate which use this configuration will automatically executed.
+
+# rotate log files daily
+daily
+
+# default size of log files which should be rotated is bigger than 200KB
+size 200k
+
+# Log files are rotated 9 times.
+rotate 9
+
+# send errors to root
+errors root
+
+# create new (empty) log files after rotating old ones
+create
+
+# Original Log Rotate Configuration files are included in this directory
+include /etc/logrotate_local.d
+
+# no packages own lastlog or wtmp -- we'll rotate them here
+/var/log/wtmp {
+    monthly
+    create 0664 root utmp
+    rotate 1
+}
+</pre>
+　・・・と、ここまでがlogrotate_local.confです。includeで/etc/logrotate_local.dディレクトリの中身を読みとります。では、その中は・・・<br>
+<pre>
+[fenjin@seisyuu etc]$ cd /etc/logrotate_local.d/
+[fenjin@seisyuu logrotate_local.d]$ ls
+apache  syslog
+
+[fenjin@seisyuu logrotate_local.d]$ cat apache
+# ソースコードからビルドしたApacheにあわせてあります。
+/usr/local/apache/logs/access_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+/usr/local/apache/logs/agent_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+/usr/local/apache/logs/error_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+/usr/local/apache/logs/referer_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+[fenjin@seisyuu logrotate_local.d]$ cat syslog
+# デフォルトのsyslogを修正して、必要なログファイルだけ、
+# 不必要な処理を省いて設定し直しました。
+/var/log/messages {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/secure {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/maillog {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/spooler {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/boot.log {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+</pre>
+　で・・・logrotate_local.conf中のコメントにもありますが、これはWorkstation仕様ですので、できれば「電源が入るたびに」ログローテーションしてもらいたいところです。そういった起動条件にはcronは不適切です。というわけで、<b>/etc/rc.d/rc.local</b>というスクリプトファイルの末尾辺りに、次の一行を追加します。<br>
+<br>
+/usr/sbin/logrotate /etc/logrotate_local.conf<br>
+echo executed /usr/sbin/logrotate /etc/logrotate_local.conf. Done.<br>
+sleep 3<br>
+<br>
+　最初の一行で/etc/logrotate_local.confを設定ファイルとしてlogrotateを起動しています。んで、確認用のメッセージにechoを使ってます。<br>
+　最後の「sleep 3」というのは、echoメッセージがあっという間に流れ去ってしまいエラーなどがあっても見えない。また、apacheやsyslogなどを何度か再起動しているのでその分の時間取りもあった方が良いんじゃないか？という考えから3秒ほどストップさせることにしたわけです。<br>
+　rc.localについてですが。<b>/etc/rc.d/</b>以下に、rc*.dというディレクトリに各ランレベルに入ったときに実行されるスクリプトへのリンクが格納されています。ここら辺は昨今のLinux雑誌に何度も紹介されていますのでそちらを参照してください。<br>
+　で、とにかくrc.localというのはランレベル毎のスクリプトを全部起動し終わり、後はログインプロンプトを表示するだけ、という、最後の最後に起動されるスクリプトファイルです。このスクリプトファイルが実行し終えた次の瞬間にはもう、ログインプロンプトが表示されます。で、rc.localはユーザーが自由にカスタマイズすることが許されているスタートアップシェル（とでも言うのかな？）でもあります。<br>
+　そんなわけで、今回「電源が入るたびに起動する」という要求を、rc.local内でlogrotateを実行する、という形で実現しました。<br>
+<br>
+　さて、実際に上記の設定でどんな具合か。<br>
+　結論は、「なかなかいい感じ。」です。200KBというのはlessコマンドで流し流し読める私にとっての限界量ですが、まあ。messageに関してはいい感じです。maillogとsecureに関してはそもそも使ってないので（sshで多少secureが増える）無事、ローテーションされませんでした。boot.logはよく分かりません。一応、200KBには達してないのでローテーションされていませんし。<br>
+　Apacheのログファイルも、まだ本格使用してないのであんましたまっておらず、ローテーションされていません。<br>
+　盲点だったのが/var/log/samba/。まだ50KBくらいですが、実際問題私は毎日毎日VMware越しにSambaを利用しているわけですから、放っておくわけにも参りません。が、Sambaを利用し初めてかれこれ２週間以上経過していて50KB程度ですから、もうちょっと様子を見てもよいかもしれません。<br>
+<br>
+　それではワークステーションとして使っているみなさんも、快適なログ生活を送ってください。<br>
+<b>総合参考資料</b>
+・「man logrotate」<br>
+・「man cron」<br>
+・「man crontab」<br>
+<br>
+<br>
+<font size=+1><b><a name="main_05">資料：TLXW8のcron初期設定</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+service: /etc/rc.d/init.d/cron<br>
+<br>
+configuration files:<br>
+<br>
+/etc/crontab<br>
+<pre>
+[root@seisyuu etc]# cat crontab
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+
+# run-parts
+
+01 * * * * root run-parts /etc/cron.hourly	#毎時間01分に実行
+02 4 * * * root run-parts /etc/cron.daily	#毎日午前四時02分に実行
+22 4 * * 0 root run-parts /etc/cron.weekly	#毎週日曜日午前四時22分に実行
+42 4 1 * * root run-parts /etc/cron.monthly	#毎月一日午前四時42分に実行
+</pre>
+<br>
+/etc/cron.daily/<br>
+<pre>
+[root@seisyuu cron.daily]# ls
+inn-cron-expire*  inn-cron-rnews*  logrotate*  makewhatis.cron*
+ medusa.cron*  slocate.cron*  tetex.cron*  tmpwatch*
+[root@seisyuu cron.daily]# cat logrotate
+#!/bin/sh
+
+/usr/sbin/logrotate /etc/logrotate.conf
+</pre>
+<br>
+/etc/cron.hourly/<br>
+<pre>
+[root@seisyuu cron.hourly]# ls
+inn-cron-nntpsend*  logcheck*  rmmod*
+[root@seisyuu cron.hourly]# cat inn-cron-nntpsend
+#!/bin/sh
+/sbin/chkconfig innd && su - news -c /usr/bin/nntpsend
+[root@seisyuu cron.hourly]# cat logcheck
+#!/bin/sh
+/usr/sbin/logcheck
+[root@seisyuu cron.hourly]# cat rmmod
+#!/bin/sh
+/sbin/rmmod -as
+[root@seisyuu cron.hourly]# file /usr/sbin/logcheck
+/usr/sbin/logcheck: Bourne shell script text executable
+</pre>
+<br>
+/etc/cron.weekly/<br>
+<pre>
+[root@seisyuu cron.weekly]# ls
+makewhatis-ja.cron*  makewhatis.cron*
+[root@seisyuu cron.weekly]# cat makewhatis-ja.cron
+#!/bin/bash
+/usr/sbin/makewhatis /usr/share/man/ja_JP.eucJP
+exit 0
+[root@seisyuu cron.weekly]# cat makewhatis.cron
+#!/bin/bash
+
+LOCKFILE=/var/lock/makewhatis.lock
+
+# the lockfile is not meant to be perfect, it's just in case the
+# two makewhatis cron scripts get run close to each other to keep
+# them from stepping on each other's toes.  The worst that will
+# happen is that they will temporarily corrupt the database...
+[ -f $LOCKFILE ] && exit 0
+trap "rm -f $LOCKFILE" EXIT
+touch $LOCKFILE
+makewhatis -w
+exit 0
+</pre>
+<br>
+/etc/cron.monthly/<br>
+<pre>
+[root@seisyuu cron.monthly]# ls
+[root@seisyuu cron.monthly]#
+</pre>
+<br>
+<font size=+1><b><a name="main_06">資料：TLXW8のlogrotate初期設定</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+/etc/logrotate.conf<br>
+<pre>
+[root@seisyuu etc]# cat logrotate.conf
+# see "man logrotate" for details
+# rotate log files weekly
+weekly
+
+# keep 4 weeks worth of backlogs
+rotate 4
+
+# send errors to root
+errors root
+
+# create new (empty) log files after rotating old ones
+create
+
+# uncomment this if you want your log files compressed
+#compress
+
+# RPM packages drop log rotation information into this directory
+include /etc/logrotate.d
+
+# no packages own lastlog or wtmp -- we'll rotate them here
+/var/log/wtmp {
+    monthly
+    create 0664 root utmp
+    rotate 1
+}
+
+# system-specific logs may be configured here
+</pre>
+<br>
+/etc/logrotate.d/apache<br>
+<pre>
+[root@seisyuu logrotate.d]# cat apache
+/var/log/httpd/access_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+/var/log/httpd/agent_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+/var/log/httpd/error_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+
+/var/log/httpd/referer_log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP httpd
+    endscript
+}
+</pre>
+<br>
+/etc/logrotate.d/cron<br>
+<pre>
+[root@seisyuu logrotate.d]# cat cron
+/var/log/cron {
+    missingok
+    notifempty
+    postrotate
+        /bin/kill -HUP `/bin/cat /var/run/crond.pid`
+    endscript
+}
+</pre>
+<br>
+/etc/logrotate.d/syslog<br>
+<pre>
+[root@seisyuu logrotate.d]# cat syslog
+/var/log/messages {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/secure {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/maillog {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/spooler {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+
+/var/log/boot.log {
+    postrotate
+        /usr/bin/killall -HUP syslogd
+    endscript
+}
+</pre>
+<br>
+<font size=+1><b><a name="main_07">資料：logrotate実行時オプション（「man logrotate」より抜粋）</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<table border>
+<tr><td colspan=2>OPTIONS</td></tr>
+<tr><td> -d </td>
+<td>デバッグモードを有効にする。デバッグモードではログファイルはいじらず、
+logrotateのstateファイルもいじらない。一種のシミュレートモード。</td>
+</tr>
+<tr><td> -f, --force </td>
+<td>強制的にその場でログローテーションさせます。新しい設定を試したり、
+古すぎるログファイルを手動で消したい時などに便利です。</td>
+</tr>
+<tr><td> -s, --state &lt;statefile&gt;</td>
+<td>指定されたstateファイルを使うよう指示します。違うユーザーや、いろんな
+ログファイルをローテーションさせたりするときに使います。デフォルトのstateファイル
+は/var/lib/logrotate.statusです。</td>
+</tr>
+<tr><td> --usage </td>
+<td>使い方を表示してくれます。</td>
+</tr>
+</table>
+<br>
+<font size=+1><b><a name="main_08">資料：logrotate設定ファイルオプション（「man logrotate」より抜粋）</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　めんどくさいので英文のまま掲載。実際、英語のままの方がわかりやすい場合も多かったりする。<br>
+<pre>
+　logrotate reads everything about the log files it should be handling from the series of configuration files specified on the command line.  Each configuration file can set global options (local definitions override  global  ones,  and  later definitions override earlier ones) and specify a logfile to rotate. A simple configuration file looks like this:
+
+# sample logrotate configuration file
+errors sysadmin@my.org
+compress
+/var/log/messages {
+	rotate 5
+	weekly
+	postrotate
+		/sbin/killall -HUP syslogd
+endscript
+}
+
+"/var/log/httpd/access.log" {
+	rotate 5
+	mail www@my.org
+	errors www@my.org
+	size=100k
+	postrotate
+		/sbin/killall -HUP httpd
+	endscript
+}
+
+/var/log/news/* {
+	monthly
+	rotate 2
+	missingok
+	errors newsadmin@my.org
+	postrotate
+		kill -HUP `cat /var/run/inn.pid`
+	endscript
+	nocompress
+}
+
+　The  first  few lines set global options; any errors that occur during log file processing are mailed to sysadmin@my.org and logs are compressed after they are rotated.  Note that comments may appear anywhere in the config file  as  long  as the first non-whitespace character on the line is a #.
+　The  next section of the config files defined how to handle the log file /var/log/messages. The log will go through five weekly rotations before being removed. After the log file has been rotated (but before the old version of  the  log  has been compressed), the command /sbin/killall -HUP syslogd will be executed.
+　The  next  section  defines  the parameters for /var/log/httpd/access.log.  It is rotated whenever is grows over 100k is size, and the old logs files are mailed (uncompressed) to www@my.org after going through 5 rotations, rather then  being removed.  Likewise,  any  errors  that occur while processing the log file are also mailed to www@my.org (overriding the global errors directive).  Note that the double quotes around the filename at  the  beginning  of  this  section  allows logrotate to rotate logs with spaces in the name.
+　The last section definest the parameters for all of the files in /var/log/news. Each file is rotated on a monthly basis, and the errors are mailed to newsadmin@my.org. This is considered a single rotation directive and if  errors  occur  for more then one file they are mailed in a single message. In this case, the log files are not compressed.
+</pre>
+その他オプション<br>
+<table border>
+<tr>
+	<td><b>create mode owner group</b></td>
+	<td>Immediately  after  rotation (before the postrotate script is run) the log file is created (with the same name as the log file just rotated). <b>mode</b> specifies the mode for the log file in octal  (the  same  as  chmod(2)), <b>owner</b> specifies the user name who will own the log file, and <b>group</b> specifies the group the log file will belong to. Any of the log file attributes may be omitted, in which case those attributes for the new file will use the same values as the original log file for the omitted attributes. This option can be disabled using the <b>nocreate</b> option.</td>
+</tr>
+<tr>
+	<td><b>daily</b></td><td>Log files are rotated every day.</td>
+</tr>
+<tr>
+	<td><b>delaycompress</b></td>
+	<td>Postpone compression of the previous log file to the next rotation cycle.  This has only effect when used in combination with <b>compress</b>.  It can be used when some program can not be told to close its logfile  and  thus  might continue writing to the previous log file for some time.</td>
+</tr>
+<tr>
+	<td><b>errors address</b></td>
+	<td>Any errors that occur during log file processing are mailed to the given <b>address</b>.</td>
+</tr>
+<tr>
+	<td><b>extension ext</b></td>
+	<td>Log  files  are  given the final extension ext after rotation. If compresssion is used, the compression extension(normally .gz) appears after ext.</td>
+</tr>
+<tr>
+	<td><b>ifempty</b></td>
+	<td>Rotate the log file even if it is empty, overiding the <b>notifempty</b> option <b>(ifempty is the default)</b>.</td>
+</tr>
+<tr>
+	<td><b>include file_or_directory</b></td>
+	<td>Reads the file given as an argument as if it was included inline where the include directive appears. If a directory  is  given,  most of the files in that directory are read before processing of the including file continues.<br>　The only files which are ignored are files which are not regular files (such as directories and named pipes)  and files  whose  names  end  with  one of the taboo extensions, as specified by the tabooext directive.  <b>The include directive may not appear inside of a log file definition.</b></td>
+</tr>
+<tr>
+	<td><b>mail address</b></td>
+	<td>When a log is rotated out-of-existence, it is mailed to <b>address</b>. If no mail should be generated by  a  particular log, the nomail directive may be used.</td>
+</tr>
+<tr>
+	<td><b>mailfirst</b></td>
+	<td>When using the mail command, mail the just-rotated file, instead of the about-to-expire file.</td>
+</tr>
+<tr>
+	<td><b>maillast</b></td>
+	<td>When  using  the  mail  command,  mail  the  about-to-expire  file, instead of the just-rotated file (this is the default).</td>
+</tr>
+<tr>
+	<td><b>missingok</b></td>
+	<td>If the log file is missing, go on to the next one without issuing an error message. See also nomissingok.</td>
+</tr>
+<tr>
+	<td><b>monthly</b></td>
+	<td>Log files are rotated the first time logrotate is run in a month (this is  normally  on  the  first  day  of  the month).</td>
+</tr>
+<tr>
+	<td><b>nocompress</b></td>
+	<td>Old versions of log files are not compressed with gzip. See also compress.</td>
+</tr>
+<tr>
+	<td><b>nocopytruncate</b></td>
+	<td>Do not truncate the original log file in place after creating a copy (this overrides the copytruncate option).</td>
+</tr>
+<tr>
+	<td><b>nocreate</b></td>
+	<td>New log files are not created (this overrides the create option).</td>
+</tr>
+<tr>
+	<td><b>nodelaycompress</b></td>
+	<td>Do not postpone compression of the previous log file to the next rotation cycle (this overrides the delaycompressoption).</td>
+</tr>
+<tr>
+	<td><b>nomail</b></td>
+	<td>Don't mail old log files to any address.</td>
+</tr>
+<tr>
+	<td><b>nomissingok</b></td>
+	<td>If a log file does not exist, issue an error. This is the default.</td>
+</tr>
+<tr>
+	<td><b>noolddir</b></td>
+	<td>Logs are rotated in the same directory the log normally resides in (this overrides the olddir option).</td>
+ </tr>
+ <tr>
+	<td><b>notifempty</b></td>
+	<td>Do not rotate the log if it is empty (this overrides the ifempty option).</td>
+</tr>
+<tr>
+	<td><b>olddir directory</b></td>
+	<td>Logs are moved into <b>directory</b> for rotation. The directory must be on the same physical device  as  the  log  file being  rotated.  When  this  option  is used all old versions of the log end up in directory.  This option may be overriden by the <b>noolddir</b> option.</td>
+</tr>
+<tr>
+	<td><b>postrotate/endscript</b></td>
+	<td>The lines between postrotate and endscript (both of which must appear on lines by themselves) are executed  <b>after</b> the  log  file  is  rotated.  These directives may only appear inside of a log file definition.  See prerotate as well.</td>
+</tr>
+<tr>
+	<td><b>prerotate/endscript</b></td>
+	<td>The lines between prerotate and endscript (both of which must appear on lines by themselves) are executed  <b>before</b> the  log  file  is  rotated. These directives may only appear inside of a log file definition.  See postrotate as well.</td>
+</tr>
+<tr>
+	<td><b>rotate count</b></td>
+	<td>Log files are rotated <b>count</b> times before being removed or mailed to the address specified in a mail  directive. If <b>count</b> is 0, old versions are removed rather then rotated.</td>
+</tr>
+<tr>
+	<td><b>size size</b></td>
+	<td>Log  files are rotated when they grow bigger then <b>size</b> bytes. If size is followed by M, the size if assumed to be in megabytes.  If the k is used, the size is in kilobytes. So size 100, size 100k, and size 100M are all valid.</td>
+</tr>
+<tr>
+	<td><b>tabooext [+] list</b></td>
+	<td>The current taboo extension list is changed (see the include directive for information on the taboo  extensions). If  a + precedes the list of extensions, the current taboo extension list is augmented, otherwise it is replaced.  At startup, the taboo extension list contains .rpmorig, .rpmsave, ,v and ~.</td>
+</tr>
+<tr>
+	<td><b>weekly</b></td>
+	<td>Log files are rotated if the current weekday is less then the weekday of the last rotation or if more then a week has  passed since the last rotation. This is normally the same as rotating logs on the first day of the week, but it works better if logrotate is not run every night.</td>
+</tr>
+</table>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　つ、疲れた・・・・・・。<br>
+　何つっても、大量のcronやらlogrotateの設定ファイル、manページを整理し直すことになったわけで。疲れた。<br>
+　実際、このページは実に<b>二週間に渡って</b>延々と（だらだらと）書き続けていた。<br>
+　もう、はっきり言ってlogrotateとかcronとかは見る気なし。しばらくの間は。<br>
+<br>
+　本当は、logrotateのmanからの抜粋も独自に日本語訳しようかとも思ったんだけど、いい加減面倒になったし、私の下手な日本語訳よりは、素直な英文のまま上げさせてもらいました。turboさん、logorotateの作者さん、ごめんなさい。<br>
+　ログローテーションはシステムの規模が大きくなるほど、しっかりと作り込む必要のある部分です。かといって、logrotate自体は小さくまとまっていて、設定ファイルを作り込むことによって徐々に機能を強化していくといったなんだか可愛らしいプログラムです。cronと簡単に組み合わせられるのも良いですね。<br>
+　というわけで、ワークステーションユーザーの方もこれを機にcronとかlogrotateとか眺めてみてください。勉強になります。<b>結局参考資料はmanページだけだったし。</b><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップぺージ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenGL3D 導入の始末記（Borland C++ Compilerへ）</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>OpenGL3D 導入の始末記（Borland C++ Compilerへ）</h1>
+初版作成：不明。2001年度内であることは確か。<br>
+二版作成：2002/10/18<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+<font size=-1>2002/10/18:このページで説明してるOpenGL3DのDLL, LIB, Hファイルのインストールを、
+含まれているreadme.txtを追っていけば出来るようにした詰め合わせパックを用意しました。<br>
+<a href="SpecialSet.lzh">SpecialSet.lzh(1.7MB)</a><br>
+　SGIのSDKに含まれている膨大なファイルの中から、必要なDLL, LIB, Hファイルを詰め込み、BCC用に
+変換し直したLIBファイルも含んでいます。また、VCを持っていなく、BCCで使う人のために、後々必要に
+なるVCのwinmm.libもコソーリと含んでいたりします。<br>
+　とにかくこの詰め合わせパックに含まれているreadme.txtを追っていけばどうにかインストールできるかも。<br>
+　質問はメールにて、遠慮無くどうぞ。<br>
+</font>
+<h2><a name="preface">前書き</a></h2>
+ああ・・・一体何をやっているのだ？俺は・・・。<BR>
+そう。<BR>
+　・・・何から話したものか。実際、今だ心が興奮の渦に突き上げられ定まらないのだ。<br>
+　ああ。俺のいつものパターン。一瞬のひらめきの後に続く、大量の失敗。<BR>
+　目に見えている。dllからのlibの切り出し。VC++用のlibファイルをBorland用のOMFコードへの変換。<BR>
+　手動の.dllの交換、調整。<BR>
+<BR>
+　今回はまだ良い。本の中でも一等最初のプログラムだから。たまたま動いたと言うこともできるのさ。<BR>
+・・・まあいい。とにかく、俺はここに記すのみだ。<BR>
+　どうやってVC++用に調整されたOpenGLライブラリ、GLUTをBorland C++ Compilerに組み込んだのかを。<BR>
+<BR>
+　発端はいつも小さな事だ。glut-3.7.5-binを作ってくれた奴が、親切にもREADME-win32.txtの中でこんな事をアドバイスしてくれていた。本当にそれだけなんだ。<BR>
+<PRE>
+BORLAND NOTES:
+
+    From what I understand, Borland supplies a utility that
+    converts Microsoft Visual C++ .libs into Borland compatible
+    files.  Therefore, the best method for Borland users is
+    probably to get the precompiled versions of the library and
+    convert the library.  To create an import library for Borland 
+    from the DLLs, use the following command (from a command prompt):
+          IMPLIB glut32.lib glut32.dll
+    If IMPLIB crashes when called this way, try
+          IMPLIB glut32.lib glut32.def
+    using the glut32.def file in this distribution.
+</PRE>
+<BR>
+　最初は俺も何を言っているのかさっぱりだった。どうも、
+glut-3.7.5-binの中に入っている  glut32.libというライブ
+ラリはVC++用でそのままではBCC32では使えない。だから、BCCの
+ツールの一つであるIMPLIBというのを使ってglut32.dllから<BR>
+直接インポートライブラリを切り出せ、と言っているらしい。<BR>
+　半信半疑でやってみたら、・・・ホントにライブラリファイ
+ルができてた。とにかく作られた以上は試してみる。俺は素直に<BR>
+bcc55¥libフォルダに突っ込んだ。<BR>
+<BR>
+・・・おっと、状況説明がまだだったな。<BR>
+　んー、まーあれだ。3Dプログラミングと言う奴を試してみたく
+なった俺は、さて何を使おうかと考えたのよ。<BR>
+　以前から3Dプログラミング専用のライブラリにDirectXとOpenGL3D
+とかいうのがあるのは知っていた。DirectXはWindows専用なのは知っ
+ていたが、OpenGL3Dとは何か？まあ、１年に一度くらい考えたって訳
+だ。いずれ挑戦したい分野でもあったし。<BR>
+　そんなある日。RedHatLinux 7.0Jの本の後ろのAppendixに載って
+いたパッケージリストに目を通していた俺はある文章に眼が止まっ
+た。「〜OpenGLライクな〜ライブラリ〜」・・・そう、後に分かる
+ことだがOpenGL3DはLinuxにも移植可能なライブラリだった。このと
+きからだな。DirectXではなく、3DをやるならOpenGL3Dを勉強しよう
+とぼんやりと思い始めたのは。<BR>
+　とはいっても、TurboC++でちまちまとしたDOS学習プログラムしか
+したことのないずぶの素人には、3D云々よりもまずWin32APIの勉強
+をしなければならなかった。そこでまあ、足かけ１年くらいか。Win32API
+について二冊ほど読み終えたのは。そして、今ようやくOpenGL3D
+でもやろうかな、とこわごわ足を踏み出したってわけよ。<BR>
+<BR>
+〜ガラスのロープを目隠しで渡る<BR>
+みんな淋しいサーカスの子供さ〜（ダブルゼータガンダム後半オープニングテーマより）
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+　じゃあ、OpenGL3Dの入手経過から話そう。<BR>
+　参考にしようと兼ねだして買った本は、入門書の中でも比較的
+統合開発環境にとらわれない書き方をしている本だった。<BR>
+  つまり、VC++専用というわけではなかったんだな。それが気
+に入った。おれは「OpenGL3Dとはヘッダー、ライブラリ、DLLの
+一連のセットなのだ。」と言うことを学び、「とにかくこの三
+点セットを入手すればいいわけか。」と勝手に納得した。そして
+学校の端末で二時間ほどSGI社のホームページと格闘した。<BR>
+　どうもOpenGLと一口に言ってもいろんなグレードがあるらしい。
+もっとも単純なOpenGLは単体ではダウンロードできないらしい。現在は
+Graphics SDKとして、その他もうちょい上のレベルのセットとかと
+一緒に、パックされてる。また入門書で使っているGLUTと言うのも
+入手しなければならないが、これまた２，３バージョン出そろって
+いる。ええい、どうせこちらはMOだ。落としまくってやれと頑張った。<BR>
+<BR>
+　さて、ここからが問題だ。早速それらのセットを解凍してみたん
+だが・・・どうも、ライブラリやヘッダー、DLLが重複してるんだ。
+当たり前の話だけど。ただ悪い予感を感じたのは、ファイルのタイム
+スタンプなんだ。<BR>
+　Graphics SDKを解凍すると(SGI¥dev¥)graphicsの中に、サンプル
+ファイルやそれらの実行ファイル、実行やコンパイルに必要な三点
+セットが入っていた。実行ファイルもあったので、早速実行・・・
+の前に。「あ、OpenGL32.dllをwindows¥systemにコピーしなくちゃ。」
+・・・「ん？もうあったのか。でもメーカーが出してるDLLの方が新
+しいか、最適化されてるに決まってるよね。よし、上書き・・・と。」<BR>
+　そう。メーカーを信じすぎた俺は、ろくにタイムスタンプも見
+ずに前のDLLを上書きしてしまったのだ。そして、上書きしたファイル
+のタイムスタンプは、依然のより確かに古いものだった。<BR>
+　そして実行ファイルが動かなくなった。<BR>
+　これには焦った。だって前のDLLは完全に上書きしてしまった。
+やばい。だが幸運にも、二台目のパソコンは無事だ。よし、二台目
+の方からOpenGL32.dllをコピーしてきてタイムスタンプを確認しよう。
+そっちの方が新しければそのまま上書きしてしまう。何しろ、使って
+るWin98SEのCDROMは同じなのだから・・・（おっと）。<BR>
+　そう。なぜ。なぜ、メーカーの提供するDLLより、別のメーカー
+にバンドルされてきたDLLのタイムスタンプの方が新しいんだ？胸中に
+渦巻く不審の嵐に気づく暇もなく、事態は次の顔を静かに見せ始めていた。<BR>
+<BR>
+　OpenGLはそんなに大量のヘッダーファイル、ライブラリファイル、
+DLLで構成されているわけではない。<BR>
+　簡単に解説すると、OpenGLの学習用にGLUTという、簡単に
+グラフィック用ウインドウを作ってくれるセットがある。この
+セットのglut-3.7.5-binには以下のファイルが含まれていた。<BR>
+glut.h<BR>
+glut32.dll<BR>
+glut32.lib<BR>
+README-win32.txt<BR>
+　ポイントは、glut32.dllをwindows¥systemフォルダに。ヘッダー
+ファイルをインクルードし、glut32.libとリンクする。<BR>
+  それだけ・・・のはずだった。まあいい。それは後だ。<BR>
+　glut.hの中を覗いてみると、以下の記述があった。<BR>
+<PRE>
+/* To disable automatic library usage for GLUT, define GLUT_NO_LIB_PRAGMA
+   in your compile preprocessor options. */
+# if !defined(GLUT_BUILDING_LIB) && !defined(GLUT_NO_LIB_PRAGMA)
+#  pragma comment (lib, "winmm.lib")      /* link with Windows MultiMedia lib */
+/* To enable automatic SGI OpenGL for Windows library usage for GLUT,
+   define GLUT_USE_SGI_OPENGL in your compile preprocessor options.  */
+#  ifdef GLUT_USE_SGI_OPENGL
+#   pragma comment (lib, "opengl.lib")    /* link with SGI OpenGL for Windows lib */
+#   pragma comment (lib, "glu.lib")       /* link with SGI OpenGL Utility lib */
+#   pragma comment (lib, "glut.lib")      /* link with Win32 GLUT for SGI OpenGL lib */
+#  else
+#   pragma comment (lib, "opengl32.lib")  /* link with Microsoft OpenGL lib */
+#   pragma comment (lib, "glu32.lib")     /* link with Microsoft OpenGL Utility lib */
+#   pragma comment (lib, "glut32.lib")    /* link with Win32 GLUT lib */
+#  endif
+# endif
+
+〜
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+</PRE><BR>
+つまり、このヘッダーファイルをインクルードしたプログラムを完成さ
+せるにはGL/gl.h, GL/glu.h の二つのヘッダーファイル。さらにライブ
+ラリとして opengl32.lib glu32.lib glut32.lib が必要だと言うことだ。
+glut32.libは既にある。他のファイルについてもGraphics SDKのなかに
+収められていた。例えばGraphics SDK 1.1の中にはこれらのライブラリ
+が収められていた。<BR>
+<BR>
+dlls¥glmf32.dll(98/11/24)<BR>
+dlls¥glu32.dll(98/11/24)<BR>
+dlls¥glut32.dll(98/11/30)<BR>
+dlls¥opengl32.dll(98/11/24)<BR>
+<BR>
+include¥GL¥gl.h(99/01/14前後)<BR>
+include¥GL¥glaux.h(99/01/14前後)<BR>
+include¥GL¥glSGI.h(99/01/14前後)<BR>
+include¥GL¥glu.h(99/01/14前後)<BR>
+include¥GL¥glut.h(99/01/14前後)<BR>
+include¥GL¥wglSGI.h(99/01/14前後)<BR>
+<BR>
+lib¥glaux.lib(99/01/14)<BR>
+lib¥glu32.lib(99/01/14)<BR>
+lib¥glut32.lib(99/01/22)<BR>
+lib¥opengl32.lib(99/01/14)<BR>
+<BR>
+さらに、glut-3.7.5-binの中には<BR>
+glut.h(00/12/13)<BR>
+glut32.dll(01/10/04)<BR>
+glut32.lib(01/10/04)<BR>
+README-win32.txt(01/10/04)<BR>
+があることはさっきも書いた。ああ。既に三つもファイルが重複している。<BR>
+<BR>
+　他にも...
+(for Windows98SE)　windows¥systemの中に<BR>
+glu32.dll(99/05/05)<BR>
+Opengl32.dll(99/05/05)<BR>
+<br>
+(for Win2kPro)　winnt¥system32の中に<br>
+glu32.dll(99/12/17)<br>
+Opengl32.dll(99/12/17)（SPが適用されていると日付がより新しくなる）<br>
+<br>
+　がある。<BR>
+<BR>
+　これらのタイムスタンプから勘案するに・・・。<BR>
+ヘッダーファイル：glut.h 以外はGraphics SDKのものを使う。<BR>
+ライブラリ：同じくglut32.lib 以外はgraphics SDKのものを使う。<BR>
+dll：glut32.dllはglut3.7.5を。glu32.dllとOpengl32.dllは動かさない。glmf32.dllは仕方ないのでSDKを使う。<BR>
+<BR>
+と言うことで落ち着く。ところがだ。ここでようやく冒頭で話したこの文章が出てくるわけ。<BR>
+<PRE>
+BORLAND NOTES:
+
+    From what I understand, Borland supplies a utility that
+    converts Microsoft Visual C++ .libs into Borland compatible
+    files.  Therefore, the best method for Borland users is
+    probably to get the precompiled versions of the library and
+    convert the library.  To create an import library for Borland 
+    from the DLLs, use the following command (from a command prompt):
+          IMPLIB glut32.lib glut32.dll
+    If IMPLIB crashes when called this way, try
+          IMPLIB glut32.lib glut32.def
+    using the glut32.def file in this distribution.
+</PRE>
+　んーー・・・つまりアレか？IMPLIBっつーミニプログラムは、
+DLLファイルから、DLLファイルに収められてる関数を呼び出す用の
+LIBファイルを作ってくれるっちゅーこと？良く分かんないけど。
+って、何だこのツールは！？こんなのがあるのか。うーん、勉強に
+なった。さて作ってみるか・・・。とまあ、こんな感じで作ったわけ。<BR>
+　glut32.dllの最新はglut3.7.5。ここからまー、指示の通りに<BR>
+IMPLIB glut32.lib glut32.dll<BR>
+　と打ち込むと・・・できました！！ホントかなー、動くのかなー、
+とどきわくしながらLibフォルダにコピー。その他のファイルも所定
+位置に置きました。さあ、コンパイルー！！って。あれ・・・。<BR>
+　最初のエラーはこれ。<BR>
+Error: 'D:¥ORIGIN¥BCC55¥LIB¥GLUT32.LIB' contains invalid OMF record, type 0x21 (posibly COFF)<BR>
+　・・・きたよ。OMFレコードだよ。俺はこれが未だに良くわからん
+のだ。このOMFレコードとCOFFっつーやつは別の場面でもお目にかか
+ったことがある。そう、さすがにリソースファイル(*.rc)で手動でコ
+ントロールの位置決めをするのにうんざりしてた頃。生成された.RES
+ファイルを、VC++が関連づけされた状態でダブルクリックしてしまっ
+たのだ。するとVC++がなぜかまともに起動してくれて、おまけにリソ
+ースエディタで開いてくれたりしたもんだ。おまけに.RESファイルの
+まま編集したのを保存したりして・・・。ひょっとして、この.RESフ
+ァイル、ILINK32でリンクし直せるのかも・・・。<BR>
+　無理だった。そう、COFF と OMF がどーのこーのと言ったエラーが
+出たのだ。<BR>
+　ひょっとして・・・OMF とか COFFってのは、VC++とBCBそれぞれの、
+リソースやライブラリに使われている汎用データフォーマットみたい
+な奴じゃないのか？<BR>
+　そんなことを考えながらIMPLIBをしたDOS窓でふとdir を打ち込ん
+だら・・・。ん？「coff2omf.exe」ぇぇえええ！？<BR>
+ま、ましゃか・・・<BR>
+<PRE>
+COFF to OMF Converter Version 1.0.0.74 Copyright (c) 1999, 2000 Inprise Corporation
+Syntax:   COFF2OMF [options] InputFile OutputFile
+  -h, -?  Display help
+  -q      Quiet mode
+  -v      Verbose mode
+  -r      Remove (delete) output file if empty
+  -lib:xx Specify options for OMF import library generation:
+       ms - Allow entries that have MS C++ name mangling (default: no)
+       st - Normalize names instead of aliasing MS stdcall mangling
+       ca - Don't perform MS cdecl aliasing (default is to alias)
+
+COFF2OMF will convert a COFF import library file (InputFile)
+to the corresponding OMF type import library file (OutputFile).
+</PRE><BR>
+　・・・うっっっっわーーーーーーーー！！！！！！！！！これって、
+よーするにVC++用のライブラリをbcc用に変換すると言う意味かーーー
+ーーーー？？？？？？？<BR>
+　そして、俺は試した。<BR>
+　成功した。<BR>
+　・・・エラーは、出なかった。<BR>
+<BR>
+　と言うわけで、GLU32.LIBとOPENGL32.LIBについてもなるべくタイム
+スタンプの新しいものからIMPLIBでLIB生成、COFF2OMFでbcc用に変換。
+これにて、以下のエラーにも対処できた。<BR>
+Error: 'D:¥ORIGIN¥BCC55¥LIB¥GLU32.LIB' contains invalid OMF record, type 0x21 (posibly COFF)<BR>
+Error: 'D:¥ORIGIN¥BCC55¥LIB¥OPENGL32.LIB' contains invalid OMF record, type 0x21 (posibly COFF)<BR>
+<BR>
+　何よりその威力が如実に現れていたのがこの部分。winmm.libがないと
+動かなかったのだが、幸運にもVC++を持っていたのでそこからコピー。
+COFF2OMFでbcc用に変換した。見事に（多分）成功！！<BR>
+D:¥Origin¥bcc55¥Bin>coff2omf d:¥origin¥winmm.lib d:¥origin¥winmm_1.lib<BR>
+COFF to OMF Converter Version 1.0.0.74 Copyright (c) 1999, 2000 Inprise Corporation<BR>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　かくして、入門書の最初のプログラムはどうにか作れた。<BR>
+　が。<BR>
+　一抹の不安がある。<BR>
+　dllから切り出したLibだが、もとのLibと比べてファイルサイズが
+異様に小さいのだ。数キロから数十キロバイトしかない。<BR>
+・・・もしかして。本来はdllの呼び出し以外にもいろいろな関数が
+リンクされていたりして・・・。<BR>
+　ま、やばかったらそれなりのエラーが出てくれるだろう・・・。
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+</body>
+</html>

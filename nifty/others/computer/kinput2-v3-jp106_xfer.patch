@@ -1,0 +1,94 @@
+diff -uNr kinput2-v3.orig/lib/Canna.c kinput2-v3/lib/Canna.c
+--- kinput2-v3.orig/lib/Canna.c	Mon Sep  8 23:55:51 2003
++++ kinput2-v3/lib/Canna.c	Tue Sep  9 00:00:22 2003
+@@ -1317,6 +1317,15 @@
+ 	*buffer_return = CANNA_KEY_Nfer;
+       functionalChar = 1;
+       break;
++    case XK_Henkan_Mode:
++      if (event_struct->state & 4 /* control-shifted */)
++	*buffer_return = CANNA_KEY_Cntrl_Xfer;
++      else if (event_struct->state & 1 /* shifted */)
++	*buffer_return = CANNA_KEY_Shift_Xfer;
++      else
++	*buffer_return = CANNA_KEY_Xfer;
++      functionalChar = 1;
++      break;
+     case XK_Kanji:
+       if (event_struct->state & 4 /* control-shifted */)
+ 	*buffer_return = CANNA_KEY_Cntrl_Xfer;
+@@ -1607,7 +1616,8 @@
+   {(unsigned char)'\024',	XK_Scroll_Lock,	0},
+   {(unsigned char)'\e',		XK_Escape,	0},
+   {(unsigned char)CANNA_KEY_Nfer,	XK_Muhenkan,	0},
+-  {(unsigned char)CANNA_KEY_Xfer,	XK_Kanji,	0},
++  /*{(unsigned char)CANNA_KEY_Xfer,	XK_Kanji,	0},*/
++  {(unsigned char)CANNA_KEY_Xfer,	XK_Henkan_Mode,	0},
+   {(unsigned char)CANNA_KEY_Up,		XK_Up,		0},
+   {(unsigned char)CANNA_KEY_Left,	XK_Left,	0},
+   {(unsigned char)CANNA_KEY_Right,	XK_Right,	0},
+@@ -1619,13 +1629,15 @@
+   {(unsigned char)CANNA_KEY_Help,	XK_Help,	0},
+   {(unsigned char)CANNA_KEY_KP_Key,	XK_KP_Space,	0}, /* ? */
+   {(unsigned char)CANNA_KEY_Shift_Nfer,	XK_Muhenkan,	ShiftMask},
+-  {(unsigned char)CANNA_KEY_Shift_Xfer,	XK_Kanji,	ShiftMask},
++  /*{(unsigned char)CANNA_KEY_Shift_Xfer,	XK_Kanji,	ShiftMask},*/
++  {(unsigned char)CANNA_KEY_Shift_Xfer,	XK_Henkan_Mode,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Up,	XK_Up,		ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Left,	XK_Left,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Right, XK_Right,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Down,	XK_Down,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Nfer,	XK_Muhenkan,	ControlMask},
+-  {(unsigned char)CANNA_KEY_Cntrl_Xfer,	XK_Kanji,	ControlMask},
++  /*{(unsigned char)CANNA_KEY_Cntrl_Xfer,	XK_Kanji,	ControlMask},*/
++  {(unsigned char)CANNA_KEY_Cntrl_Xfer,	XK_Henkan_Mode,	ControlMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Up,	XK_Up,		ControlMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Left,	XK_Left,	ControlMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Right, XK_Right,	ControlMask},
+diff -uNr kinput2-v3.orig/lib/Canna.c.ia64 kinput2-v3/lib/Canna.c.ia64
+--- kinput2-v3.orig/lib/Canna.c.ia64	Thu May 27 08:55:23 1999
++++ kinput2-v3/lib/Canna.c.ia64	Tue Sep  9 00:01:41 2003
+@@ -1315,6 +1315,15 @@
+ 	*buffer_return = CANNA_KEY_Nfer;
+       functionalChar = 1;
+       break;
++    case XK_Henkan_Mode:
++      if (event_struct->state & 4 /* control-shifted */)
++	*buffer_return = CANNA_KEY_Cntrl_Xfer;
++      else if (event_struct->state & 1 /* shifted */)
++	*buffer_return = CANNA_KEY_Shift_Xfer;
++      else
++	*buffer_return = CANNA_KEY_Xfer;
++      functionalChar = 1;
++      break;
+     case XK_Kanji:
+       if (event_struct->state & 4 /* control-shifted */)
+ 	*buffer_return = CANNA_KEY_Cntrl_Xfer;
+@@ -1605,7 +1614,8 @@
+   {(unsigned char)'\024',	XK_Scroll_Lock,	0},
+   {(unsigned char)'\e',		XK_Escape,	0},
+   {(unsigned char)CANNA_KEY_Nfer,	XK_Muhenkan,	0},
+-  {(unsigned char)CANNA_KEY_Xfer,	XK_Kanji,	0},
++  /*{(unsigned char)CANNA_KEY_Xfer,	XK_Kanji,	0},*/
++  {(unsigned char)CANNA_KEY_Xfer,	XK_Henkan_Mode,	0},
+   {(unsigned char)CANNA_KEY_Up,		XK_Up,		0},
+   {(unsigned char)CANNA_KEY_Left,	XK_Left,	0},
+   {(unsigned char)CANNA_KEY_Right,	XK_Right,	0},
+@@ -1617,13 +1627,15 @@
+   {(unsigned char)CANNA_KEY_Help,	XK_Help,	0},
+   {(unsigned char)CANNA_KEY_KP_Key,	XK_KP_Space,	0}, /* ? */
+   {(unsigned char)CANNA_KEY_Shift_Nfer,	XK_Muhenkan,	ShiftMask},
+-  {(unsigned char)CANNA_KEY_Shift_Xfer,	XK_Kanji,	ShiftMask},
++  /*{(unsigned char)CANNA_KEY_Shift_Xfer,	XK_Kanji,	ShiftMask},*/
++  {(unsigned char)CANNA_KEY_Shift_Xfer,	XK_Henkan_Mode,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Up,	XK_Up,		ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Left,	XK_Left,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Right, XK_Right,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Shift_Down,	XK_Down,	ShiftMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Nfer,	XK_Muhenkan,	ControlMask},
+-  {(unsigned char)CANNA_KEY_Cntrl_Xfer,	XK_Kanji,	ControlMask},
++  /*{(unsigned char)CANNA_KEY_Cntrl_Xfer,	XK_Kanji,	ControlMask},*/
++  {(unsigned char)CANNA_KEY_Cntrl_Xfer,	XK_Henkan_Mode,	ControlMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Up,	XK_Up,		ControlMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Left,	XK_Left,	ControlMask},
+   {(unsigned char)CANNA_KEY_Cntrl_Right, XK_Right,	ControlMask},

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FMV-BIBLO NE HDD換装記(9GB→20GB)</title>
+<style>
+</style>
+</head>
+<body >
+<!-- i.e. -->
+<!-- $title := "タイトル" -->
+<!-- $toppage := "トップページ" -->
+<!-- $subtop := "いろいろ" -->
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>FMV-BIBLO NE HDD換装記(9GB→20GB)</h1>
+初版作成：2003/04/08<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　先日、友人のFMV-BIBLO NEが急に調子が悪くなったと電話がかかってきた。<br>
+　話を聞いてみると、「System not found」というメッセージが表示され、「なんかがりがりというか、異音がする。」とやばげな話。<br>
+　ここまで来れば「HDDが物理的に壊れた。」と目星を付けて、20GBの2.5inchHDDが余っていたので交換してあげることになりました。<br>
+<br>
+　この話題ではHDDの換装しか扱いません。OS(Win98SE)の再インストールとかはマニュアルを読んで臨機応変に対応してください。<br>
+　ちなみにFMV-BIBLO NEは友人が大学入学の際、大学生協で共同購入したPCでCeleron433MHz, 9GBHDD, メモリは・・・忘れた。で三年前のシロモノ。まあ、HDDが物理的に吹っ飛んでも不思議ではなさそうなタイミングです。保証はとっくの昔に切れてます。<br>
+　それでは始めます。Mebiusの時とは違って、さくさく行きましょう。<br>
+<br>
+（写真が暗くて見づらいかもしれません。サムネイルをクリックした後の拡大画像の方では多少修正してみました。すんません。）<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+　BIOSを立ち上げてみるとプライマリマスタが認識されていません。HDDが物理的に壊れてしまった証拠です。というわけで、余っていたIBMの20GBHDDに換装することになりました。<br>
+<br>
+　<a href="fmvbiblo_ne_hdd/fh01.jpg"><img src="fmvbiblo_ne_hdd/fh01s.jpg"></a><br>
+　早速ひっくり返し、内蔵CD-ROMドライブを外します。拡大画像でマークしてありますが、たった一カ所のネジを外すだけで、CD-ROMドライブを手前にスライドすることができました。<br>
+　CD-ROMの下に（ひっくり返してあるから実際は上かな？）HDDが取り付け金具に収まってはめてありました。<br>
+<br>
+　<a href="fmvbiblo_ne_hdd/fh02.jpg"><img src="fmvbiblo_ne_hdd/fh02s.jpg"></a><br>
+　こんな感じ。<br>
+<br>
+　<a href="fmvbiblo_ne_hdd/fh03.jpg"><img src="fmvbiblo_ne_hdd/fh03s.jpg"></a><br>
+　取り付け金具に貼ってあるシールの通りに外せば大丈夫です。ネジを二カ所外し、マイナスドライバなどを隙間に入れて、てこの要領で外します。<br>
+<br>
+　<a href="fmvbiblo_ne_hdd/fh04.jpg"><img src="fmvbiblo_ne_hdd/fh04s.jpg"></a><br>
+　外し終わりました。あとは良くあるパターンで、取り付け金具のサイドに四ヶ所ネジ止めされていますのでそれを外せばHDDが取り出せます。んで、新しいHDDに入れ替えるだけ。<br>
+<br>
+　<a href="fmvbiblo_ne_hdd/fh05.jpg"><img src="fmvbiblo_ne_hdd/fh05s.jpg"></a><br>
+　が、ここでちょっとした問題が発生しました。上が元のHDD、取り付け金具に嵌っている下のHDDが新しい20GBのものです。<b>新しいHDDの方が、微妙に横幅が大きい。</b><br>
+　取り付け金具が少しゆがんでしまいました。<br>
+　が、実際に本体の方に戻してみると何とか収まったので不問に付します。ただネジは片方にしか締めませんでした。取り付け金具がゆがんでしまったため、もう片方のネジ穴が合わなかったからです。<br>
+<br>
+　これでお終いです。CD-ROMを元に戻しBIOSを立ち上げるとしっかり20GB認識されていました。元々9GB入っていましたので、8GBOverの問題は今回は発生しません。IBMのDiskManagerを入れる必要は無かったです。<br>
+　・・・というか。今回使ったIBMの20GBHDDは、元々IBMのDMを導入してあったので。<br>
+　逆にDMをアンインストールした、というオチ。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　この後サスペンド用の領域を、リカバリCD中のPHDISKとかいうので確保し、基本MSDOS領域を10GBで一つ。拡張を10GBで。その中に論理MSDOSを一つ10GB。<br>
+　これでリカバリCDが予想している、Cドライブ(10GB)とDドライブ(10GB)が用意完了。あとはリカバリCDのインストールプログラムに任せておけば無事Win98SEが立ち上がりました。<br>
+<br>
+　というわけで、今回は以上です。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+</body>
+</html>

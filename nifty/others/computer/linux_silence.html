@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Linux Unix linux unix ブザー ブザー音 Beep ビープ ビープ音
+オフ 静音化 静音 ブザーオフ ビープオフ ビープ音オフ Beepオフ -->
+<title>ブザーの鳴らないLinuxマシン(Beepオフ)</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a><br>
+<br>
+<h1>ブザーの鳴らないLinuxマシン(Beepオフ)</h1>
+初版作成：2002/10/20<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　初心者の方なら一度は悩まされているか今も悩まされ続けていると思うんですが。Linuxって、（少なくともRHLとTLXS7, TLXW8の三種類のディストリビューションに関しては）インストール状態だと、
+たとえばbashシェル上で変なキー（BackSpace押し続けたり）を押すと「ぴっ」ってブザーが鳴るんですよね。<br>
+　これはサウンドカード云々じゃなくて、マザーボードにくっついている電子ブザー、或いはケースにくっついているスピーカをびっびこびっびこ鳴らしているわけです。<br>
+　んで。初心者って結構エディタやらシェル上で打ち間違えをするのでその度に「ぴっぴっぴっぴっぴ・・・」。<br>
+<br>
+　要するに、<b>凄いうるさいんです。</b><br>
+　と言うわけで。今回のお題はずばり<b>「ブザーの鳴らないLinuxマシンを作ろう」</b>です。はい。<br>
+　っつっても２，３の設定ファイルを調整するだけです。んじゃ、始めましょう。<br>
+<b>対象ディストリビューション：RedHat Linux 7.2, TurboLinux Server 7, TurboLinux Workstation 8</b><br>
+　これ以外のディストリビューションでも、設定ファイルの位置と設定内容さえ理解すれば問題なく、以下に示す設定例を適宜応用してブザー、Beep音のならないLinuxを手に入れられるはずです。</br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<br>
+<ol>
+	<li><a href="#main_01">シェルの静音化</a></li>
+	<li><a href="#main_02">viの静音化</a></li>
+	<li><a href="#main_03">rxvtの静音化</a></li>
+	<li><a href="#main_04">Xemacs, Emacsの静音化</a></li>
+	<li><a href="#main_05">物理的に静音化</a></li>
+	<li><a href="#main_06">（おまけ）lsの色分け表示、lessの静音化</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">シェルの静音化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　CUIログインした状態で、変なキーを押したりすると「ぴっ」とブザーが鳴ります。何でこんな機能があるのかというと、<b>readline</b>というライブラリのおかげです。<br>
+　readlineはbashシェルやbc(計算機用言語)やgdb(GNUデバッガ)何かにも利用されているライブラリで、いったい何をしているのかと言いますと。<br>
+　・矢印キーによるコマンドライン上のカーソル移動<br>
+　・上下矢印キーによる履歴機能<br>
+　・Tabキーによるコマンドあるいはファイル名補完機能<br>
+　などを裏で実現してくれています。<br>
+　んで、結局readlineの機能の一つに「ビープ音を鳴らす」機能がありまして、これが初心者を苛立たせるブザー音の原因です。<br>
+　ブザー音を止めるにはreadlineの設定ファイルをいじくります。<br>
+　設定ファイルは環境変数INPUTRCに設定されているファイルで行います。<br>
+　んでー。ここでディストリビューションの差が出てきます。<br>
+　・RedHatLinux：INPUTRCに<b>/etc/inputrc</b>が指定されている。<br>
+　・Turbolinux W8：INPUTRC設定無し。<b>ホームディレクトリの.inputrc</b>が指定される。<br>
+　というわけでRHLの場合は/etc/inputrcを書き換えるだけで全員の設定が一息に出来ますが、TLXW8だと一人一人の$HOME/.inputrcを修正する必要があるわけです。しょうがないですが。ひょっとしたら手動で/etc/inputrcを作成して、編集すれば全体設定で適用できるのかもしれませんが未確認です。<br>
+　結局どうすればよいのかといいますと。要は、inputrcファイルに次の一行を追加します。<br>
+set bell-style visible<br>
+<br>
+　以下は私の使っているTLXW8の$HOME/.inputrcです。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ cat .inputrc
+set meta-flag on
+set convert-meta off
+set output-meta on
+set bell-style visible（これを追加するとシェル上のBeep機能オフ）
+</pre>
+　これでログイン、或いは再起動し直せばシェル上で変なキーを押しても画面が点滅するだけです。ちょっとだけオプションの説明をしましょう。<br>
+・meta-flag:よくわかんないッス。<br>
+・convert-meta off:8ビット文字入力・表示。日本語利用時はoffを設定。<br>
+・output-meta on:8ビット文字表示用。（上は？）日本語利用時はこっちはonにする。<br>
+・input-meta on:8ビット文字入力用。日本語利用時はこっちもできればonにするらしい。<br>
+・bell-style:ビープ音を鳴らすときはaudibleに。noneとするとビープ音は鳴らない。visibleとすると、ビープ音を鳴らす代わりに画面を点滅させる。<br>
+<b>参考資料</b><br>
+・「月刊リナックスワールド」2002年６月号（IDGジャパン）<br>
+・「man readline」<br>
+<br>
+<font size=+1><b><a name="main_02">viの静音化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　しかしまだまだビープ音は鳴り止まず・・・。そう。コンソール、X問わずまだ「vi」の静音化が済んでいません。（人によっては）よく使っているエディタなだけに、これがうるさいと全く、やる気がしませんよね（え？よく使っているならコマンドミスもしないからそもそもビープ音が鳴らない？・・・自爆）。<br>
+　とはいっても、<b>実は最近のディストリビューション収録のviは標準でビープ音は鳴りません。</b>まあ、‾/.exrcとかexrcとかを眺めてみてこんな部分があれば気をつけてあげてください。<br>
+<pre>
+set errorbells
+set noerrorbells
+</pre>
+　set errorbellsでエラーの時ベル、つまりブザーを鳴らします。<br>
+　set noerrorbellsでブザーを鳴らす代わりに、エラーメッセージを反転表示したりして強調します。<br>
+　errorbellsオプションは基本のviからnvi,vimへと受け継がれているので、大概のディストリビューションでも通用するはずです。試しにコンソール上でvi動かして、コマンドモードで<br>
+:set errorbells<br>
+:set noerrorbells<br>
+　とかして遊んでみてください。<br>
+<b>参考資料</b><br>
+・「man vim」<br>
+・「vi」金光雅夫　株式会社アスキー<br>
+・「vi デスクトップリファレンス」Arnold Robbins　オライリージャパン<br>
+<br>
+<font size=+1><b><a name="main_03">rxvtの静音化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　まあ、X Window使うんであればこれは最初になすべきことですね。現在はrxvt, kterm,aterm, etermなどなど様々なX端末が利用できるようになっていますが、基本的なオプションはすべて先祖であるXTermのものを使えます。んで、Xtermにはエラーベルを鳴らすオプションがちゃんと存在します。<br>
+・-vb：Visual Bellを有効にする。具体的にはCtrl-Gが入力されたとき、ブザーを鳴らす代わりに画面を点滅させる。<br>
+・+vb：Visual Bellを無効化。Ctrl-Gがくれば、ブザーを鳴らす。<br>
+　なんだか+と-が逆のような気がしますが・・・ここは。「-がつくと普通にオプション。」「+は、-に縦にもう一本取消線が入ったから+。つまり、オプションの無効化。」と見ると違和感も・・・無いよ、ね？<br>
+　んで、結局KDEやGNOMEとかのメニューやボタンに設定されているrxvt起動コマンドラインに「-vb」オプションをくっつければ静かなX端末がゲットできるわけです。<br>
+<br>
+　ちなみに、お気に入りの壁紙を透過して表示したいときなんかは「rxvt <b>-ip</b>」とすると壁紙透過モードになります。ただし。色によっては文字が読みにくくなることもあるので要注意！<br>
+<b>参考資料</b><br>
+・「man rxvt」<br>
+・「man xterm」<br>
+<br>
+<font size=+1><b><a name="main_04">Xemacs, Emacsの静音化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　じつわ。私、まだEmacs、使いこなせてないんです（わ、恥っ）。<br>
+　だってだってだって〜〜、サーバーの設定なんてviがあれば平気だし、PHPソースコードなんてKateでやるようになっちゃったし。結局Emacs使う必要があるのは、Linuxマシン上でSJISのHTMLを編集するときぐらいだもの〜〜。<br>
+　まあそれでも、いつか使うときがあるかもしれないし、実際使うときに只でさえ慣れてないコマンド形態にそのうえベル音が「びっびっびっびっ」なるのじゃあ、たまったモンじゃあございません。<br>
+　というわけで、一応<br>
+emacs-X11-21.1-2<br>
+emacs-21.1-2<br>
+xemacs-21.4.6-2<br>
+　上で確認をとった結果、以下のオプション、じゃなかった変数を.emacsなり.emacs.elなり、直接M-x set-variableでtにすればVisualBellが有効になることが判明しました。<br>
+変数名：visible-bell<br>
+.emacsでの記述例<br>
+(setq visible-bell t);; Visual Bell有効（エラー時画面反転）<br>
+(setq visible-bell nil);; Visual Bell無効（エラー時ブザー音）<br>
+emacs or xemacs上でのその場限りの変数設定例<br>
+M-x set-variableコマンド→「visible-bell」と入力→「t」と入力。これでVisual Bell有効。「nil」と入力すればVisual Bell無効。<br>
+<br>
+　ちなみに、TLXW8ではデフォルトでVisual Bellが無効になっていました。<br>
+<b>参考資料</b><br>
+・「図解でおぼえるMuleの使い方」神山文雄　翔泳社<br>
+<br>
+<font size=+1><b><a name="main_05">物理的に静音化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　これは半田ごてを握る必要がでてきます。<br>
+　はい。よーするに、ケースについてるスピーカーとマザーボードを繋げる線の途中にスイッチをくっつけて外に引き出して、必要なときだけブザースピーカをon/offできるようにするわけです。<br>
+　一度やってみたことがあるんですよ。結構いい感じです。<br>
+　でも、今まで書いてきたような知識を得ると、別に良いか、ってな気持ちになって。今では元に戻してます。<br>
+　マザーボードやケースによって変わってくるので、特にやり方は書きません。電気工作をしたことのある人なら難しくありません。導線とスピーカという、そんなに敏感なものを扱うわけでもありませんし。各人はんだごてでやけどしない程度に頑張ってください。<br>
+<br>
+<font size=+1><b><a name="main_06">（おまけ）lsの色分け表示、lessの静音化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　ディストリビューションによって変わってくるとは思うのですが、lsコマンドがTLXW8のデフォルトではディレクトリとかを色分けしてくれませんでした。んで、.bashrcをのぞいてみたら以下のようになっていて。指示通りに二行分のコメントアウトを外してみたら無事色分けしてくれるようになりました。TLXW8、他にもいろいろとaliasを設定してくれているみたいです。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ cat .bashrc
+#
+#        initial bashrc
+#                              by GO!
+#
+[ "$BASH" = "" ] &&  return
+# source system wide aliases
+if [ -f /etc/bashrc ]; then
+    source /etc/bashrc
+fi
+（省略）
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias ..='cd ..'
+alias ll='ls -l'
+alias la='ls -aF'
+
+# alias ls='ls -NF --show-control-chars'
+## if you use color ls, comment out above line and uncomment below 2 lines.
+LS_COLORS='no=00:（省略）*.png=01;35:' ; export LS_COLORS
+alias ls='ls --color=auto -NF'
+
+AXLANG=17       ; export AXLANG
+AX_ONSPOT=1     ; export AX_ONSPOT
+</pre>
+　他のディストリビューションでもこれと似たような設定が/etcだの$HOME/だのに転がっていると思われます。また、RHL系列では/etc/DIR_COLORSとかいうファイルにLS_COLORSが格納されていたような・・・（かなりあやふや）。<br>
+　まあ、上のをコピペするもよし、自分でカスタマイズするも良し。適当に遊んでみてください。<br>
+<br>
+　後もう一つ。最後の最後に「<b>lessの静音化</b>」を残していました。<br>
+　以外と盲点なんですが、readlineでVisualBellを有効にしても、その上で動くlessやらviに関してはそれぞれ設定しなくては静音化できません。というわけで、viとemacsはやっつけたので最後。もっともよく利用するlessコマンドはどうすれば静音化できるのか？答えは単純。<br>
+<br>
+$ less -q<br>
+　これで基本的にお仕舞いです。もうちょっと深くオプションを知りたい人は、以下の「man less」からの抜粋をどうぞ。<br>
+<pre>
+-q or --quiet or --silent
+Causes  moderately  "quiet"  operation:  the  terminal  bell is not rung if an 
+attempt is made to scroll past the end of the file or before the beginning  of 
+the  file.  If the terminal has a "visual bell", it is used instead.  The bell 
+will be rung on certain other errors, such as  typing  an  invalid  character. 
+The default is to ring the terminal bell in all such cases.
+
+-Q or --QUIET or --SILENT
+Causes totally "quiet" operation: the terminal bell is never rung.
+</pre>
+<b>参考資料</b><br>
+・「man less」<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　つ、疲れた・・・・・・。<br>
+　いや、本当に疲れた・・・・・・。<br>
+　今回あつかったトピックは、なんか不思議とまとまって扱っている類似のページがないんですよ。しかも扱う情報の目的は同じなのに、幅が広いので情報を集めるのが面倒くさかった。<br>
+　特にreadlineの設定はなかなか見あたらず、月刊リナックスワールドに載っていた部分はしっかりとポストイットを貼ってある。<br>
+　とにかく、リナックス初心者にとってこのページが少しでも役に立ってくれれば大変幸せー。なのだ。<br>
+<br>
+　おちまい。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#computer">「いろいろ」目次</a>
+</body>
+</html>
