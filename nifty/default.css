@@ -1,0 +1,33 @@
+/* global settings */
+img { border-width:0 }
+
+/******************************
+ Spring 
+********************************/
+
+body {
+	color:#ffc0cb;
+	background-color:#6b8e23;
+	line-height: 130%;
+}
+A:link {
+	color:#ffc0cb;
+	text-decoration: underline
+}
+A:visited {
+	color:#ffc0cb;
+	text-decoration: underline
+}
+A:active {
+	color : #ffd700;
+	text-decoration: underline
+}
+A:hover {
+	color: yellow;
+	text-decoration: underline
+}
+
+.select { color:#ffc0cb;
+	font-size:medium;
+	background-color:#6b8e23}
+
