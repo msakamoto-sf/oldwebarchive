@@ -1,0 +1,114 @@
+http://localhost/in_vitro/cache_expire01/session01.php
+
+GET /in_vitro/cache_expire01/session01.php HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.8) Gecko/20050511 Firefox/1.0.4
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+
+HTTP/1.x 200 OK
+Date: Sat, 09 Jul 2005 15:03:38 GMT
+Server: Apache/2.0.50 (Win32) PHP/4.3.8
+X-Powered-By: PHP/4.3.8
+Set-Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Keep-Alive: timeout=15, max=100
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=EUC-JP
+----------------------------------------------------------
+http://localhost/in_vitro/cache_expire01/session01.php
+
+POST /in_vitro/cache_expire01/session01.php HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.8) Gecko/20050511 Firefox/1.0.4
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+Referer: http://localhost/in_vitro/cache_expire01/session01.php
+Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 4
+=abc
+HTTP/1.x 200 OK
+Date: Sat, 09 Jul 2005 15:03:42 GMT
+Server: Apache/2.0.50 (Win32) PHP/4.3.8
+X-Powered-By: PHP/4.3.8
+Set-Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Keep-Alive: timeout=15, max=97
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=EUC-JP
+----------------------------------------------------------
+http://localhost/in_vitro/cache_expire01/session01.php
+
+POST /in_vitro/cache_expire01/session01.php HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.8) Gecko/20050511 Firefox/1.0.4
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+Referer: http://localhost/in_vitro/cache_expire01/session01.php
+Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 4
+=def
+HTTP/1.x 200 OK
+Date: Sat, 09 Jul 2005 15:03:50 GMT
+Server: Apache/2.0.50 (Win32) PHP/4.3.8
+X-Powered-By: PHP/4.3.8
+Set-Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Keep-Alive: timeout=15, max=95
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=EUC-JP
+----------------------------------------------------------
+http://localhost/in_vitro/cache_expire01/session01.php
+
+POST /in_vitro/cache_expire01/session01.php HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.8) Gecko/20050511 Firefox/1.0.4
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+Referer: http://localhost/in_vitro/cache_expire01/session01.php
+Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb
+Pragma: no-cache
+Cache-Control: no-cache
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 4
+=abc
+HTTP/1.x 200 OK
+Date: Sat, 09 Jul 2005 15:03:56 GMT
+Server: Apache/2.0.50 (Win32) PHP/4.3.8
+X-Powered-By: PHP/4.3.8
+Set-Cookie: CacheExpireExperiment01=225b4c965b29028b78bec94bfebce4cb; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Keep-Alive: timeout=15, max=93
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=EUC-JP
+----------------------------------------------------------

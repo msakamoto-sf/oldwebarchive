@@ -1,0 +1,434 @@
+@charset "Shift_JIS";
+
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: Verdana, Osaka, sans-serif;
+	font-size: 90%;
+	color: #333;
+	line-height: 1.5;
+}
+
+a {
+	text-decoration: underline;
+	vertical-align: middle;
+	color: #333;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: red;
+}
+
+img {
+	vertical-align: middle;
+	border: 0;
+}
+
+.body {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+#header-wrap {
+	width: 100%;
+	text-align: left;
+	margin: 0px;
+	margin-bottom: 1em;
+	padding: 0px;
+}
+
+#header {
+	margin: 0px;
+	padding: 0.5ex;
+}
+
+#header h1 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+#header h3 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+#header-login {
+	width: 100%;
+	text-align: left;
+	font-size: small;
+	margin-top: 0.5ex;
+}
+
+#header-login img {
+	border: none;
+}
+
+#header-menu {
+/*	width: 100%;
+	text-align: left;*/
+	font-size: small;
+}
+
+#header-menu img {
+	border: none;
+}
+
+#header-menu a {
+	text-decoration: none;
+}
+
+.session-get-flash-info li {
+	list-style-type: none;
+}
+
+#sidemenu-wrap {
+	display: none;
+}
+
+#createmenu {
+	display: none;
+}
+
+#menupage {
+	display: none;
+}
+
+#searchbox {
+	display: none;
+}
+
+
+#diff ins {
+	text-decoration: none;
+	color: blue;
+}
+
+#diff del {
+	color: red;
+}
+
+fieldset {
+	text-align: left;
+}
+
+/***************************************
+ *
+ * class="contents_s"
+ *
+ * (With SideBar Menu, Boxes)
+ *
+ ***************************************/
+
+.contents_s {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+/***************************************
+ *
+ * class="contents_c"
+ *
+ * (Without SideBar Menu, Boxes)
+ *
+ ***************************************/
+
+.contents_c {
+	text-align: center;
+}
+
+
+.contents_c h2 {
+	margin: 0px;
+}
+
+.contents_c .data_attrs_pre {
+	color: #999;
+	font-size: small;
+}
+
+.contents_c .data_body {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.contents_c .data_attrs_post {
+	color: #999;
+	margin-top: 3px;
+	border-top: 1px solid #999;
+	font-size: small;
+}
+
+.contents_c img.link {
+	border: none;
+}
+
+.contents_c a.iconlink {
+	text-decoration: none;
+}
+
+/***************************************
+ *
+ * class="formtable"
+ *
+ * For Input Form Table
+ *
+ ***************************************/
+
+table.formtable {
+	margin-left: auto;
+	margin-right: auto;
+	background: #999;
+	border-collapse: separate;
+	border-spacing: 1px;
+	empty-cells: show;
+}
+
+.formtable td {
+	background: #fff;
+	padding: 0.5ex;
+}
+
+.formtable th {
+	font-weight: normal;
+	background: #eee;
+	padding: 0.5ex;
+}
+
+/***************************************
+ *
+ * class="zebralist"
+ *
+ * For Item List with "Zebra" row colors
+ *
+ ***************************************/
+
+table.zebralist {
+/*	width: 100%;*/
+	text-align: center;
+	font-size: 10pt;
+	background: #999;
+	border-collapse: separate;
+	border-spacing: 1px;
+	empty-cells: show;
+}
+
+.zebralist th {
+	padding: 0.3ex;
+	text-align: center;
+	font-weight: normal;
+	background: #eee;
+}
+
+.zebralist td.odd {
+	padding: 0.3ex;
+	background: #fff;
+}
+
+.zebralist td.even {
+	padding: 0.3ex;
+	background: #eee;
+}
+
+.zebralist th.ob {
+	padding: 0.3ex;
+	background: #ddd;
+}
+
+#footer {
+	clear: both;
+	width: 100%;
+	text-align: center;
+	margin: 0px;
+	margin-top: 1em;
+	border-top: 1px solid #999;
+	font-size: small;
+}
+
+#footer img {
+	border: none;
+	margin: 0px 1em 0px 1em;
+}
+
+#footer a {
+	text-decoration: none;
+}
+
+/***************************************
+ *
+ * class="data_main"
+ *
+ * (Contents Main Block)
+ *
+ ***************************************/
+
+.data_main {
+	padding: 0.5ex;
+	margin: 0px;
+	margin-bottom: 1em;
+	margin-right: 1ex;
+	padding-bottom: 1ex;
+}
+
+.data_main h2 {
+	position: absolute;
+	padding: 0px;
+	padding-left: 2px;
+	padding-right: 0.5em;
+	margin: 0px;
+	margin-top: -0.8em;
+	margin-left: 1px;
+	background-color: white;
+	text-align: left;
+}
+
+.data_main .data_attrs_pre {
+	margin: 0px;
+	margin-top: 1.5em;
+	color: #999;
+	font-size: small;
+	border-bottom: 1px solid #999;
+}
+
+.data_main .data_body {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.data_main .data_attrs_post {
+	color: #999;
+	margin-top: 3px;
+	border-top: 1px solid #999;
+	font-size: small;
+}
+
+.data_main .auto_ls {
+	position: absolute;
+	padding: 0px;
+	padding-left: 2px;
+	padding-right: 0.5em;
+	margin: 0px;
+	margin-top: -0.8em;
+	margin-left: 1px;
+	background-color: white;
+	text-align: left;
+	font-weight: bold;
+	font-size: 120%;
+}
+
+/***************************************
+ *
+ * id="searchbox"
+ *
+ * (Search Condition Side Box)
+ *
+ ***************************************/
+
+#searchbox {
+	display: none;
+}
+
+#searchbox h4 {
+	display: none;
+}
+
+#searchbox fieldset {
+	margin: 0.5em 0.5ex 0.5em 0.5ex;
+}
+
+
+/***************************************
+ *
+ * id="search_result_header"
+ *
+ * (Search Result Title Headers)
+ *
+ ***************************************/
+
+#search_result_header {
+	border-bottom: 1px dashed dimgray;
+	margin: 0px;
+	margin-bottom: 1.5em;
+	padding: 0.5em;
+}
+
+#srh_slider {
+	background-color: #eee;
+	font-size: 90%;
+	border-bottom: 1px solid dimgray;
+	padding-top: 1ex;
+	margin: 0px;
+	margin-bottom: 1ex;
+}
+
+#srh_sort_limit {
+	background-color: #eee;
+	font-size: 90%;
+	border-top: 1px solid dimgray;
+	padding-bottom: 1ex;
+	margin: 0px;
+	margin-top: 1ex;
+}
+
+/***************************************
+ *
+ * class="comment", and other "comment" related.
+ *
+ ***************************************/
+
+.comment {
+	margin: 0px;
+	margin-top: 2em;
+	margin-right: 1ex;
+	margin-bottom: 1em;
+	border: 1px solid gray;
+	font-size: 90%;
+}
+
+.comment h5 {
+	font-size: 100%;
+	margin: 0px;
+	margin-top: -0.5em;
+	margin-left: 1ex;
+	padding-left: 0.5ex;
+	padding-right: 1em;
+	background-color: white;
+	text-align: left;
+}
+
+.comment_list {
+	margin-top: 1em;
+	margin-left: 1ex;
+	margin-right: 1ex;
+}
+
+.comment_block {
+	margin: 0px;
+	margin-bottom: 1em;
+	border: none;
+	border-bottom: 1px solid gray;
+	padding-bottom: 0.5em;
+}
+
+.comment_body {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 1em;
+}
+
+.comment_footer {
+	font-size: 90%;
+}
+
+.comment_post {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 1em;
+}
+
+.help_main {
+	margin: 0px;
+}
+

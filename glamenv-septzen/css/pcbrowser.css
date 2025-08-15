@@ -1,0 +1,517 @@
+@charset "UTF-8";
+
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: Verdana, Osaka, sans-serif;
+	color: #333;
+	background: #990000;
+	line-height: 1.5;
+}
+
+a {
+	text-decoration: underline;
+	vertical-align: middle;
+	color: #333;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: red;
+}
+
+img {
+	vertical-align: middle;
+	border: 0;
+}
+
+.body {
+	width: 94%;
+	margin: 1em auto 0px auto;
+	padding: 0px;
+	border: 1px solid black;
+	background: #990000;
+}
+
+#header-wrap {
+	width: 100%;
+	text-align: left;
+	font-size: small;
+	color: white;
+	margin: 0px;
+	/* margin-bottom: 1em; */
+	padding: 0px;
+	border-bottom: 1px solid black;
+	background: black;
+}
+
+#header-wrap img {
+	border: none;
+}
+
+#header-wrap a {
+	text-decoration: underline;
+	vertical-align: middle;
+	color: #ddd;
+}
+
+#header-wrap a:hover {
+	text-decoration: underline;
+	color: red;
+}
+
+#header-wrap h1 {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  #header-wrap h1 {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: small;
+  }
+}
+
+@media (min-width: 800px) {
+  #header-wrap h1 {
+    display: block;
+    font-size: xx-large;
+  }
+}
+
+#header-wrap h3 {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.session-get-flash-info li {
+	list-style-type: none;
+}
+
+#diff ins {
+	text-decoration: none;
+	color: blue;
+}
+
+#diff del {
+	color: red;
+}
+
+fieldset {
+	text-align: left;
+}
+
+#content-wrap {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-flow: row wrap;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+
+/***************************************
+ *
+ * class="contents_s"
+ *
+ * (With SideBar Menu, Boxes)
+ *
+ ***************************************/
+
+.contents_s {
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+#sidemenu-wrap {
+  width: 100%;
+  margin-left: 5px;
+  margin-bottom: 10px;
+  padding: 0.2ex;
+  border: 1px solid black;
+  background: white;
+}
+
+/* もう side menu は使わないので、width 調整は外す。
+@media (min-width: 800px) {
+  .contents_s {
+    width: 77%;
+    -webkit-order: 2;
+    order: 2;
+  }
+  #sidemenu-wrap {
+    width: 20%;
+    -webkit-order: 1;
+    order: 1;
+  }
+}
+*/
+
+.contents_s .data_body {
+  margin: 0.2ex;
+  padding: 0.5ex;
+  background: white;
+}
+
+#createmenu {
+  margin: 0px;
+  margin-bottom: 0.5em;
+  font-size: small;
+  padding: 1ex;
+  border: 1px solid black;
+}
+
+#menupage {
+  margin: 0px;
+  font-size: small;
+  padding: 0.5ex;
+  border: 1px solid #999;
+}
+
+#searchbox {
+  margin: 0px;
+  font-size: small;
+}
+
+/***************************************
+ *
+ * class="contents_c"
+ *
+ * (Without SideBar Menu, Boxes)
+ *
+ ***************************************/
+
+.contents_c {
+  width: 100%;
+  text-align: center;
+  padding: 1em;
+  background: white;
+}
+
+
+.contents_c h2 {
+	margin: 0px;
+	border-bottom: 1px solid #999;
+}
+
+.contents_c .data_attrs_pre {
+	color: #999;
+	font-size: small;
+}
+
+.contents_c .data_body {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.contents_c .data_attrs_post {
+	color: #999;
+	margin-top: 3px;
+	border-top: 1px solid #999;
+	font-size: small;
+}
+
+.contents_c img.link {
+	border: none;
+}
+
+.contents_c a.iconlink {
+	text-decoration: none;
+}
+
+/***************************************
+ *
+ * class="formtable"
+ *
+ * For Input Form Table
+ *
+ ***************************************/
+
+table.formtable {
+	margin-left: auto;
+	margin-right: auto;
+	background: #999;
+	border-collapse: separate;
+	border-spacing: 1px;
+	empty-cells: show;
+}
+
+.formtable td {
+	background: #fff;
+	padding: 0.5ex;
+}
+
+.formtable th {
+	font-weight: normal;
+	background: #eee;
+	padding: 0.5ex;
+}
+
+/***************************************
+ *
+ * class="zebralist"
+ *
+ * For Item List with "Zebra" row colors
+ *
+ ***************************************/
+
+table.zebralist {
+/*	width: 100%;*/
+	text-align: center;
+	font-size: 10pt;
+	background: #999;
+	border-collapse: separate;
+	border-spacing: 1px;
+	empty-cells: show;
+}
+
+.zebralist th {
+	padding: 0.3ex;
+	text-align: center;
+	font-weight: normal;
+	background: #eee;
+}
+
+.zebralist td.odd {
+	padding: 0.3ex;
+	background: #fff;
+}
+
+.zebralist td.even {
+	padding: 0.3ex;
+	background: #eee;
+}
+
+.zebralist th.ob {
+	padding: 0.3ex;
+	background: #ddd;
+}
+
+#footer {
+	clear: both;
+	width: 100%;
+	text-align: center;
+	margin: 0px;
+	/* margin-top: 1em; */
+	border-top: 1px solid #900;
+	font-size: small;
+	background: black;
+	color: white;
+}
+
+#footer a {
+	text-decoration: underline;
+	vertical-align: middle;
+	color: #ddd;
+}
+
+#footer a:hover {
+	text-decoration: underline;
+	color: red;
+}
+
+
+#footer img {
+	border: none;
+	margin: 0px 1em 0px 1em;
+}
+
+#footer a {
+	text-decoration: none;
+}
+
+/***************************************
+ *
+ * class="data_main"
+ *
+ * (Contents Main Block)
+ *
+ ***************************************/
+
+.data_main {
+	/* border: 1px solid dimgray; */
+	padding: 0.5ex;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	margin: 0px;
+	/*margin-bottom: 1em;*/
+	/*margin-right: 1ex;*/
+	background: white;
+}
+
+.data_main h2 {
+	position: absolute;
+	padding: 0px;
+	padding-left: 2px;
+	padding-right: 0.5em;
+	margin: 0px;
+	margin-top: -0.8em;
+	margin-left: 1px;
+	background-color: white;
+	text-align: left;
+}
+
+.data_main .data_attrs_pre {
+	margin: 0px;
+	margin-top: 1.5em;
+	color: #999;
+	font-size: small;
+	border-bottom: 1px solid #999;
+}
+
+.data_main .data_body {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.data_main .data_attrs_post {
+	color: #999;
+	margin-top: 3px;
+	border-top: 1px solid #999;
+	font-size: small;
+}
+
+.data_main .auto_ls {
+  /* position: absolute; */
+  padding: 0px;
+  padding-left: 2px;
+  padding-right: 0.5em;
+  margin: 0px;
+  margin-top: -0.8em;
+  margin-left: 1px;
+  background-color: white;
+  text-align: left;
+  font-weight: bold;
+  font-size: 120%;
+}
+
+/***************************************
+ *
+ * id="searchbox"
+ *
+ * (Search Condition Side Box)
+ *
+ ***************************************/
+
+#searchbox {
+	border: 1px solid #999;
+	margin-top: 2em;
+	margin-bottom: 1em;
+	padding-bottom: 1em;
+}
+
+#searchbox h4 {
+	position: absolute;
+	background-color: white;
+	margin: 0px;
+	margin-left: 1px;
+	margin-top: -0.8em;
+	padding: 0px;
+	padding-right: 1ex;
+	text-align: left;
+}
+
+#searchbox fieldset {
+	margin: 0.5em 0.5ex 0.5em 0.5ex;
+}
+
+
+/***************************************
+ *
+ * id="search_result_header"
+ *
+ * (Search Result Title Headers)
+ *
+ ***************************************/
+
+#search_result_header {
+	border-bottom: 1px dashed dimgray;
+	margin: 0px;
+	margin-bottom: 1.5em;
+	margin-right: 0.5em;
+	padding: 0.5em;
+	background: white;
+}
+
+#srh_slider {
+	background-color: #eee;
+	font-size: 90%;
+	border-bottom: 1px solid dimgray;
+	padding-top: 1ex;
+	margin: 0px;
+	margin-bottom: 1ex;
+}
+
+#srh_sort_limit {
+	background-color: #eee;
+	font-size: 90%;
+	border-top: 1px solid dimgray;
+	padding-bottom: 1ex;
+	margin: 0px;
+	margin-top: 1ex;
+}
+
+/***************************************
+ *
+ * class="comment", and other "comment" related.
+ *
+ ***************************************/
+
+.comment {
+	margin: 0px;
+	margin-top: 2em;
+	margin-right: 1ex;
+	margin-bottom: 1em;
+	border: 1px solid gray;
+	font-size: 90%;
+	background: white;
+}
+
+.comment h5 {
+	font-size: 100%;
+	position: absolute;
+	margin: 0px;
+	margin-top: -0.5em;
+	margin-left: 1ex;
+	padding-left: 0.5ex;
+	padding-right: 1em;
+	background-color: white;
+	text-align: left;
+}
+
+.comment_list {
+	margin-top: 1em;
+	margin-left: 1ex;
+	margin-right: 1ex;
+}
+
+.comment_block {
+	margin: 0px;
+	margin-bottom: 1em;
+	border: none;
+	border-bottom: 1px solid gray;
+	padding-bottom: 0.5em;
+}
+
+.comment_body {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 1em;
+}
+
+.comment_footer {
+	font-size: 90%;
+}
+
+.comment_post {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 1em;
+}
+
+.help_main {
+	margin: 0px;
+	background: white;
+}
+

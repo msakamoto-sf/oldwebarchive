@@ -1,0 +1,146 @@
+;;; ローマ字かな変換の設定
+
+(setq romkana-table "just.cbp")
+
+
+;;; 利用する辞書
+
+(use-dictionary
+ "iroha"
+ "fuzokugo"
+ "hojomwd"
+ "hojoswd"
+ :bushu "bushu"
+ :user  "user"
+)
+
+;日本語入力 on にする。
+(set-key 'alpha-mode "\C-Xfer" 'japanese-mode)
+
+; 右端で右に行こうとすると左端にいく。
+(setq cursor-wrap            t)   ; default t
+
+; 一覧表示で数字を打ったときに選択までする。
+(setq select-direct          t)   ; default t
+
+; 一覧表示で数字で選択する。
+(setq numerical-key-select   t)   ; default t
+
+; ローマ字かな変換の単位でカーソルを移動する。
+(setq character-based-move   nil) ; default t
+
+; 入力中の読み全体をリバースしない。
+(setq reverse-widely         nil) ; default nil
+
+; 頻度学習をする。
+(setq gakushu                t)   ; default t
+
+; 一覧の最後までいったら、また先頭の候補を表示する。
+(setq quit-if-end-of-ichiran nil) ; default nil
+
+; 文節の右端で右移動をすると全体が確定する。
+(setq kakutei-if-end-of-bunsetsu t) ; default nil
+
+; 読みを入力中にバックスペースを打つと文字ベースで削除を行う。
+(setq break-into-roman       nil) ; default nil
+
+;一覧から選択を行うとひとつ先の文節に移動する。
+(setq stay-after-validate    nil) ; default t
+
+; 2 回変換キーを押すと一覧表示を行う。
+(setq n-henkan-for-ichiran   2)   ; default 2
+
+; 候補が全体の何番目かを表示する。
+(setq kouho-count            t)   ; default t
+
+; 単語登録/削除の直後に辞書の書き出し処理を行う
+(setq auto-sync		     t)   ; default t
+
+
+;; キーマップ
+
+(global-unbind-key-function    'extend)
+(global-unbind-key-function    'shrink)
+(global-unbind-key-function    'forward)
+(global-unbind-key-function    'backward)
+(global-unbind-key-function    'previous)
+(global-unbind-key-function    'next)
+(global-unbind-key-function    'beginning-of-line)
+(global-unbind-key-function    'end-of-line)
+(global-unbind-key-function    'kill-to-end-of-line)
+(global-unbind-key-function    'convert-as-bushu)
+(global-unbind-key-function    'quoted-insert)
+
+
+(global-set-key "\Backspace"   'delete-previous)
+(global-set-key "\C-h"         'delete-previous)
+(global-set-key "\Delete"      'delete-next)
+(global-set-key "\C-d"         'delete-next)
+(global-set-key "\C-o"         'extend)
+(global-set-key "\C-i"         'shrink)
+(global-set-key "\Right"       'forward)
+(global-set-key "\C-f"         'forward)
+(global-set-key "\Left"        'backward)
+(global-set-key "\C-b"         'backward)
+(global-set-key "\C-a"         'beginning-of-line)
+(global-set-key "\C-e"         'end-of-line)
+(global-set-key "\C-p"         'previous)
+(global-set-key "\C-n"         'next)
+(global-set-key "\Return"      'kakutei)
+(global-set-key "\Escape"      'quit)
+(global-set-key "\C-g"      'quit)
+(global-set-key "\F6"           'hiragana)
+(global-set-key "\F7"           'katakana)
+(global-set-key "\F8"           'hankaku)
+(global-set-key "\F9"           'romaji)
+
+;; 入力モードの定義
+(set-mode-display 'empty-mode            " あ連 ")
+(set-mode-display 'yomi-mode             " あ連 ")
+(set-mode-display 'henkan-nyuuryoku-mode " あ連 ")
+(defmode hankaku-eisu-mode     " A 固 " nil '(hankaku kakutei) nil)
+
+(global-set-key                 "\Nfer"     'henkan-nyuuryoku-mode)
+(set-key 'henkan-nyuuryoku-mode "\Nfer"     'hankaku-eisu-mode)
+
+(set-key 'henkan-nyuuryoku-mode	"\C-q"	    'kigou-mode)
+(set-key 'hankaku-eisu-mode	"\C-q"	    'kigou-mode)
+
+
+;; 読みモード時
+(let ((mode 'yomi-mode))
+  (set-key mode "\Space"        'henkan)
+)
+
+
+;; 単候補モード時
+(let ((mode 'tankouho-mode))
+  (set-key mode "\Right"        '(shinshuku-mode extend))
+  (set-key mode "\C-o"          '(shinshuku-mode extend))
+  (set-key mode "\Left"         '(shinshuku-mode shrink))
+  (set-key mode "\C-i"          '(shinshuku-mode shrink))
+  (set-key mode "\Xfer"         'kouho-ichiran)
+  (set-key mode "\Space"        'henkan)
+)
+
+
+;; 伸縮モード時
+(let ((mode 'shinshuku-mode))
+  (set-key mode "\Right"        '(extend))
+  (set-key mode "\Left"         '(shrink))
+)
+
+
+;; シンボルの定義
+
+(defsymbol
+  ?, "、" "，")
+(defsymbol
+  ?. "。" "．")
+(defsymbol
+  ?[ "「" "［" "『" "《"
+  ?] "」" "］" "』" "》")
+(defsymbol
+  ?/ "・" "／")
+(defsymbol 
+  ?~ "−" "〜" "ー")

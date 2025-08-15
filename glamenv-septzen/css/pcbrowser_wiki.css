@@ -1,0 +1,239 @@
+@charset "UTF-8";
+
+/***************************************
+ *
+ * Wiki (class = data_body) stylesheet
+ *
+ ***************************************/
+
+
+/**
+ * '*' heading
+ */
+.data_body h3 {
+	font-size: 160%;
+	color: inherit;
+	background-color: #DDD;
+	padding: 0.3em;
+	border: 0px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin: 0px;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+/**
+ * '**' heading
+ */
+.data_body h4 {
+	font-size: 130%;
+	color: inherit;
+	background-color: #FFFFFF;
+	padding: 0.3em;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin: 0px;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+
+	border-bottom:  3px solid #CCC;
+	border-top:     1px solid #CCC;
+	border-left:   10px solid #CCC;
+	border-right:   5px solid #CCC;
+}
+
+/**
+ * '***' heading
+ */
+.data_body h5 {
+	font-size: 100%;
+	color: inherit;
+	background-color: #FFFFFF;
+	padding: 0.3em;
+	margin: 0px;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+
+	border: none;
+	border-left: 18px solid #CCC;
+}
+
+/**
+ * '****' heading
+ */
+.data_body h6 {
+	font-size: 100%;
+	color: inherit;
+	background-color: #FFFFFF;
+	padding: 0.3em;
+	margin: 0px;
+	margin-bottom: 0.5em;
+}
+
+/**
+ * '----' horizon bar
+ */
+.data_body hr {
+	border: solid #AAA 1px;
+}
+
+/**
+ * ' ' leading line : preformatted text
+ */
+.data_body pre {
+	border: 1px solid gray;
+	background-color: #f0f0f0;
+	padding: 3px;
+	padding-top: 0.7em;
+	padding-bottom: 0.7em;
+	font-family: monospace;
+/*	font-size: 80%;*/
+	margin: 0px;
+	margin-right: 0.5em;
+	margin-bottom: 1ex;
+}
+
+/**
+ * '>' block quote
+ */
+.data_body blockquote {
+	margin-left: 2em;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	padding-left: 2px;
+	border-left: 2px solid #CCC;
+}
+
+/**
+ * '-', '+' leading list items
+ */
+.data_body ul {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	line-height: 130%;
+}
+
+/**
+ * ':<dt>:<dd>' data definition list
+ */
+.data_body dt {
+	font-weight: bold;
+	margin-top: 1em;
+	margin-left: 1em;
+}
+
+/**
+ * tables
+ */
+.data_body table {
+	color: inherit;
+	text-align: left;
+	background-color: #CCC;
+	padding: 0px;
+	border: 0px;
+}
+.data_body th {
+	color: inherit;
+	background-color: #DDD;
+	padding: 5px;
+	margin: 1px;
+	text-align: center;
+}
+.data_body td {
+	color: inherit;
+	background-color: #EEE;
+	padding: 5px;
+	margin: 1px;
+}
+
+/**
+ * Paragraphs
+ */
+
+.data_body div.paragraph {
+	margin: 0px;
+	margin-top: 1em;
+	margin-bottom: 1ex;
+}
+
+.data_body div.paragraph p {
+	margin: 0px;
+}
+
+
+/**
+ * '[' - ']' : external link
+ */
+.data_body a.externallink {
+	padding-left: 0.5ex;
+	padding-right: 0.5ex;
+	color: black;
+	text-decoration: underline;
+}
+
+.data_body a.externallink:hover {
+	color: red;
+	font-style: italic;
+	text-decoration: none;
+}
+
+.data_body a.maillink {
+	padding-left: 0.5ex;
+	padding-right: 0.5ex;
+	color: black;
+	text-decoration: underline;
+}
+
+.data_body a.maillink:hover {
+	color: red;
+	font-style: italic;
+	text-decoration: none;
+}
+
+/**
+ * '**' - '**', "''" - "''" : strong
+ */
+.data_body strong {
+	font-weight:bold;
+}
+
+/**
+ * '*' - '*', "'''" - "'''" : italic
+.data_body em {
+	font-weight: normal;
+	font-style: italic;
+}
+
+/**
+ * '%%' - '%%' : del
+ */
+.data_body del {
+}
+
+/**
+ * "((" - "))" : footnote link
+ */
+.data_body a.footnote {
+	vertical-align: super;
+	color: inherit;
+	background-color: inherit;
+	font-weight: bold;
+	font-size: 75%;
+}
+
+.data_body span.hidden {
+	visibility: hidden;
+}
+
+/**
+ * "((" - "))" : footnote block
+ */
+.data_body div.footnote {
+	margin-top: 1em;
+	border-top: 1px solid gray;
+	padding-top: 1ex;
+	font-size: small;
+}
+
+
