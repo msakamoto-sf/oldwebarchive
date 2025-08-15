@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qtで遊んでみました第一回。</title>
+<style>
+</style>
+</head>
+<body >
+<!-- i.e. -->
+<!-- $title := "タイトル" -->
+<!-- $toppage := "トップページ" -->
+<!-- $subtop := "ぷろぐらみんぐ" -->
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a><br>
+<br>
+<h1>Qtで遊んでみました第一回。</h1>
+初版作成：2002/12/24<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2>注意</h2>
+<p>
+2008/11月現在、実に6年前のドキュメントになっています。「昔はこうしていた」という参考としてご利用下さい。
+</p>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　杉田研治著の「KDE プログラミングパーフェクトガイド」を一通り読み終えました。<br>
+　読もう読もうと思っている内に、いつの間にやらQt, KDEともに3.Xが出始めてしまいました。<br>
+　まあ良いのです。<b>出遅れるのはいつものことだし</b>（自慢できないか）。<br>
+　んでですね。後書きでいろいろ管巻こうとは思っていますがとにかくQtDesignerとtmake, progenでもって
+ちこっと何か作ってみようかな、と思ったわけですよ。<br>
+　そう言うわけで、できたのは<b>「ボタンが二つあって、PushButton1をクリックするとアプリ終了。」</b>という
+、「なぜ二つあるのだから両方オッケーにしないのか」とかゆー手抜き具合に関してのクレームは無視しますみたいな
+感じのお試しジャンクです。<br>
+　とりあえず、<b>手順をざっと追っただけ</b>という自分自身のリファレンス用（又かよ）に作ったので、わかりづらさは
+勘弁してください。いずれ、Qtのインストールから追ったきちんとしたページを作ると思うので。<br>
+　さ、急ぎましょう。ざっと追うだけです。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">Qt環境、知識の確認。</a></li>
+	<li><a href="#main_02">とにかく作る。</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">Qt環境、知識の確認。</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　使用ディストリビューションはTLXW8でフルインストールです。<br>
+　従ってQtはdevelパッケージも一緒に入ります。<br>
+<pre>
+qt-2.3.1-21
+qt-devel-2.3.1-21
+</pre>
+　Qtにコアに関連してくるパッケージはこれぐらいですか。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ rpm -ql qt
+/etc/profile.d/qt.csh
+/etc/profile.d/qt.sh
+/usr/lib/qt
+/usr/lib/qt/lib
+/usr/lib/qt/lib/libqt-mt.so.2
+...ライブラリ色々。
+/usr/share/doc/packages/qt-2.3.1
+/usr/share/doc/packages/qt-2.3.1/ANNOUNCE
+...ドキュメント色々。
+
+[fenjin@seisyuu fenjin]$ rpm -ql qt-devel
+/usr/bin/designer
+/usr/bin/findtr
+/usr/bin/makeqpf
+/usr/bin/mergetr
+/usr/bin/moc
+/usr/bin/msg2qm
+/usr/bin/qconfig
+/usr/bin/qt20fix
+/usr/bin/qtrename140
+/usr/bin/uic
+/usr/include/qt
+/usr/lib/qt/bin
+/usr/lib/qt/bin/designer
+/usr/lib/qt/bin/findtr
+/usr/lib/qt/bin/makeqpf
+/usr/lib/qt/bin/mergetr
+/usr/lib/qt/bin/moc
+/usr/lib/qt/bin/msg2qm
+/usr/lib/qt/bin/qconfig
+/usr/lib/qt/bin/qt20fix
+/usr/lib/qt/bin/qtrename140
+/usr/lib/qt/bin/uic
+/usr/lib/qt/doc
+/usr/lib/qt/doc/html
+...あといろいろなドキュメントとか。一応manページもインストールされている。
+</pre>
+　といった感じです。結局、<font size=+1><b>/usr/lib/qt/</b></font>ディレクトリ以下にQt関連のすべてが納められている、
+と考えて良いです。この中のサンプルとか、チュートリアルとかも、既にある実行ファイル動かすだけでも面白いですよ。<br>
+<br>
+　ただし、このdevelパッケージにはQtプログラミングを楽にしてくれる「progen」と「tmake」が含まれていない、という致命
+的なミスがあります。<br>
+　これに関してはどーしよーもないので、<a href="http://www.trolltech.com/" target=_blank>Trolltechのホームページ</a>
+にダウンロードパスが載っていますので、てきとーに探しててきとーにFTPで落としててきとーに/usr/local/binあたりにでも
+つっこんどいてください。動作確認までは今回はサポートしません。いずれきっちりやりたいとは思いますが・・・今回の参考本
+みりゃ良いわけだし。とりあえず、動いた、としときましょう！！<br>
+　んじゃ、とりあえず作りましょう・・・のまえに。「./configure, make, make install位しかやったこと無いんだけど。」と
+言う人のために簡単な用語集でも拵えておきましょう。あ、<b>C, C++はある程度知ってる</b>を前提にしてますよ。<br>
+<br>
+・progenってなに？：「make」コマンドをぶったたくにはコンパイル手順を記述した、俗に言う「メイクファイル」が必要です。
+progen, tmakeは何と、<b>「ソースコードを見ただけでメイクファイルをとりあえず作ってくれちゃう便利なソフト」</b>なの
+です。もっともQt開発用に特化してるみたいではありますが。<br>
+・tmakeってなに？：上記の質問の続きですね。progenで生成されるのは、コンパイルに必要なソースのリスト、みたいなもんです。
+ここから実際のMakefileを生成してくれるのがtmakeです。<br>
+・Qtプログラミングって、Windowsプログラミングとどう違うの？：もしあなたがVC++やC++Builder, Delphi等を触っているなら
+非常に話が早いです。その世界で言うところの「イベント」「イベントハンドラ」は、Qtでは（非常に大胆な例えであるが）「
+シグナル」「スロット」として実現します。Qtのボタンや何かにはあらかじめ典型的な「シグナル」（実際には関数）が実装済み
+です。あとは、「スロット」をこちら側で定義してあげます。ここまではWindowsと一緒です。<br>
+　違うのはその先です。Qtでは、connect関数とかユーのをつかって「シグナル」と「スロット」を自由につなげることができます。
+やろうと思えば「シグナル」と「シグナル」をつなげることもできます。<br>
+　ぶっちゃけた話、「シグナル(SIGNAL)」も「スロット(SLOT)」も関数で、イメージとしては「関数のポインタをつなげる」みたい
+な。実際問題、シグナルとして定義する関数は実装しなくて良いんです。ほっといて良いんです。<br>
+　とにかく、「イベント」と「イベントハンドラ」を、WindowsのMessageシステムがないLinux, UNIX上でどうにか実装しようと
+試みた結果が「シグナル」と「スロット」になったみたいな。<br>
+　というわけで、両方ともその実体は関数です。どうやって関連づけしてるのか、その内側まではまだわかりません。<br>
+<br>
+　以上。え？短い？・・・ま、まあ。今回は雰囲気だけ感じ取ってもらえれば・・・さ！次いこっか！<br>
+<br>
+<b>参考資料</b><br>
+・「KDE プログラミングパーフェクトガイド」杉田研治 技術評論社<br>
+<br>
+<font size=+1><b><a name="main_02">とにかく作る。</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　とりあえず、作業用のディレクトリを作ります。今回は「Test Class 1」を省略して「tc1」ディレクトリを適当な場所に作り
+ました。<br>
+　んで、KDEのメニューから「開発」カテゴリの「Qt Designer」を選びます。初回起動時には何か聞かれてきたような気もします
+がもう忘れました。とにかく適当に返事して先に進みましょう。<br>
+　んで、「新規作成」します。<br>
+<br>
+　<a href="qt_intro_1.png">新規作成するとこんなDLGが表示されるので、とりあえずWidgetを選択してOKします。</a><br>
+<br>
+　<a href="qt_intro_2.png">すると、C++Builderではお馴染みの「Form1」と「Property Editor」が表示されて起動します。</a><br>
+<br>
+　さて、ここでBCB(C++Builderのこと)になじんでいる人ならボタンを二つは位置するくらいは即行でしょう。ツールバーにさっそく
+Qtウィジェットが色々並んでますね。<br>
+　あ、ウィジェットってユーのはすごい乱暴な例えですがMFCとかVCLにあたります。<br>
+<br>
+　<a href="qt_intro_3.png">はい。とりあえずPushButton二つてきとーに配置します。</a><br>
+<br>
+　<a href="qt_intro_4.png">フォームがでかすぎるので、Form1の右下をドラッグして縮めます。</a><br>
+<br>
+　<a href="qt_intro_5.png">マウスでボタン二つを選択状態にします。</a><br>
+<br>
+　さて、ここでQtオリジナルのAlignmentシステムの登場です。Qtでは部品の配置に関して「升目上に簡易的に配置」機能を提供
+してくれています。まあ・・・直接座標指定でも良いんですが、ボタン一つで結構見栄え良くなるので。<br>
+　ボタン二つが選択状態で、「Layout」メニューから「LayOut Vertically」を選択します。すると・・・<br>
+<br>
+　<a href="qt_intro_6.png">こんな感じにさくっと垂直に並んでくれました。</a><br>
+<br>
+　んで、いよいよシグナルとスロットの準備をします。今回はまず、PushButtonのclecked()シグナルを関知するためにForm1側に
+slotForm1Exit()スロットを設けます。Form1上を普通にクリックした後、右クリック。<br>
+<br>
+　<a href="qt_intro_7.png">メニューから「Slots」を選択します。</a><br>
+<br>
+　<a href="qt_intro_8.png">こんな感じのDLGが表示されるんで、こんな感じにslotForm1Exit()を登録します。</a><br>
+<br>
+　んで、「Tool」から「Connect Signal/Slots」というそのものズバリを選択。PushButton1で左ボタンを押し、そのままForm1まで
+マウスポインタを持ってきます。<br>
+<br>
+　<a href="qt_intro_9.png">ちょうどこんな感じになるかも。こんな風に枠線が両方に表示されれば、マウスは放し?謄?奪院次?
+</a><br>
+<br>
+　<a href="qt_intro_10.png">マウスを放すと、こんなDLGが表示されます。直観的に「clicked()」を選択状態にした後、「slot
+Form1Exit()」をクリックすれば自動的に下の「connections」に追加されます。</a><br>
+<br>
+　この段階でOKすれば、めでたくPushButton1とslotForm1Exitがつながりました。これでもう、QtDesigner上での作業はおしまい
+です。<b>え？コンパイルは？</b>・・・そこまではQtDesignerはしません。いえ・・・KDevelopはしてくれるんですけど・・・。
+　ま、まあ、何で私がKDevelopではなくてQtDesignerを試したかの話にもつながりますので、今は不問にして置いてください。<br>
+<br>
+　<a href="qt_intro_11.png">後は「File」「Save As」で、「test.ui」という名前で保存しておきます。</a>Windowsとクリソツ
+な見た目ですが、このどうみてもSaveDialogだろと言いたくなるようなDLGは/usr/lib/qt/のサンプルに入っています。<br>
+　「Preview」の「Preview Form」で文字通り、実行時の画面を確認できます。<br>
+<br>
+　<a href="qt_intro_12.png">ちなみに今回は最終的にこんな感じ。</a><br>
+<br>
+　んで。今は何も考えずにtc1/に移動して、以下のコマンドをぶっ叩いてください。<br>
+<pre>
+$ uic test.ui -o test.h
+$ uic test.ui -i test.h -o test.cpp
+$ uic -subdecl tc1 test.h test.ui -o tc1.h
+$ uic -subimpl tc1 tc1.h test.ui -o tc1.cpp
+</pre>
+　前半でForm1クラスの基本定義ファイル、実装ファイルを自動生成してくれます。BCBと一緒。後半はちょっと変わってて、
+前半で作ったクラスを派生させることにより、いわゆる「ラッパークラス」みたいな感じの定義ファイルと実装ファイルを生成
+してくれてます。うまく使いこなせばデザインは基本定義ファイルに。実装部はラッパークラス側にまとめることにより、デザイン
+と実装を分離できる・・・らしいです。<br>
+　ここでちょっとtc1.cppに細工します。slotForm1Exit()を、さらに自分自身で（これから）定義するExit()シグナルを発生させる
+トリガーっぽくしましょう。<br>
+<br>
+<center>PushButtonのclicked→Form1のslotForm1Exit()→Form1のExit()シグナル→アプリケーションの終了用スロット</center>
+<br>
+　・・・と、つなげるためです。え？何でPushButtonのclickedを直接アプリにつなげないか？・・・あとでやってみます。<br>
+　ま、まあとにかく。以下のようにtc1.h, tc1.cppを修正します。<br>
+<pre>
+tc1.h:
+（修正前）
+public:
+    tc1( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    ~tc1();
+
+protected slots:
+    void slotForm1Exit();
+（修正後）
+public:
+    tc1( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    ~tc1();
+//ここで、ユーザー定義のシグナル関数を作っときます。
+signals:
+        void Exit();
+
+protected slots:
+    void slotForm1Exit();
+
+tc1.cpp
+（修正前）
+void tc1::slotForm1Exit()
+{
+    //qWarning( "tc1::slotForm1Exit() not yet implemented!" );
+}
+（修正後）
+void tc1::slotForm1Exit()
+{
+    //qWarning( "tc1::slotForm1Exit() not yet implemented!" );
+        emit Exit(); //ここで自分自身のシグナルExit()を発動してます。
+}
+</pre>
+　んで、後は何も考えずに以下のmain.cppを作ります。<br>
+<pre>
+#include &lt;qapp.h&gt;
+#include "tc1.h"
+
+int main(int argc, char **argv)
+{
+        //create QApplication Object
+        QApplication app(argc, argv);
+
+        tc1 hogehoge(0, "hunyann");
+        app.setMainWidget(&hogehoge);
+        hogehoge.show();
+
+	//このconnectで最後のシグナル→スロットをつなげる。
+        QObject::connect(&hogehoge,SIGNAL(Exit()), &app, SLOT(quit()));
+
+        return app.exec();
+}
+</pre>
+<br>
+　・・・さて、後はもう一息です。これでソースコードの準備は完了しました。では、早速progenとtmakeの威力を見てみましょう。<br>
+　とりあえず<br>
+<pre>
+$ progen -n tc1 -o tc1.pro
+$ tmake tc1.pro -o Makefile
+</pre>
+　これだけでMakefileができちゃいました。ね？簡単でしょ？んじゃ早速makeしてみてください。<br>
+<br>
+　・・・失敗した、と思われます。これはですね、progenはカレントディレクトリ内の「すべての」ソースコードをコンパイル
+あーんどリンク対象としてしまうからなんです。そのため、test1.oとtc1.oでシンボル名が衝突してしまったんじゃないか、と
+まあ、見た感じそんな気がするエラーが吐き出されたと思います。<br>
+　んじゃあ後は簡単。progenの吐き出すtc1.proから、test.cppに関する記述を省けばいいわけです。<br>
+　最終的なtc1.proです。<br>
+<pre>
+TEMPLATE        = app
+CONFIG          = qt warn_on release
+HEADERS         = tc1.h
+SOURCES         = main.cpp \
+                  tc1.cpp
+INTERFACES      = test.ui
+TARGET          = tc1
+</pre>
+　これでもう一度tmakeしたMakefileを使えば、今度こそうまくいくはずです。<br>
+<br>
+　いかがでしょうか。とりあえず./configureの吐き出すメッセージに恐怖する必要はなくなったと思います。<br>
+　結局、Qtはmakeに対して非常に素直なビルド環境を提供してくれているわけです。Autoconfは使う必要はありません。<br>
+　初心者にとってはだいぶ<b>透明度が高い</b>という意味で非常に安心できる開発環境だと思います。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　えー・・・んじゃ、管でも巻かせていただきます。<br>
+　KDEの勉強をしていて思ったのですが、「巨大すぎる・・・。」<br>
+　WindowsみたいにGUIがレジストリと共にシステムと密接に関わっている「ように」つくっているため、KDEデスクトップ用の
+プログラムを作るとなるととにかく、でかい。<br>
+　しかもQtと組み合わせて動くようにしているため、「Makefileで何してるのか全くわからない。」<br>
+　・・・あんまり、気持ちよい環境ではなかったんです。しかもソースを全部CVSで管理する必要があったし。<br>
+　<b>正直、UNIXプログラミング初心者向きでは無いと思います。</b><br>
+　いえ。まあ・・・これを通してCVSの使い方とか覚えられたので一概にNGとも言えないんですが。<br>
+<br>
+　ただ、やっぱり自分の好みとは違う方向へすっ飛んでいっているみたい。<br>
+　できればQtはデスクトップ環境の整備なんかはKDEに押しつけて、「シンプルだけど拡張性に富んだ柔軟な」ライブラリで居続けて
+欲しい。基本に徹しつつ、それでいてカスタマイズによっては非常に柔軟な面も見せる・・・って、それCetaの目指していたところ
+なんだよね。<br>
+<br>
+　まだ・・・大丈夫かもしれないけど。Linuxって、RPMとかライブラリとかが絡みすぎていつの間にか下手なWindowsアプリケーシ
+ョンよりもブラックボックス化して、巨大化して、複雑化してない？<br>
+　<b>結局、ソースコードが公開されていようがいまいが一般ユーザーには何の関係もない。</b><br>
+　そう言いきってしまえれば簡単なんだけどね。<br>
+<br>
+　結局、中間層が欠如し始めてるのかもしれません。<br>
+　まあ自分で埋めていくものなんでしょう。<br>
+　慣れなんでしょう。<br>
+<br>
+　とにかく、大きな開発セットが必要なKDEやKDevelopは自分の好みと一致しませんでした。<br>
+　逆に、単に*.uiを作るだけに徹してくれているQtDesignerに惹かれました。<br>
+　KDEの開発セットを理解し切れて、QtDesingerでも捌ききれなくなったらKDevelopに移行したいと思います。<br>
+　それまではZaurus Linux関連の話もあることですししばらくはQtとつきあっていきたいと思います。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>
+</body>
+</html>

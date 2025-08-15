@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 6: Building Blocks Galore!</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 6: Building Blocks Galore!</h1>
+初版作成：2002/01/01<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t06_1.png"></center>
+<br>
+　一体全体、正月早々何やってんだこの俺は・・・。<br>
+　まあ良い。始めましょう、Chapter6を。<br>
+<br>
+　今回の例ではウィジェットを複数生成する方法を例示します。<br>
+　とりあえず最初に、複数生成するウィジェットをQVBoxからの派生によって定義しておきます。<br>
+　次に <b>QGrid という升目状に自動配置してくれるウィジェット</b>に、上で定義しておいた単位ウィジェットを
+突っ込んでいきます。<br>
+　まあ・・・比較するものがないんで何ともいえないんですが・・・多分、BCBやDelphiよりは簡単なんじゃ、ないかなー、
+と。特にQGridによる自動配置のおかげで、新しいウィジェットの位置を計算する手間が省けますし。<br>
+　とにかく、冒頭に示した画面が実行結果になります。前回の続き物で、QLCDNumberとQSliderをQVBoxに突っ込んだものが
+単位ウィジェットになりまして、それがずらりとQGridに並べられるわけです。<br>
+<br>
+　それではソースコードです。<br>
+<br><pre>
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qslider.h>
+#include &lt;qlcdnumber.h>
+#include &lt;qfont.h>
+#include &lt;qvbox.h>
+#include &lt;qgrid.h>
+
+class LCDRange : public QVBox
+{
+public:
+    LCDRange(QWidget *parent=0, const char *name=0);
+};
+
+LCDRange::LCDRange(QWidget *parent, const char *name)
+    : QVBox(parent, name)
+{
+    QLCDNumber *lcd = new QLCDNumber(2, this, "lcd");
+    QSlider *slider = new QSlider(Horizontal, this, "slider");
+    slider->setRange(0, 99);
+    slider->setValue(0);
+    connect(slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
+}
+
+class MyWidget : public QVBox
+{
+public:
+    MyWidget(QWidget *parent=0, const char *name=0);
+};
+
+MyWidget::MyWidget(QWidget *parent, const char *name)
+    : QVBox(parent, name)
+{
+    QPushButton *quit = new QPushButton("Quit", this, "quit");
+    quit->setFont(QFont("Times", 18, QFont::Bold));
+
+    connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
+
+    QGrid *grid = new QGrid(4, this);
+
+    for(int c=0; c&lt;4; c++)
+        for(int r=0; r&lt;4; r++)
+            (void)new LCDRange(grid);
+}
+
+int main(int argc, char **argv)
+{
+    QApplication a(argc, argv);
+
+    MyWidget w;
+    a.setMainWidget(&w);
+    w.show();
+    return a.exec();
+}
+</pre><br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+　ほんじゃあポイントごとに解説していきます。<br>
+　つっても・・・今までさんざっぱら「いじくりまわす」でいろいろ実験してきましたし。そんなに目新しかったり重要なポイント
+は無いです。<br>
+　まあ、とにかく始めます。<br>
+<br><pre>
+class LCDRange : public QVBox
+{
+public:
+    LCDRange( QWidget *parent=0, const char *name=0 );
+};
+</pre><br>
+　LCDRangeウィジェットにはAPIを実装していません。コンストラクタだけです。このようなウィジェットは実際問題としては
+役立たずに近いので作りません。今回はあくまでも例示です。後に続くChapterでいろいろ変更を加えていくことになると思い
+ます。<br>
+<br><pre>
+LCDRange::LCDRange( QWidget *parent, const char *name )
+    : QVBox( parent, name )
+{
+    QLCDNumber *lcd  = new QLCDNumber( 2, this, "lcd"  );
+    QSlider * slider = new QSlider( Horizontal, this, "slider" );
+    slider->setRange( 0, 99 );
+    slider->setValue( 0 );
+    connect( slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)) );
+}
+</pre><br>
+　これはほとんど前回のMyWidgetです。Quitボタンが除かれたのと、クラス名が変わっていることくらいです。<br>
+<br><pre>
+class MyWidget : public QVBox
+{
+public:
+    MyWidget(QWidget *parent=0, const char *name=0);
+};
+</pre><br>
+　MyWidgetもコンストラクタ以外には何のAPIも実装していません。このMyWidgetがQuitボタンと、QGridを突っ込む母体と
+なります。<br>
+<br><pre>
+MyWidget::MyWidget(QWidget *parent, const char *name)
+    : QVBox(parent, name)
+{
+    QPushButton *quit = new QPushButton("Quit", this, "quit");
+    quit->setFont(QFont("Times", 18, QFont::Bold));
+
+    connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
+</pre><br>
+　コンストラクタです。Quitボタンをまず突っ込んでます。<br>
+<br><pre>
+    QGrid *grid = new QGrid(4, this);
+</pre><br>
+　次に <b>QGrid レイアウトウィジェット（と言っていいのかな？）</b>を張り付けてます。<br>
+<br>
+　QGrid ウィジェットは升目状に配置、というよりは「とりあえず一方向に並べていって、指定数並べたら折り返してまた並べて。」
+といった感じで、どちらかというを<b>自動折り返し機構のついた QHBox や QVBox みたいな？</b><br>
+　したがってQGridのコンストラクタは次のようになっています。<br>
+<br><pre>
+QGrid::QGrid ( int n, QWidget * parent=0, const char * name=0, WFlags f=0 )
+    Constructs a grid widget with parent parent and name name. n specifies the number of columns.
+
+QGrid::QGrid ( int n, Direction dir, QWidget * parent=0, const char * name=0, WFlags f=0 )
+    Constructs a grid widget with parent parent and name name. If dir is Horizontal,
+     n specifies the number of columns. If dir is Vertical, n specifies the number of rows.
+</pre><br>
+　このように引数を変えて二種類のコンストラクタをとれるようにしていました。違うのは Direction dir のあるなしです。<br>
+　Directionというのは<br>
+<pre>
+      enum Direction { Horizontal, Vertical }
+</pre>
+　としてQGridで宣言されている列挙型です。よーするに水平方向にならべていくのか、垂直方向に並べていくのかの差です。<br>
+　どちらを指定するかによって最初の引数 n の持つ意味が変わります。<br>
+<br>
+　Direction 無し、あるいは Horizontal の時は n は列数（Column）を指示します。つまりQHBoxの延長になります。<br>
+　Direction に Vertical が指示されていると n は行数（Row）を指示します。つまりQVBoxの延長になります。<br>
+<br><pre>
+    for(int c=0; c&lt;4; c++)
+        for(int r=0; r&lt;4; r++)
+            (void)new LCDRange(grid);
+</pre><br>
+　四列を一行として、四行分 LCDRange を並べてます。<br>
+<br>
+　これでポイント部分の解説はおしまいです。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+<br>
+　んじゃあ、コンパイルしてみましょう。<br>
+<br><pre>
+[fenjin@murasame t06]$ vi t06.cpp
+[fenjin@murasame t06]$ progen -n t06 -o t06.pro
+[fenjin@murasame t06]$ tmake -o Makefile t06.pro
+[fenjin@murasame t06]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o t06.o t06.cpp
+g++  -o t06 t06.o   -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@murasame t06]$ ls
+Makefile  t06*  t06.cpp  t06.o  t06.pro
+</pre><br>
+　んで、実行ファイル t06 を実行すると冒頭に示したようなウインドウが表示されるわけです。上部のQuitボタンをクリック
+するとアプリケーションは終了します。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+<br>
+　まあ今回はあんまり凝るようなところも凝りたくなるようなところも私的には無かったので。<br>
+　QGridの配置実験でもして遊びましょう。<br>
+<br>
+　とりあえず、QLCDRangeは4x4の16個生成しています。<br>
+　ここでQGridのコンストラクタで n=2 としてみると、２列×８行で表示されることが予想されます。<br>
+<br>
+　実験結果です。予想通りでした。<br>
+<br><img src="img/qt_t06_2.png"><br>
+<br>
+　んじゃあ n=8 としてみましょう。８列×２行で表示されることが予想されます。<br>
+　実験結果です。予想通りでした。<br>
+<br><img src="img/qt_t06_3.png"><br>
+<br>
+　それでは、Directionを指定してみましょう。コンストラクタの n の指定の後に「QGrid::Vertical」を追加します。<br>
+　n=8 としておきます。これにより n は行数を指示するようになりますから、結局前回と同じく８行×２列で表示されることに
+なるはずです。<br>
+　しかし前回と同じでは味気ないので、for文で内側ロープを3とかにしてみましょう。４×３で１２個のLCDRangeが表示される
+はずです。しかし実際は８行ならんでから折り返しますので、予想としては「左半分が８行×１列、右半分で４行×１列。空いた
+部分は普通に空白処理」といったところでしょうか・・・。<br>
+<br><img src="img/qt_t06_4.png"><br>
+<br>
+　予想通りになりました。<br>
+<br>
+　今回は遊べるところはこれくらいでしょう。QGridの使い方さえわかれば、ちゃっちゃと次のChapterに進んじゃってもいいかな、
+と思われます。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

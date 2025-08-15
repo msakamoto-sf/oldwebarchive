@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 3: Family Values</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 3: Family Values</h1>
+初版作成：2002/12/27<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t03_1.png"></center>
+<br>
+　さて、今回はウィジェットのレイアウトを楽にしてくれる、Qtの提供するQVBoxを使ってみます。<br>
+　Qtではウィジェットの配置を簡単にしてくれるレイアウトコントロール、とでもいうべき代物があります。それ自体は
+ユーザーインターフェイスとしての役目を果たさないのですが、ウィジェットの配置に関して勝手に調節してくれます。<br>
+　そういう点ではWindowsでは見られない一風変わった代物ではあります。具体的な説明の前に、とにかく作って動かして
+みましょう。単純に動かしただけでは上に示すような、あんまり代わり映えのしない見た目ですが・・・さてはて。<br>
+<font size=-1>どーでもいいけどこの冒頭文書、原文完全無視したオリジナル。</font><br>
+<br>
+　ついでに、今回は親ウィジェットと子ウィジェットの作例でもあります。<br>
+<br>
+<pre>
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qfont.h>
+#include &lt;qvbox.h>
+
+int main( int argc, char **argv )
+{
+    QApplication a( argc, argv );
+
+    QVBox box;
+    box.resize( 200, 120 );
+
+    QPushButton quit( "Quit", &box );
+    quit.setFont( QFont( "Times", 18, QFont::Bold ) );
+
+    QObject::connect( &quit, SIGNAL(clicked()), &a, SLOT(quit()) );
+
+    a.setMainWidget( &box );
+    box.show();
+
+    return a.exec();
+}
+</pre>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+　さて、それでは今回のポイントについて順に説明していきましょう。<br>
+　<font size=-1>（qapplication.h, qpushbutton.h などについては説明は省きます。</font><br>
+<br><pre>
+#include &lt;qvbox.h>
+</pre><br>
+　ここで、レイアウトクラス（とでも言うべき）QVBoxクラスを定義しているヘッダファイルを作成します。<br>
+　QVBoxやレイアウトクラスの説明に関してはもうちょっとお待ちを・・・。<br>
+<br><pre>
+	QVBox box;
+</pre><br>
+　さて、ここでQVBoxクラスのオブジェクトを作成しています。んでもって、続く<br>
+<br><pre>
+	box.resize( 200, 120 );
+</pre><br>
+　でもって、QVBoxのサイズを200x120に設定しています。・・・いよいよです。<br>
+<br><pre>
+
+	QPushButton quit("Quit", &box);
+</pre><br>
+　ここです！今回のポイントが詰まっているのは。<br>
+　特にBCBをいじくったことのある人なら、動的にVCLを生成するときの親コントロールの設定とそっくりなのに思い当たり
+ませんか？<b>ようやく、親ウィジェットの登場となるわけです。</b>よーするに親ウインドウと子ウインドウの関係です。<br>
+<br>
+　では・・・なんでわざわざQVBoxなんてーのを親ウインドウにしたのでせう？それはQVBoxがレイアウトを自動で行ってくれる
+ためのウィジェットであるからです。<br>
+　よーするにですね。<b>QVBox だの QHBox だの QGridLayout だのは、自分の子ウィジェットが作成されると適当に、自動
+配置してくれるわけです。</b><br>
+　QVBoxは Vertical に。QHBoxは Horizontal に。QGridLayout は升目状に・・・そんな感じで、勝手に配置してくれるので<b>
+特に動的にウィジェットを作成したり、試しに作ってみたオリジナルウィジェットをさくっと試したいときに最適</b>な代物な
+わけです。<br>
+　とにかく、デフォルトで勝手に汎用ウインドウになってくれるアーンド、ウィジェットの配置もテキトーにやってくれちゃう、
+結構便利な「テンプレートウインドウ」みたいなシロモノです、はい。<br>
+<br>
+　ちょっと、あとでいじくってみましょう。とりあえず先に進みます。<br>
+<br><pre>
+	box.show();
+</pre><br>
+　後は今までと同様 setMainWidget()します。今回は QVBox の box がトップレベルウインドウに当たりますのでそっちを指定
+します。んでもって、box.show()呼び出してウィジェット表示、ですか。<br>
+　親ウィジェットが表示されるとき、明示的に QWidget::hide() を呼んでない限りその子ウィジェットも自動的に表示されます。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+<br>
+　んじゃあ、コンパイルしてみましょう。<br>
+<br><pre>
+[fenjin@murasame t03]$ vi t03.cpp
+[fenjin@murasame t03]$ ls
+t03.cpp
+[fenjin@murasame t03]$ progen -n t03 -o t03.pro
+[fenjin@murasame t03]$ tmake -o Makefile t03.pro
+[fenjin@murasame t03]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o t03.o t03.cpp
+g++  -o t03 t03.o   -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@murasame t03]$ ls
+Makefile  t03*  t03.cpp  t03.o  t03.pro
+</pre><br>
+　実行してみると、冒頭に示したようなウインドウが表示されるはずです。<br>
+　少し広げてみます。<br>
+<img src="img/qt_t03_2.png"><br>
+　幅や位置も適当に調節してくれてますね。<br>
+<br>
+　限界まで縮めてみました。<br>
+<img src="img/qt_t03_3.png"><br>
+　ボタンの大きさを限度に、これ以上は縮まりません。<br>
+<br>
+　まあ、こんな感じです。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+　さて。まずはQVBoxの醍醐味を堪能するために、<b>ボタンを追加してみます。</b><br>
+　適当に三つほど追加してみましょう。<br>
+<br><pre>
+修正前：
+    quit.setFont( QFont( "Times", 18, QFont::Bold ) );
+
+    QObject::connect( &quit, SIGNAL(clicked()), &a, SLOT(quit()) );
+
+修正後：
+    quit.setFont(QFont("Times", 18, QFont::Bold));
+
+    QPushButton b2("Button2", &box);
+    QPushButton b3("Button3", &box);
+    QPushButton b4("Button4", &box);
+
+    QObject::connect(&quit, SIGNAL(clicked()), &a, SLOT(quit()));
+</pre><br>
+　結果を示します。最初がデフォルトの実行結果、次がちょっと広げた結果、最後が限界まで縮めた結果です。<br>
+<br><img src="img/qt_t03_4.png"><br>
+<br><img src="img/qt_t03_5.png"><br>
+<br><img src="img/qt_t03_6.png"><br>
+<br>
+　・・・いかがでしょうか。ボタンの配置が自動化されている、しかも<b>「とりあえずレイアウトを意識して配置される」</b>
+便利さが感じられます。<br>
+<br>
+　ワンモアクエスチョン。・・・<b>レイアウトの中にレイアウトを入れることはできるのでしょうか？</b>つまり、レイアウトの
+入れ子構造とかは簡単にできるんでしょうか。<br>
+　いっちょう、<b>QHBoxの試しもかねて</b>やってみましょう。<br>
+<br>
+　とにかくQHBoxを QVBoxクラスのboxオブジェクトを親として生成してみます。んで、そのQHBoxの中に三つほどボタンを
+つっこんでみます。<br>
+<br><pre>
+修正前：
+    QPushButton b4("Button4", &box);
+
+    QObject::connect(&quit, SIGNAL(clicked()), &a, SLOT(quit()));
+
+修正後：
+    QPushButton b4("Button4", &box);
+
+    QHBox hbox(&box);
+    QPushButton b5("Button5", &hbox);
+    QPushButton b6("Button6", &hbox);
+    QPushButton b7("Button7", &hbox);
+
+    QObject::connect(&quit, SIGNAL(clicked()), &a, SLOT(quit()));
+</pre><br>
+　んで、実行結果です。<br>
+<br><img src="img/qt_t03_7.png"><br>
+<br><img src="img/qt_t03_8.png"><br>
+<br>
+　・・・さっきまでとボタンの間隔が違ってます。でもまあ、とりあえず配置は良い感じに自動化されてますね。<br>
+　ところで今回、qhbox.h みたいなのをインクルードせずともコンパイルが通りました。これはQVBoxはQHBoxから派生されている
+からです。従ってqvbox.h 中ですでに qhbox.h がインクルードされていたのです。<br>
+<br>
+　ところでQVBoxとかQHBoxのドキュメントを読んでいるとこんなメソッドがあることがわかります。<br>
+<pre>
+void setSpacing ( int )
+bool setStretchFactor ( QWidget *, int stretch )
+void setMargin (int )
+</pre>
+　これらでもって、ちょっと配置間隔をいじくってみたくなりました。<br>
+　効果のほどを個別確認するために、<b>QVBox の方で setSpacing() を。QHBox の方で setMargin() を</b>それぞれ適用して
+みます。<br>
+<br><pre>
+修正前：
+    a.setMainWidget(&box);
+
+修正後：
+    box.setSpacing(16);
+    hbox.setMargin(40);
+    a.setMainWidget(&box);
+</pre><br>
+　実験結果です。<br>
+<br><img src="img/qt_t03_9.png"><br>
+<br>
+　ほぼ、メソッド名通りの結果となったようです。<b>setSpacing はウィジェット間隔を。setMarginはレイアウトボックスの内側
+からの余白</b>を指示するメソッドのようです。<br>
+<br>
+　こうしてみるとくだらない実験がむらむらとしたくなってきます。「ではQHBoxの中にさらにQVBoxを入れてみたらどうなる？」
+とか、「QPushButton自体を親ウインドウとして、その中にレイアウトを張り付けてその中に・・・」とか。<br>
+<br>
+　だいぶ長くなってきたので、今回はこの最後の実験で締めさせていただきます。そもそもコンパイルできるのか？<br>
+<br>
+ まあ最後のは非常に興味深い実験ではありますが、とりあえず今回は下の実験で締めさせていただきます。<br>
+<br>
+　・・・ソースは省略。QPushButtonを親ウィジェット0で作って、代わりにQVBox box(&quit)としてください。んで、
+setMainWidget(&quit)にして、box.show()ではなくてquit.show()にします。<br>
+　実行結果は・・・なんじゃこりゃ。<br>
+<br><img src="img/qt_t03_10.png"><br>
+<br>
+　やっぱり変になっちゃったみたいです。今回はこれ以上はあきらめましょう。<br>
+<br>
+　実は、原文の方には <b>QSizePolicy</b> とか言うのと関連してウィジェットのサイズ変更の際のタイプ、みたいなのが
+設定できるらしいことが書いてあります。んで、実際少しあさってみたんですが結構深そうで、めんどくさそうなので今回は
+パスすることにしました。まあ、QVBoxとQHBoxだけでもそれなりに遊べることが判明したので良しとしましょう。<br>
+<br>
+　んじゃ今回はこの辺でおしまいにします。<br>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

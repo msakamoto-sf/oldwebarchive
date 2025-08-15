@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 4: Let There Be Widgets</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 4: Let There Be Widgets</h1>
+初版作成：2002/12/29<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t04_1.png"></center>
+<br>
+　今回の作例では、プログラマーが自分でウィジェットを作る方法の一つを示します。<br>
+　・・・といっても、要はですね。今まではQPushButtonなりQVBoxなりを直接トップレベルウィジェットに
+指定してきましたが、今回は<b>QWidget</b>というQtウィジェットの基本ともなるべきウィジェットクラスを
+独自に拡張し、そいつをトップレベルに張り付けてみよう、ということです。<br>
+　BCBやDelphiユーザー向けに言えば、TFormを拡張して、TForm1を作るのと雰囲気的には変わりありません。<br>
+<br>
+　ついでにウィジェットの最小、および最大サイズの指定方法も示します。<br>
+　最後の方では、以降のTutorialで作っていくちょっとしたミニゲームの大雑把な紹介も併せて行います。<br>
+<br>
+　上にしめしたのが実行結果です。ボタン部分はふつうのQPushButtonですが、それ以外のウインドウ部分は
+QWidgetクラスを継承したMyWidgetクラスです。下に示すのがソースです。<br>
+<br><pre>
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qfont.h>
+
+class MyWidget : public QWidget
+{
+public:
+    MyWidget( QWidget *parent=0, const char *name=0 );
+};
+
+MyWidget::MyWidget( QWidget *parent, const char *name )
+        : QWidget( parent, name )
+{
+    setMinimumSize( 200, 120 );
+    setMaximumSize( 200, 120 );
+
+    QPushButton *quit = new QPushButton( "Quit", this, "quit" );
+    quit->setGeometry( 62, 40, 75, 30 );
+    quit->setFont( QFont( "Times", 18, QFont::Bold ) );
+
+    connect( quit, SIGNAL(clicked()), qApp, SLOT(quit()) );
+}
+
+int main( int argc, char **argv )
+{
+    QApplication a( argc, argv );
+
+    MyWidget w;
+    w.setGeometry( 100, 100, 200, 120 );
+    a.setMainWidget( &w );
+    w.show();
+    return a.exec();
+}
+</pre><br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+　それではポイント部分の解説を行っていきます。今回はCPPのクラス機能が前面にでていますが、CPPのクラスについては
+基本的な知識があることを前提としていますので解説しません。<br>
+<br><pre>
+class MyWidget : public QWidget
+{
+public:
+    MyWidget( QWidget *parent=0, const char *name=0 );
+};
+</pre><br>
+　ここでは新しいウィジェットクラスを宣言しています。このクラスはQWidgetから派生しているので新しいクラスも
+Qtのウィジェットになります。んでもってやっぱり、トップレベルウインドウとか子ウィジェットみたいに使えるわけです。<br>
+<br>
+　今回のクラスではメンバを一つだけしか持ってません。と、ゆーかウィジェットとして必要な機能とかはQWidgetの方で
+すでに実装済みです。とゆーことで、QPushButtonを生成して最大最小サイズを調整するコンストラクタしか派生先のこの
+クラスで宣言していなくても、簡単にウィンドウとしての役目を果たしてくれるわけです。<br>
+　このコンストラクタ宣言はQtウィジェットの標準的なコンストラクタ宣言でもあります。もしも自分でウィジェットを
+派生させるときは、同様の形式のコンストラクタを実装するべきでしょう。<br>
+　第一引数は親ウィジェットです。トップレベルウィンドウにするときは、今まで見てきたようにNULLポインタ(0らしい)
+を親として指定します。今回のコンストラクタ宣言ではデフォルト引数を指定することにより、なにも指示がなかった場合は
+トップレベルウィンドウとして作成されることになります。<br>
+　第二引数はウィジェットの名前です。これはウインドウタイトルバーやボタンに表示される文字列<b>ではありません。</b><br>
+<br>
+　単刀直入にたとえれば、BCBやDelphiで言うところの<b>VCLのNameプロパティ</b>です。<br>
+　これはウィジェットを後で参照するときや、Xのウィジェット階層構造をデバッグするときに使うことになる・・・らしい、
+です。<br>
+　実はQtDesignerでもしっかりとNameプロパティとして登場していますので、いい加減に扱うことはできません。とはいっても、
+まあ今回程度の簡単なチュートリアルくらいでは気にする必要はないでしょう。QtDesignerやKDevelopを扱い始めればしっかり
+考える必要があります。<br>
+<br>
+<br><pre>
+    MyWidget::MyWidget( QWidget *parent, const char *name )
+            : QWidget( parent, name )
+</pre><br>
+　コンストラクタの実装はここから始まります。ほとんどのウィジェットもこれと同様に、親ウィジェットやNameプロパティを
+単にQWidgetのコンストラクタに流しています。<br>
+<br><pre>
+   {
+        setMinimumSize( 200, 120 );
+        setMaximumSize( 200, 120 );
+</pre><br>
+　このウィジェットはサイズ変更をどう扱えばいいのかまだ知りません。ので、こちら側で最大と最小サイズが等しくなるように
+修正しています。<br>
+　次のChapterでは、ユーザーからのサイズ変更イベントへの応答方法を例示します。<br>
+<br><pre>
+        QPushButton *quit = new QPushButton( "Quit", this, "quit" );
+        quit->setGeometry( 62, 40, 75, 30 );
+        quit->setFont( QFont( "Times", 18, QFont::Bold ) );
+</pre><br>
+　ここで子ウィジェットのセットアップを行っています。新しいウィジェットの"Nameプロパティ"は quit です。
+んでもって、オブジェクトの変数名も quit ですが、わかりやすさを優先したら同じになっただけで、違っていても別段
+問題ありません。quit というNameプロパティはボタンに表示する文字列とは何の関係もありません。<br>
+　この子ウィジェットはコンストラクタ内ではローカル変数にすぎないことに注意してください。MyWidgetクラスでは
+コンストラクタで作成したローカルなquitウィジェットを、コンストラクタから抜けた後も保持するようなコードは
+どこにも書かれていません。じつは、Qtがローカルに作成したウィジェットを保持してくれています。<br>
+　んでもって、デフォルトではMyWidgetオブジェクトがdeleteされるときに、自動的に子ウィジェットもdeleteしてくれる
+ようになっています。これがなんでMyWidgetにデストラクタが存在しないか、の理由です。<br>
+　(プログラマー自身が明示的に子ウィジェットをdeleteしても悪影響はありません。子ウィジェットはdeleteされるとき、
+Qtにその旨を自動的に知らせてくれるからです。）<br>
+<br>
+　setGeometry()メソッドは、move()とresize()でも代用可能です。<br>
+<br>
+<br><pre>
+        connect( quit, SIGNAL(clicked()), qApp, SLOT(quit()) );
+    }
+</pre><br>
+　ここで qApp という見慣れない変数（使われ方から言ってQtウィジェットの一種らしいです）が突如出現しています。<br>
+　これ、じつはQtが提供する アプリケーションウィジェットへのポインタです。<br>
+<br>
+　ウィジェットというのはソフトウェアの部品であり、再利用可能で汎用的であるためには、環境については必要最低限度
+の情報を保持するにとどめるべきである。そういったQtのウィジェットに対するポリシーがあります。<br>
+<br>
+　ところが今回のようにウィジェットがアプリケーションと直接対話する必要に迫られたときなど、このポリシーが障壁となって
+しまいます。そこで、Qt は qApp というアプリケーションオブジェクトへのポインタを提供してくれているわけです。<br>
+　BCBでも各フォームのヘッダファイルに、そのフォームクラスへのポインタがexportされてるじゃないですか。
+あれですよ、あれ。<br>
+<br>
+<br><pre>
+    int main( int argc, char **argv )
+    {
+        QApplication a( argc, argv );
+
+        MyWidget w;
+        w.setGeometry( 100, 100, 200, 120 );
+        a.setMainWidget( &w );
+        w.show();
+        return a.exec();
+    }
+</pre><br>
+　ここでようやくカスタムウィジェットのインスタンスを作成し、メインウィジェットに設定してあぷりけーしょんを実行して
+います。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+<br>
+　んじゃあ、コンパイルしてみましょう。<br>
+<br><pre>
+[fenjin@murasame t04]$ vi t04.cpp
+[fenjin@murasame t04]$ progen -n t04 -o t04.pro
+[fenjin@murasame t04]$ tmake -o Makefile t04.pro
+[fenjin@murasame t04]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o t04.o t04.cpp
+g++  -o t04 t04.o   -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@murasame t04]$ ls
+Makefile  t04*  t04.cpp  t04.o  t04.pro
+</pre><br>
+　んで、実行ファイル t04 を実行すると冒頭に示したようなウインドウが表示されるわけです。中央のQuitボタンをクリック
+するとアプリケーションは終了します。<br>
+　ただちょっと今までと違うのは、最大と最小サイズを同じ値にしていますので、サイズ変更ができない点です。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+<br>
+　簡単にできるところでは、「-geometryオプションとsetGeometry()のどちらが優先されるか」ですか。<br>
+<br>
+　ぶっちゃけた話、ウインドウの位置は-geometryオプションで指示したとおりになりましたがウインドウのサイズはsetGeometry
+()が優先されました。たぶんこれ、geometryオプション自体はふつうに処理されているんでしょうけどsetMinimumSizeとsetMaximum
+Sizeでもってサイズに関して上書きされちゃうのかもしれませんね。<br>
+<br>
+　他にいじくれるところはないでしょうか・・・。何か目的があるわけじゃありませんが、MyWidgetをmain()内部でもう一つ
+作ってみましょうか。<br>
+<br><pre>
+修正前：
+    w.show();
+
+    return a.exec();
+
+修正後：
+    w.show();
+
+    MyWidget w2;
+    w2.setGeometry(350, 100, 100, 200);
+    w2.show();
+
+    return a.exec();
+</pre><br>
+　実行してみるとですね、ウインドウが二つ表示されてしまうのですよ。んで、setGeometryで大きさを変更しているはず
+なのに両方とも最初と同じ大きさです。二つ目のウインドウはこんな感じです。<br>
+<br><img src="img/qt_t04_2.png"><br>
+<br>
+　んで、どちらのQuitボタンをクリックしてもアプリケーションは終了します。おもしろいですね。<br>
+<br>
+　さて・・・setMinimumSize()とsetMaximumSize()を取り払ったらどうなるのでしょうか？<br>
+<br><pre>
+修正前：
+    setMinimumSize(200, 120);
+    setMaximumSize(200, 120);
+
+修正後：
+    //setMinimumSize(200, 120);
+    //setMaximumSize(200, 120);
+</pre><br>
+　前の実験の続きですので、相変わらずウインドウが二つ表示されますが・・・<br>
+　一つ目。<br>
+<br><img src="img/qt_t04_3.png"><br>
+<br>
+　続いて二つ目。<br>
+<br><img src="img/qt_t04_4.png"><br>
+<br>
+　二つ目のsetGeometry()が有効になっています。あと、一つ目のウインドウのウインドウタイトルバー右上、ウインドウ操作
+アイコン群に最大化ボタンが新たに現れているのに気がつかれたでしょうか。こういった変化もあるようですね。<br>
+　最大最小サイズの設定をはずしましたので、ウインドウの四辺四隅をマウスでドラッグすればふつうにウインドウサイズを変更
+できるようになりました。<br>
+<br>
+　では、最後はちょっと複合技を試してみましょう。<br>
+　まず、MyWidgetの継承元をQWidgetではなくQVBoxに変更してみましょう。<br>
+　次にQPushButtonをもう一つ作成してみましょう。QVBoxを利用すればそのまま縦方向に詰めて配置されます。<br>
+　んでもって、main()内で作成した二つ目のMyWidgetを、QVBoxの中に入れてみましょう。<br>
+　んでもって・・・と、最後の実験はソースを見てからのお楽しみで。<br>
+<br>
+　今回は変更箇所が散在しているので、新しいソースコードとして全て示します。<br>
+<br><pre>
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qfont.h>
+#include &lt;qvbox.h>
+
+class MyWidget : public QVBox
+{
+public:
+    MyWidget(QWidget *parent=0, const char *name=0);
+};
+
+MyWidget::MyWidget(QWidget *parent, const char *name)
+    : QVBox(parent, name)
+{
+    QPushButton *quit = new QPushButton("Quit", this, "quit");
+    quit->setFont(QFont("Times", 18, QFont::Bold));
+    QPushButton *quit2 = new QPushButton("Quit2", this, "quit2");
+    quit->setFont(QFont("Times", 18, QFont::Bold));
+
+    connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
+    connect(quit2, SIGNAL(clicked()), quit, SIGNAL(clicked()));
+}
+
+int main(int argc, char **argv)
+{
+    QApplication a(argc, argv);
+
+    MyWidget w;
+    MyWidget w2(&w);
+    w.setGeometry(100, 100, 200, 120);
+    a.setMainWidget(&w);
+    w.show();
+
+    return a.exec();
+}
+</pre><br>
+　QVBoxのコンストラクタについてはQtのドキュメントで<br>
+<pre>
+Public Members
+	QVBox ( QWidget * parent=0, const char * name=0, WFlags f=0, bool allowLines=TRUE )
+</pre>
+　として、QWidgetのコンストラクタがそのまま流用できることを確認しています。<br>
+　下に実行結果を示します。<br>
+<br><img src="img/qt_t04_5.png"><br>
+<br>
+　上半分がMyWidget本来のQuit, Quit2です。Quit2の方ではBoldが効いていないような気もしますがそれは今回はさくっと無視
+しまして。下半分がmain()内で生成した二つ目のMyWidgetインスタンスです。<br>
+　動作としてはQuit, Quit2 どちらをクリックしてもアプリケーションは終了します。<br>
+<br>
+　今回のキモは・・・ズバリ。<br>
+<font size=+2><b>connect(quit2, SIGNAL(clicked()), quit, SIGNAL(clicked()));</b></font><br>
+　です。<h2>SIGNAL 同士が connect() できる。これはWindowsでは簡単には実現できません。</h2><br>
+<br>
+　つまり今回の実験では、<br>
+<center>quitのclicked()シグナル→qapplicationのquit()スロット</center>
+　プラス、<br>
+<center>quit2のclicked()シグナル→<b>quitのclicked()シグナル</b></center>
+　んでもって結局applicationのquit()スロットへはquitのシグナルと、quit2のシグナルの二通りの通り道が造れたわけです。<br>
+<br>
+<br>
+　さて、今回はへんちくりんなconnect()関数の使い方を示しておしまいです。ではいよいよいミニゲームの作成の下準備に
+入りましょう。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

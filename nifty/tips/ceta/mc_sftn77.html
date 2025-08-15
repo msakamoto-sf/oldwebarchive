@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mc_sftn77開発日記</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#ceta">「ぷろぐらみんぐ」目次</a><br>
+<br>
+<h1>mc_sftn77開発日誌</h1>
+初版作成：2002/11/16<br>
+二版作成：2002/11/19<br>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2><br>
+　Salford Fortran77を導入してみたはよいのだが。詳細は口述するが、とにかくCeta Ver2.50では、外部プログラムを呼び出すときの引数を渡す際の仕様上、ftn77.exeにソースコードファイル名が正常に認識されないことが判明した。<br>
+　Ceta側を作り替えるのは(Fortranのみのせいでそのような羽目に陥るのは)避けたい。<br>
+　そこで、直接ftn77を呼ぶのではなく、仕様上の違いを吸収するプログラムを間に挟むことにした。それが<b>mc_sftn77</b>(<b>M</b>odule of <b>C</b>eta for <b>S</b>alford <b>F</b>or<b>t</b>ra<b>n</b> 77)である。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#01">(2002/11/16)Salford Fortran 77 の動き</a></li>
+	<li><a href="#02">(2002/11/16)GetShortPathName()とstring→PCharの話</a></li>
+	<li><a href="#03">(2002/11/19)PChar→stringと文字列の連結とか。</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="01">(2002/11/16)Salford Fortran 77 の動き</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　Salford Fortran 77(以下、sftn77と表記)は個人使用に限ったFortranコンパイラである。Salfordのサイトに行けば商用で使えるような便利なIDE付きのものも購入できるようだ。たかがフリーのコンパイラごときで「セットアッププログラム」でちゃっかりレジストリ使う点を除けば便利であろう。もっとも、展開したファイルをコピーするだけでも別のマシンで動かせるので、レジストリに関しては「インストールしましたよ。」と書き込むだけで、とりわけ中枢プログラムが使うわけでもないようだ。<br>
+　まあ、とにかくセットアッププログラムを動かせばPATHにftn77.exeというコンパイラが入っているフォルダが追加される。それだけで利用可能になる。<br>
+　Cetaでもできるか・・・と試してみたが。何度試してもうまくいかない。PATHがおかしいらしい。困った。しょうがないので、.BATファイルで以下の内容をこしらえ、こいつでラッパーさせてみた。<br>
+<br>
+set PATH=C:\Origin\salford<br>
+echo %1<br>
+ftn77.exe %1<br>
+slink.exe %1.obj<br>
+<br>
+　DOSコマンドライン上からはこれでうまくいく。ちなみに、<b>/link</b>オプションをftn77.exeの方につければslink.exeまで自動化してくれる。<br>
+　ところが、Cetaからはやっぱりうまくいかない。んで、ようやく原因が判明したのが以下のエラー。<br>
+<br>
+*** File  ""c:\origin\test.for"" does not exist<br>
+<br>
+　ん？・・・ファイル名は渡されているが・・・<b>何で""（ダブルクォーテーション）が二重についてるんだ？</b>普通、ファイルが存在しないとかは""の一重で済むはず。<br>
+　待てよ。<b>確か、Cetaはロングファイル名を正常に渡すために、""で囲んでから引数となるファイルを渡すようにしている。</b>ということは。<br>
+　<b>ftn77.exe側がロングファイル名、特に""で囲まれたファイル名に対応していない。</b>ということかも。<br>
+　ということで、DOS窓ではうざいのでCygwinのrxvt-win32.exe上でいろいろロングファイル名に対するftn77.exeの反応を探ってみました。<br>
+　ファイル名：C:\Program Files\test.for<br>
+　<b>実験１：Cetaと同様の渡し方</b><br>
+<pre>
+[Administrator@KOTETSU Program Files]$ ftn77 "C:\Program Files\test.for"
+[Salford FTN77/Win32 v4.03, Copyright (c) Salford Software Ltd. 1988-1998]
+    Licensed to: FTN77 Personal Edition
+    Department: Non-commercial use only
+*** File ""c:\program files\test.for"" does not exist
+
+*** Compilation failed
+</pre>
+　・・・見事に（じゃないが）Cetaと同様のエラーを吐き出してコンパイル失敗。<br>
+　<b>実験２：\(エスケープ)使って長いまま包まず指定</b><br>
+<pre>
+[Administrator@KOTETSU Program Files]$ ftn77 C:\Program\ Files\test.for
+[Salford FTN77/Win32 v4.03, Copyright (c) Salford Software Ltd. 1988-1998]
+    Licensed to: FTN77 Personal Edition
+    Department: Non-commercial use only
+*** File ""c:program filestest.for"" does not exist
+
+*** Compilation failed
+</pre>
+　・・・これまた見事に失敗。<br>
+　<b>実験３：これでどうだ？包まないけどDOS8.3形式ショートファイル名</b><br>
+<pre>
+[Administrator@KOTETSU Program Files]$ ftn77 C:\Progra~1\test.for
+[Salford FTN77/Win32 v4.03, Copyright (c) Salford Software Ltd. 1988-1998]
+    Licensed to: FTN77 Personal Edition
+    Department: Non-commercial use only
+*** File "c:progra~1test.for" does not exist
+
+*** Compilation failed
+</pre>
+　・・・ううん。まだ駄目みたいですね。直接はやっぱまずいみたいです。\がエスケープされてしまってますねえ。<br>
+　<b>実験４：今度こそ！包んだ上でのDOS8.3形式ショートファイル名</b><br>
+<pre>
+[Administrator@KOTETSU Program Files]$ ftn77 "C:\Progra~1\test.for"
+[Salford FTN77/Win32 v4.03, Copyright (c) Salford Software Ltd. 1988-1998]
+    Licensed to: FTN77 Personal Edition
+    Department: Non-commercial use only
+    NO ERRORS  [<MAIN@>FTN77 Ver 4.03]
+</pre>
+　・・・<b>成功！！</b>ぐへへ。これで大体の目処が付きました。<br>
+<br>
+　つまりですね。ラッパープログラムとしては大体以下の動作をしてくれればいいわけです。<br>
+１．とにかくCetaから渡されてきたロングファイル名をGetShortPathNameというWin32APIでショートファイル名に変換します。んでもってこいつを""で包んであげます。<br>
+２．オプション入力欄をもうけたDLGを表示。デフォルトで「/link」を設定済みにしておき、ユーザーのカスタマイズ性をある程度残す。<br>
+３．これだとftn77.exeのパス設定ができないので、Ceta側で環境変数に「FTNDIR」を設定しておき、これを取り出して「ftn77.exe」と連結してftn77.exeのフルパスファイル名を取得する。ついでにftn77.exeを起動するときの環境変数のPATHにも使い回す。<br>
+　・・・と、まあこんな具合で。設計途中のスナップショットがこいつ↓<br>
+<img src="mc_sftn77_01.jpg"><br>
+　後は中身を書いていくだけ。<br>
+<br>
+<b>参考資料</b><br>
+　無し<br>
+<br>
+<font size=+1><b><a name="02">(2002/11/16)GetShortPathName()とstring→PCharの話</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて。<b>何故開発をDelphiで始めてしまったのかという疑問はぐっと抑えて。</b><br>
+　んでえ。さっき見せたような画面構成です。んで、OnShow関数の時に環境変数とってこさせたり、ショートファイル名作ってEditに表示したりさせるです。<br>
+　環境変数を取得する部分は以下のコードです。これ、後でCetaからテストする必要があります。未検証。<br>
+<pre>
+var
+	i: DWORD;
+	fd_ebuf: array[0..MAXSIZE] of char;
+begin
+	i := GetEnvironmentVariable('FTNDIR',@fd_ebuf,SizeOf(fd_ebuf));
+	e_ftndir.Text := fd_ebuf;
+</pre>
+　e_ftndirというのが$FTNDIR=に続くEditですね。<br>
+<br>
+　問題はGetShortPathNameで起こりました。これに関しては自分でも一時間ほど何とかしようとがんばり、結局どうにか作れました。んで、Delphiの実行時引数オプションで適当な存在しないロングファイル名を渡すようにしておいて、やってみたらうまくいかない。<br>
+　さては自分で作ったのが不味いのか・・・と思い、DelphiTipsに載っていたのを１０分で探して適用してみます。が。やっぱりうまくいかない・・・。<br>
+<pre>
+var
+	src_buf1: string;
+	src_buf2: array[0..MAXSIZE] of char;
+	src_buf3: string;
+begin
+	src_buf1 := ParamStr(1);
+	if src_buf1 &lt;&gt; '' then begin
+		ShowMessage(src_buf1);
+		i := GetShortPathName(PChar(src_buf1),PChar(src_buf3),0);
+		SetLength(src_buf3,i);
+		ShowMessage(IntToStr(i));
+		GetShortPathName(PChar(src_buf1),PChar(src_buf3),i);
+		GetShortPathName(PChar(src_buf1),@src_buf2,1024);
+		e_srcfile.Text := src_buf2;
+		ShowMessage(src_buf1);
+	end;
+</pre>
+　自力で作った部分とDelphi Tipsを参考にしたのがごちゃ混ぜですが勘弁してください。基本的にsrc_buf2のarray of charしたのが自力でトライした方で、src_buf3でSetLengthしてるのがDelphi Tips参考にした方です。<br>
+　んで。原因はしばらくして分かりました。<br>
+　<b>「存在しないファイル名」を渡したのがいけませんでした。</b><br>
+　というのは、うまくいかない現象として最初のShowMessage(src_buf1)は正常に表示されているのにGetShortPathName()だけが両方とも訳の分からない文字列になっている。しかも、i := がゼロになっている。<br>
+　これはもしや、存在しないファイル名を渡されたのでシステムから引くことができずゼロが返されているのでは？<br>
+　と思いまして、実在するファイル名を渡したらあっけなく正常に返ってきました。GetShortPathNameは単に文字列を適当に変換しているだけではなかったみたいです。<br>
+　余談：原因を見つけた糸口。例えば、C:\Program Files\は短くするとC:\Progra~1\になります。半角空白や、7文字目は~(チルダ)で置換されるわけです。で、最後につく数字が今回の糸口でした。この数字は、「6文字目までが同じファイル名が複数同じディレクトリに存在したとき何番目にあたるかを表す」みたいなものなんです。ここで、「ん？ということはいったんはロングファイル名で調べるわけだから、存在しないファイル名とかが渡されてきた場合調べようがないんじゃ・・・？」と考えて、原因に思い当たったわけです。<br>
+<br>
+　まあ、そんなわけでとにかくGetShortPathNameに関しては一段落です。<br>
+　ただ、Delphi Tipsの方が動的に確保しているので安全です。自力でやったのはDelphiのヘルプに載っていたのを参考にしました。MAXSIZEには1024がconst MAXSIZE=1024;として指定しました。FileSystem上は1024文字あれば十分なはずですが、まあ勉強です。Delphi Tipsを採用しましょう。実際、これはCだとmallocかGlobalAlloc使うわけでちとめんどくさくなる部分ですし。<br>
+<br>
+　最終的なFormShowプロシージャです。<br>
+<pre>
+procedure TForm1.FormShow(Sender: TObject);
+var
+	i: DWORD;
+	fd_ebuf: array[0..MAXSIZE] of char;
+	src_buf1: string;
+	src_buf2: string;
+
+begin
+	i := GetEnvironmentVariable('FTNDIR',@fd_ebuf,SizeOf(fd_ebuf));
+	e_ftndir.Text := fd_ebuf;
+
+	src_buf1 := ParamStr(1);
+	if src_buf1 &lt;&gt; '' then begin
+		i := GetShortPathName(PChar(src_buf1),PChar(src_buf2),0);
+		SetLength(src_buf2,i);
+		GetShortPathName(PChar(src_buf1),PChar(src_buf2),i);
+		e_srcfile.Text := src_buf2;
+	end;
+end;
+</pre>
+<br>
+<font size=+1><b><a name="03">(2002/11/19)PChar→stringと文字列の連結とか。</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　・・・さて。後はCetaのC++のソースコードで書かれているCreateProcess周りをPascalに持ち込めばよいだけである。まあ、いろいろ大変だったけれど。DelphiTips等を助けにしていろいろ貴重な勉強をしつつ移植できました。<br>
+　が。<b>やっぱりうまくいかない。</b>以下のエラーがどうしても出力されてしまう。<br>
+<pre>
+C:\Origin>"C:\Origin\salford\ftn77.exe"
+Cannot open authorisation file \ftn77.ser:
+System error (2): 指定されたファイルが見つかりません。
+</pre>
+　なんじゃこりゃ？これ、Cetaでも発生したエラーである。ホントどうなってるんだ・・・と思ったのですが。はたと思いつきましたよ。上の例、すでに何となく原因が分かり始めていて、それの検証として打ち込んだコマンドと結果なのです。それは。ほれ、<b>実行ファイルが""で囲まれてます。</b>これはCetaの動作と全く同じにした場合どうなるかをDOS上で確認したわけですが。<br>
+　Cannot openのファイル、\ftn77.ser。これ、\だけなんて変ですよね。そこで、さっきのソースコードのお話でもあったように、<b>「ひょっとしてダブルクォーテーションがあると不味いのでは・・・」</b>に思い至ったわけです。<br>
+　というわけで。とにかくダブルクォーテーションを外したコマンドラインを生成する羽目になりました。が。ここでちょっと躓きました。<br>
+　躓いていたコードを示します。
+<pre>
+var
+	{コマンドライン文字列、環境変数文字列、標準出力ファイル名 }
+	cmd_buf,env_buf,err_buf: string;
+    _cmd_buf: string; //GetShortPathNameのための一時バッファ
+（省略）
+begin
+	{ コマンドライン文字列の生成 }
+    i := GetShortPathName(PChar(e_ftndir.Text + '\' + FTNCMD),PChar(_cmd_buf),0);
+	SetLength(_cmd_buf,i);
+	GetShortPathName(PChar(e_ftndir.Text + '\' + FTNCMD),PChar(_cmd_buf),i);
+    ShowMessage(_cmd_buf);
+
+	cmd_buf := _cmd_buf + ' ' + e_ftnoption.Text + ' ' + e_srcfile.Text;
+</pre>
+　いろいろShowMessage入れたり、'"'挟んだり四苦八苦したのですが。'"'は意味無しで、ShowMessageで調べても、どうしても<b>' ' + ...が正常に代入されない。</b><br>
+　結局ShowMessage(cmd_buf)して表示されるのは、ショートファイル名になった_cmd_bufのみ。何なんだ。というわけで、丸三日（といっても全部で５時間くらいかな？）悩みつづけ。Delphi5オフィシャルコースウェア応用編まで購入して調べます。が、どうも載っていない。<br>
+　ただ、オフィシャルコースウェアの文字列部分を読んでいて気づいたのですが、string文字列型へPChar型を代入することは「=」演算子については記述があります。<b>しかし+演算子については記述がないんです。</b>またDelphiの「Object Pascal 言語ガイド」を見てみても、確かに「+」演算子は全ての文字列型でサポートされている、とは書かれているのですが、いまいち説明が足りない感触です。例や、極端に奇妙なケースについての言及がなかったりして参考になりません。<br>
+　結局・・・C言語で、安全な文字列の代入に使われやすいsprintfと似た働きの、SysUtilsユニットのFormat関数を使うことにしました。cmd_bufへの代入部分はこのように変更されました。<br>
+<pre>
+	cmd_buf := Format('%s %s %s',[PChar(_cmd_buf),PChar(e_ftnoption.Text),PChar(e_srcfile.Text)]);
+</pre>
+　これでようやく完全に動きました！！イヤー長かったー。<br>
+<br>
+　というわけで。お待たせしました。Ceta＆Salford Fortran 77専用ラッパープログラム「mc_sftn77」、ついにVer 0.11<a href="../../program/index.html">登場です！</a><br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　ちょっと躓いたところもありましたが、どうにかDelphiを使った最初のプログラミングをかなり幸福な形で完成させることができました。学校の情報処理概論という授業で、プログラミングの紹介といった形でPascalのさわりだけを体験したのが３年前ですか。長いことご無沙汰していましたが、アスキー出版局の「Delphi5オフィシャルコースウェア」シリーズのおかげで何とかスタートラインに着くことができそうです。<br>
+　まだまだDelphiは初心者ではありますが、オフィシャルコースウェアの「応用編」をじっくりと読みこなしてDelphi、やがてはBuilderを思う存分いじくり回せるようになりたいものです。<br>
+　ちまたにはDelphiやBuilderの解説書がだいぶあふれていますが、とにかく「オフィシャルコースウェア」を読まないことには扱えないと思います。それも「応用編」まで読み込まないと、BuilderやDelphiの良さを生かし切れません。というのも、コンポーネントの作成方法やDLLなど、Windowsとの連携部分に関しては基礎編には載っていませんし、マニュアルを参照しても分厚すぎます。また、ヘルプを参照するのも画面を見つつで苦痛なんです。そういうわけで、<b>もっと早く「応用編」をBuilderなりDelphiなりで買っておけばCetaとかで無用なトラブルに悩まされなかったのに。</b>と激しく後悔していたり。まあ、まだまだ勉強し直せる（たぶん）のですから、がんばりますです。<br>
+　ちょっとヘルプを引いてみれば実感できると思うのですが、Borlandの提供しているヘルプ（特にサンプルコードとか）って、あまりにも「見れば分かるだろ」的な部分が多い（特にVCLヘルプ）。もっと境界的というか、クリティカルというか、「こいつはどうだ！？」的な「キワモノサンプル」や記述がない。というわけで、ずいぶん物足りない思いをするのです。そういったときに早めにDelphi Tipsなり、「オフィシャルコースウェア」なりを引いてみると以外とあっけなく見つかったり。<br>
+　まあ、そんなモンなんでしょう。<br>
+　というわけで、今回はこれでお仕舞い。おつきあいいただきありがとうございました。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#ceta">「ぷろぐらみんぐ」目次</a>
+</body>
+</html>

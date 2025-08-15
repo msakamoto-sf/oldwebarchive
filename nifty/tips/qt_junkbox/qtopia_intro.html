@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qtopia事始め（Zaurus用クロスコンパイル環境の構築）</title>
+<style>
+</style>
+</head>
+<body >
+<!-- i.e. -->
+<!-- $title := "タイトル" -->
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a><br>
+<br>
+<h1>Qtopia事始め（Zaurus用クロスコンパイル環境の構築）</h1>
+初版作成：2003/01/06<br>
+<!-- 二版作成：$date_2<br> -->
+<h2>注意</h2>
+<p>
+2008/11月現在、実に5年前のドキュメントです。外部サイトリンクが多数リンク切れになっています。あくまでも参考としてご利用下さい。
+</p>
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+<br>
+　バイト先の先輩が SL-A300 を使っている。<br>
+　Linuxを使っていると聞いて私もちょくちょく見せて貰っている。<br>
+　先輩は「ソフトも開発者も揃ってない。ソフトはJavaベースばかりだし。」とよく嘆く。<br>
+<br>
+　「ねえ○○（私の名前）くん、早くこっちの世界においでよ。」<br>
+<br>
+　私の部屋の本棚には、SLシリーズを目にするよりも前に購入していたKDE本があった。<br>
+　私は今、ちょうどクロスコンパイルや組み込みLinux/UNIXに興味がある。<br>
+　そして私はなぜかGTK+には興味が向かず、Qt/KDEに目が向いていた。<br>
+<br>
+　<font size=+2><b>終わったな・・・。</b></font><br>
+<br>
+　ああ。このページを先輩に見せたときの反応が今にも予想できる。<br>
+<br>
+　<font size=+2><b>「くっくっく。○○くん、ついに堕ちたね。」</b></font><br>
+<br>
+　ええ・・・まあ・・・そう言うわけで、ついに手を出してしまいました。<br>
+　ベースとなる資料はシャープから提供されている「"SL-A300" + "Qt/E / Qtopia" 開発環境セットアップガイド」です。<br>
+　これは<a href="#links">参考リンク</a>に載せてある「ザウルス宝箱 Pro」からたどれる、「SLシリーズ技術サポートページ」
+から入手できるPDFファイルで、SL-A300用のアプリケーションの開発環境を Linux 上で構築する手順が書かれています。<br>
+　基本的にそのPDFの構成に従い、実際のコマンドライン風景を交えてインストールからコンパイル動作の確認を追って行きます。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#setup_cross">Zaurus用クロスコンパイラのセットアップ</a></li>
+	<li><a href="#setup_qtopia">Qtopiaのセットアップ</a></li>
+	<li><a href="#setup_arm">Zaurus ARM 用環境設定</a></li>
+	<li><a href="#compilation">コンパイルテスト</a></li>
+	<li><a href="#using_qvfb">qvfbの使用方法</a></li>
+	<li><a href="#console_dev">コンソールでの開発</a></li>
+	<li><a href="#doc_namazu">（番外編）QtopiaドキュメントのNAMAZU化</a></li>
+	<li><a href="#links">参考リンク</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="setup_cross">Zaurus用クロスコンパイラのセットアップ</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　さて、とりあえずZaurus用のクロスコンパイラキットをインストールしてしまいます。<br>
+　これらはシャープより半ば純正品と化して RPM として提供されています。以下の四つのRPMをダウンロードします。<br>
+　Qtの開発ツールであるtmakeもリストにありますが、Qtopiaを使うときに必須ですのでついでにダウンロードしといてください。<br>
+<br>
+<table border="1" cellspacing="0" cellpadding="2" width="570">
+<tr>
+<td bgcolor="#CCCCCC" align="center" width="30%"><font size="2"><strong>ツール名</strong></font></td>
+<td align="center" bgcolor="#CCCCCC" width="40%"><font size="2"><b>説明</b></font></td>
+</tr>
+<tr>
+<td bgcolor="#ccffff"><font size="2"><a href="http://www.zaurus.com/dev/tools/downloads/tools/gcc-cross-sa1100-2.95.2-0.i386.rpm">クロスコンパイラ（gcc）</a></font></td>
+<td><font size="2">Linux上で動作するi386用のクロスコンパイラです。rpmパッケージになっており、SL-5500用のものと同じです。</font></td>
+</tr>
+<tr>
+<td bgcolor="#ccffff"><font size="2"><a href="http://www.zaurus.com/dev/tools/downloads/tools/glibc-arm-2.2.2-0.i386.rpm">ライブラリ（glibc）</a></font></td>
+<td><font size="2">上記で使用するライブラリです。rpmパッケージになっており、SL-5500用のものと同じです。</font></td>
+</tr>
+<tr>
+<td bgcolor="#ccffff"><font size="2"><a href="http://www.zaurus.com/dev/tools/downloads/tools/linux-headers-arm-sa1100-2.4.6-3.i386.rpm">ヘッダファイル</a></font></td>
+<td><font size="2">上記で使用するヘッダファイルです。rpmパッケージになっており、SL-5500用のものと同じです。</font></td>
+</tr>
+<tr>
+<td bgcolor="#ccffff"><font size="2"><a href="http://www.zaurus.com/dev/tools/downloads/tools/binutils-cross-arm-2.11.2-0.i386.rpm">ユーティリティ</a></font></td>
+<td><font size="2">上記で使用するi386用の各種ユーティリティです。rpmパッケージになっており、SL-5500用のものと同じです。</font></td>
+</tr>
+<tr>
+<td bgcolor="#ccffff"><font size="2"><a href="http://www.trolltech.com/developer/download/tmake.html">tmakeツール（TROLLTECH社様　Webへ）</a></font></td>
+<td><font size="2">tmakeツールへのリンクです。</font></td>
+</tr>
+<tr>
+<td bgcolor="#ccffff"><font size="2"><a href="http://www.zaurus.com/dev/tools/downloads/tools/tmake-sharp.tar.gz">tmake設定ファイル for SLシリーズ</a></font></td>
+<td><font size="2">上記tmakeで使用する、SLシリーズ用のtmake設定ファイルです。</font></td>
+</tr>
+</table><br>
+<br>
+　すべてのパッケージは各種ファイルのインストール先が「/opt/Embedix」になっているので多分あまりシステムには影響を
+及ぼさないはずです。安心してください。<br>
+　SL-5500用と同じ云々と書いてありますが、要するにSL-5500でもSL-A300でも使えますよ、ということです。<br>
+<br>
+　んで、<br>
+<br><pre>
+# rpm -Uvh gcc-cross-sa1100-2.95.2-0.i386.rpm
+</pre><br>
+　とかして４つのRPMパッケージをインストールしちゃってください。ファイルのインストール先は「/opt/Embedix」下です。
+不安な方や慎重な方は「rpm -qpl」とかで調べちゃってください。<br>
+<br>
+<br>
+<font size=+1><b><a name="setup_qtopia">Qtopiaのセットアップ</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　Zaurus用のアプリケーションはC++とTrolltech社のQtを使って開発します。んで、Qtopiaっちゅーのはぶっちゃけた話、
+PIM用にチューンナップされたQtベースのデスクトップ環境です。あとで画面をお見せしますが、基本的なエディタやmpeg
+プレーヤ、そのほか文字入力・手書き認識などの機能を一通り備えた一種のサーバーと化しています。<br>
+　んで、Qtopiaには通常のX11上でアプリケーションのテストを実行できる<b>仮想フレームバッファ(qvfb)</b>を提供しています。<br>
+　qvfbを使えば、クロスコンパイルしたQtopiaソフトをわざわざZaurus上まで引っ張ってこなくても、X上でシミュレートというか
+実行できるわけです。<br>
+<br>
+　よーするにZaurus用のアプリを作る、ということは<b>「Qtopia用に作成したプログラムを ARM プロセッサ用にクロスコンパイル
+する」</b>ということです（ここで言うアプリとはZaurusのQtopia用に作られたGUIソフトウェアのことです）。<br>
+<br>
+　というわけで、QtopiaやらそのためのQt用のライブラリを含む QtopiaのSDKをダウンロードします。<br>
+　QtopiaのダウンロードはTrolltech本社のWebページからたどれます。<br>
+<br>
+<a href="http://www.trolltech.com/developer/download/qtopia.html?cr=1">Open Source SDK for Qtopia</a><br>
+<br>
+　ダウンロードに関してですが、以前QtのX11用を入手しようとgFTPでダウンロードしようとしたができず、コマンドラインFTPで
+ダウンロードできたことがあります。もしお使いのFTPクライアント、またはブラウザからダウンロードが出来ないようでしたら、
+コマンドラインFTPでダウンロードしてください。そのあたりの記録は<a href="qt_tmake.html">tmakeのインストールと動作確認</a>
+にて記録してあります。<br>
+<br>
+　なお今回紹介するのは個人用のGPLライセンスに基づいた無償版です。商用に関しては別途Trolltechへ問い合わせてください。<br>
+<br>
+　初期設定ではQtopia SDKは /opt/Qtopia にインストールされます。なおこの中にtmakeも含まれています。既にtmakeの最新版
+を入れてしまった方などはどちらを利用すべきか迷うところですが、<b>tmake-1.8のtmakeとdiffしたところ、全く同じ内容でした。</b>
+　ので、その点に関しては特に心配する必要は無いと思われます。<br>
+<br>
+<br>
+　んで、Qtopiaのインストールが済みましたらどこかパスの通った場所に二つのバッチファイルを作成します。<br>
+　x86用とARMクロスコンパイル用の環境変数の設定を行うバッチファイルです。<br>
+　x86用はqvfbを使うときにも使用します。<br>
+<br><pre>
+X86ターゲット用「dev-x86-qpe.sh」
+
+#!/bin/bash
+
+CROSSCOMPILE=/opt/Embedix/tools
+QPEDIR=/opt/Qtopia
+QTDIR=/opt/Qtopia
+PATH=$QTDIR/bin:$QPEDIR/bin:$PATH:/opt/Embedix/tools/bin
+TMAKEPATH=/opt/Qtopia/tmake/lib/qws/linux-x86-g++/
+LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+
+export QPEDIR QTDIR PATH TMAKEPATH LD_LIBRARY_PATH PS1
+
+echo "Altered environment for sharp Zaurus Development x86"
+
+$*
+
+
+ARMターゲット用「dev-arm-qpe.sh」
+
+#!/bin/bash
+
+CROSSCOMPILE=/opt/Embedix/tools
+QPEDIR=/opt/Qtopia/sharp
+QTDIR=/opt/Qtopia/sharp
+PATH=$QTDIR/bin:$QPEDIR/bin:$CROSSCOMPILE/bin:$PATH
+TMAKEPATH=/opt/Qtopia/tmake/lib/qws/linux-sharp-g++/
+LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+
+export QPEDIR QTDIR PATH TMAKEPATH LD_LIBRARY_PATH PS1
+
+echo "Altered environment for sharp Zaurus Development ARM"
+
+$*
+</pre><br>
+　実はシャープの提供する「開発環境セットアップガイド」には最後の「$*」は載っていません。この理由は後述します。<br>
+<br>
+　んで、作りましたら両スクリプトファイルにchmod +xとかして実行権を付けてあげましょう。<br>
+　以降、QtopiaのX86用をコンパイルするときはdev-x86-qpe.shを、ARM用をコンパイルするときはdev-arm-qpe.shをそれぞれ
+利用することになります。<br>
+<br>
+<br>
+<font size=+1><b><a name="setup_arm">Zaurus ARM 用環境設定</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　んで、ZaurusARMクロスコンパイル用のtmake設定ファイルをインストールします。<br>
+　「Qtopiaのセットアップ」で記載しているARM用シェルスクリプト例に記述していますが、環境変数 TMAKEPATH にてターゲット
+となるシャープ用のMakefile環境定義（実体はtmake設定ファイル）を指定しますので、インストールしときます。<br>
+　よーするに<a href="http://www.zaurus.com/dev/tools/downloads/tools/tmake-sharp.tar.gz">tmake設定ファイル for SLシリーズ</a>
+をダウンロードしてきます。んで、こんな感じにインストールします。<br>
+<br><pre>
+[fenjin@seisyuu fenjin]$ ls
+...
+tmake-sharp.tar.gz
+...
+[fenjin@seisyuu fenjin]$ tar zxvf tmake-sharp.tar.gz
+README-sharp
+linux-sharp-g++/
+linux-sharp-g++/app.t
+linux-sharp-g++/lib.t
+linux-sharp-g++/subdirs.t
+linux-sharp-g++/tmake.conf
+[fenjin@seisyuu fenjin]$ su
+
+（ここで/opt/Qtopia/tmake/lib/qwsを見ると既にlinux-sharp-g++ディレクトリが存在しています。適当にリネームしといて下さい。）
+
+[root@seisyuu fenjin]# cp -rp linux-sharp-g++ /opt/Qtopia/tmake/lib/qws/
+[root@seisyuu fenjin]# ls /opt/Qtopia/tmake/lib/qws/
+...
+linux-sharp-g++/
+linux-sharp-g++.bak/ （前のliux-sharp-g++をリネームしてバックアップしたディレクトリです）
+...
+</pre><br>
+　以上でコンパイルに必要な下準備は完了しました。Qtopiaにくっついてくる動作確認用サンプルをコンパイルしてみましょう。<br>
+<br>
+<br>
+<font size=+1><b><a name="compilation">コンパイルテスト</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　というわけでコンパイルテストです。Qtopia添付の動作確認用サンプル、/opt/Qtopia/exampleを適当な場所にコピーしときます。<br>
+<br><pre>
+[fenjin@seisyuu fenjin]$ cd in_vitro/src
+[fenjin@seisyuu src]$ cp -rp /opt/Qtopia/example ./
+[fenjin@seisyuu src]$ ls
+...
+example/
+...
+[fenjin@seisyuu src]$ cd example/
+[fenjin@seisyuu example]$ ls
+Example.png      example.cpp      example.h     example.pro     main.cpp
+example.control  example.desktop  example.html  examplebase.ui
+[fenjin@seisyuu example]$ cat example.pro
+TEMPLATE        = app
+#CONFIG         = qt warn_on debug
+CONFIG          = qt warn_on release
+HEADERS         = example.h
+SOURCES         = main.cpp example.cpp
+INCLUDEPATH     += $(QPEDIR)/include
+DEPENDPATH      += $(QPEDIR)/include
+LIBS            += -lqpe
+INTERFACES      = examplebase.ui
+TARGET          = example
+</pre><br>
+　んでもって、既にtmakeの使うプロジェクトファイルが作られてしまっています。通常のproファイルとの違いは「LIBS」に「-lqpe」
+が追加されているところでしょう。これがQtopia用のライブラリ設定です。<br>
+　またコンパイルはリリース用になっています。debugオプションがコメントアウトされてます。<br>
+<br>
+　さて、それではtmakeで作ってみましょう。・・・その前に。ARMと区別しやすいよう、example.proをexample-x86.pro
+とexample-arm.proと二つにコピーします。んで、TARGETを example-x86 と example-arm にそれぞれ変更しておきましょう。<br>
+<br><pre>
+[fenjin@seisyuu example]$ mv example.pro example-x86.pro
+[fenjin@seisyuu example]$ cp example-x86.pro example-arm.pro
+[fenjin@seisyuu example]$ vi example-x86.pro
+[fenjin@seisyuu example]$ vi example-arm.pro
+</pre><br>
+　んでいよいよtmakeを使います。dev-x86-qpe.shの使い方に注目して下さい。<br>
+<br><pre>
+[fenjin@seisyuu example]$ dev-x86-qpe.sh tmake -o Makefile.x86 example-x86.pro
+Altered environment for sharp Zaurus Development x86
+[fenjin@seisyuu example]$ ls
+...
+Makefile.x86
+...
+
+[fenjin@seisyuu example]$ dev-x86-qpe.sh make -f Makefile.x86
+Altered environment for sharp Zaurus Development x86
+/opt/Qtopia/bin/uic examplebase.ui -o ./examplebase.h
+g++ -c -pipe -DQWS -fno-exceptions -fno-rtti -Wall -W -O2 -fno-default-inline
+	 -DNO_DEBUG -I/opt/Qtopia/include -I/opt/Qtopia/include -o main.o main.cpp
+...
+gcc  -o example-x86 main.o example.o examplebase.o moc_example.o moc_examplebase.o
+	  -L/opt/Qtopia/lib -lqpe -lqte
+[fenjin@seisyuu example]$ ls
+...
+Makefile.x86
+...
+example-x86*
+...
+[fenjin@seisyuu example]$ file example-x86
+example-x86: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV),
+	dynamically linked (uses shared libs), not stripped
+</pre><br>
+　<b>本来なら普通に実行するコマンドをdev-x86-qpe.shの引数として扱っています。</b><br>
+　これが、「セットアップガイド」には載っていない最後の「$*」です。<br>
+<br>
+　シャープの提供している「開発環境セットアップガイド」に記載されているスクリプト例は$*がありません。<br>
+　でえ、そのガイドではtmakeやらmakeの部分はこんな風に済むらしーんですわ。<br>
+<br><pre>
+[fenjin@seisyuu example]$ dev-x86-qpe.sh
+[fenjin@seisyuu example]$ tmake -o Makefile.x86 example-x86.pro
+Altered environment for sharp Zaurus Development x86
+[fenjin@seisyuu example]$ ls
+...
+Makefile.x86
+...
+[fenjin@seisyuu example]$ make -f Makefile.x86
+</pre><br>
+　要するにdev-***-qpe.sh内で環境変数をexportしてますから、スクリプトのシェル抜けても環境変数が保持されたまま、という
+事らしいです。<b>があ、なぜかうまくexportされなかったんですよ。</b><br>
+　しょうがないので、$1以降の引数を全部まとめて扱ってくれる $* を利用してスクリプトのシェル内でtmakeやらmakeを実行
+出来る様に修正したわけです。<br>
+<br>
+　というわけで、正常にexport出来ちゃった人は$*使う必要ないです。セットアップガイドの通りに、最初にdev-***-qpe.sh
+叩いてから普通にtmake, makeしちゃって下さい。<br>
+<br>
+　んで。とにかくX86用のバイナリがめでたくもコンパイル、リンクできたわけです。<br>
+　実行してみましょう。qvfbをあらかじめ立ち上げておきます。その後、<b>サーバーモード(-qwsオプション)で</b>
+example-x86を実行します。<br>
+<br><pre>
+[fenjin@seisyuu example]$ dev-x86-qpe.sh qvfb &
+Altered environment for sharp Zaurus Development x86
+Using display 0
+
+（qvfbをバックグラウンドで実行します。qvfbへのパスはdev-x86-qpe.sh中で設定されています。）
+
+[fenjin@seisyuu example]$ dev-x86-qpe.sh ./example-x86 -qws
+Altered environment for sharp Zaurus Development x86
+Connected to VFB server: 240 x 320 x 32
+</pre><br>
+　下に示すのが、qvfbを立ち上げた初期状態のウインドウです。<br>
+<br><img src="qtopia_intro_01.png"><br>
+<br>
+　続いてexample-x86を立ち上げた状態のウインドウです。<br>
+<br><img src="qtopia_intro_02.png"><br>
+<br>
+　画面下部のボタンをクリックするとexample-x86は終了します。qvfb自体は終了しません。<br>
+<br>
+　続いてARM用のクロスコンパイルを行ってみます。最初にmake cleanでX86用で生成されたオブジェクトファイルを一掃してから
+tmake, makeします。<br>
+<br><pre>
+[fenjin@seisyuu example]$ make -f Makefile.x86 clean
+rm -f main.o example.o examplebase.o moc_example.o moc_examplebase.o moc_example.cpp
+	 moc_examplebase.cpp examplebase.cpp examplebase.h example-x86
+rm -f *~ core
+[fenjin@seisyuu example]$ dev-arm-qpe.sh tmake -o Makefile.arm example-arm.pro
+Altered environment for sharp Zaurus Development ARM
+[fenjin@seisyuu example]$ dev-arm-qpe.sh make -f Makefile.arm
+Altered environment for sharp Zaurus Development ARM
+/opt/Qtopia/sharp/bin/uic examplebase.ui -o ./examplebase.h
+arm-linux-g++ -c -pipe -DQT_QWS_EBX -DQT_QWS_CUSTOM -DQWS -fno-exceptions -fno-rtti -Wall -W -O2
+	 -DNO_DEBUG -I/opt/Qtopia/sharp/include -I/opt/Qtopia/sharp/include -o main.o main.cpp
+...
+arm-linux-g++  -o example-arm main.o example.o examplebase.o moc_example.o moc_examplebase.o
+	-L/opt/Qtopia/sharp/lib -lqpe -lqte
+[fenjin@seisyuu example]$ ls
+...
+example-arm*
+...
+Makefile.arm
+example-arm.pro
+</pre><br>
+　いかがなもんでしょうか。一応arm-linux-g++使ってるし、まあ・・・多分・・・大丈夫なんじゃないかな、と思うんですが。<br>
+<br>
+　というのもですね、<b>私自身はまだSLシリーズを持ってない</b>という事実があるので、動作確認がとれないんですよ。<br>
+　多分いけるとは思うんですが・・・要確認事項です。<br>
+<br>
+<br>
+<font size=+1><b><a name="using_qvfb">qvfbの使用方法</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　qvfbを使うことによりアプリケーションソフトをX11上で動作させることが出来ます。<br>
+　まあ一種のシミュレーションですね。シミュレーションを開始するには先ほども行ったようにQtopia用の環境変数を有効にした後
+/opt/Qtopia/bin/qvfbをバックグラウンド実行します。<br>
+　んで、ですね。アプリケーション側で<b>サーバーモード</b>ってありましたよね。<b>-qws</b>オプションの。<br>
+　あれよく分かんないんですよ。ただ、<b>-qwsオプションを付けない場合はあらかじめ/opt/Qtopia/pqeを実行しておく
+必要がある</b>らしーんですわ。んでえ、qpeを実行しますとですね・・・<br>
+<br><pre>
+[fenjin@seisyuu example]$ dev-x86-qpe.sh qvfb &
+Altered environment for sharp Zaurus Development x86
+Using display 0
+
+[fenjin@seisyuu example]$ dev-x86-qpe.sh qpe
+Altered environment for sharp Zaurus Development x86
+Connected to VFB server: 240 x 320 x 32
+tr for sysapplet: /opt/Qtopia//i18n/ja_JP.eucJP/libbatteryapplet.qm
+tr for sysapplet: /opt/Qtopia//i18n/ja_JP.eucJP/libcardmonapplet.qm
+tr for sysapplet: /opt/Qtopia//i18n/ja_JP.eucJP/libclockapplet.qm
+tr for sysapplet: /opt/Qtopia//i18n/ja_JP.eucJP/libnetmonapplet.qm
+Categories::labels didn't find app Document View
+QDir::readDirEntries: Cannot read the directory: /opt/Qtopia/plugins/obex
+could not load IR plugin
+executing embeddedkonsole
+Connected to VFB server: 240 x 320 x 32
+QDir::readDirEntries: Cannot read the directory: /opt/Qtopia/etc/keytabs
+</pre><br>
+　という風に、エラーが多少あるものの何だかDesktopっぽいシロモノが表示されます。<br>
+<br><img src="qtopia_intro_03.png"><br>
+<br>
+　んで、ですね。具体的にここからどうやってexample-x86を動かすのかというと。<br>
+　ズバリ、画面中の「Terminal」を起動します。するとZaurusLinuxでお馴染みのTerminal画面が表示されます。<br>
+　カレントディレクトリはqpeを起動した時点でのカレントですので、画面を見て分かるとおりすぐにexample-x86を起動できます。<br>
+<br><img src="qtopia_intro_04.png"><br>
+<br><img src="qtopia_intro_05.png"><br>
+<br>
+　実行してみます。Terminalのコマンドラインから直にexample-x86を入力するだけです。<br>
+<br><img src="qtopia_intro_06.png"><br>
+<br>
+　このように、Qtopiaのデスクトップ環境下でアプリケーションをテストできるので非常に便利です。<br>
+<br>
+　<b>ただし。</b><br>
+　終わってみるとホームディレクトリに「Application」とか「Settings」とか。何だかデスクトップ環境システム特有の設定
+ディレクトリが出来てたりしてすこーしうざかったり。<br>
+<br>
+<br>
+<font size=+1><b><a name="console_dev">コンソールでの開発</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　アプリケーションによるビルドシステムを利用すれば、ARM用コンパイルの設定に変更することは環境変数CCを変更するよりも
+簡単ですが、ディストリビューションやビルドシステムのドキュメントを確認して下さい。<br>
+<br>
+　Qtのライブラリとリンクさせずに qmake と tmake を使用するには、次のオプションをプロジェクトファイルに追加します。<br>
+<br>
+CONFIG -= qt # remove the qt linking<br>
+<br>
+　<b>注意</b>：Zaurus用のコンパイルを行う際は、ARM用のライブラリがリンクされていることを確認して下さい。<br>
+<br>
+<br>
+<font size=+1><b><a name="doc_namazu">（番外編）QtopiaドキュメントのNAMAZU化</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　はい。何だかんだ言って今回オリジナルなのはこの部分だけという情けない状態ですが。<br>
+<br>
+　Qtopia SDKのパッケージには、/opt/Qtopia/doc/以下に qt ディレクトリと qtopia ディレクトリ、そしてindex.htmlファイルが
+含まれています。<br>
+　qt ディレクトリの中身はぶっちゃけた話QtのX11版に添付して来るものと殆ど同じなので、以前にQtのドキュメントをNamazu化
+している人たちには無用の長物です。一応私の場合のNamazu化の記録が<a href="qt_tlxw8_rpm.html">TLXW8におけるQtの学習法</a>
+に綴ってありますので、まだNamazu化が済んでいない方は目を通してみると良いかな、と。<br>
+<br>
+　んで。qtopiaディレクトリの中を見てみますと「index.html」がありません。実は/opt/Qtopia/doc/index.htmlがQtopiaの総合
+インデックスになっています。<br>
+　ところがこのindex.html、リンクが結構怪しいです。Qtリファレンスのリンクが間違っていますし、上部メニュー風リンクと
+中央部インデックス部リンクのディレクトリ指定が一致していないためdoc/qtopiaへ正しく飛べない箇所もあります。<br>
+<br>
+　何よりも困ったのは、ディレクトリが内部で分かれているためにmknmzの--replaceオプションが全部に対してうまく動いてくれない
+といった弊害が発生してしまいました。<br>
+<br>
+　とにかく、Qt自体のNamazu化は私の場合済んでいますので、欲しいのは doc/index.html と doc/qtopiaディレクトリだけです。<br>
+<br>
+　というわけで、index.htmlを qtopia の中にコピーしてしまいます。んで、doc/qtopia/index.htmlからでも飛べるようにリンク
+を修正しちゃいます。おっと、qtopia ディレクトリを（私の場合）public_html/kde_docs/ディレクトリ以下にコピーしておかなく
+ちゃいけませんでした。<br>
+<br><pre>
+[fenjin@seisyuu fenjin]$ cd /opt/Qtopia/doc/
+[fenjin@seisyuu doc]$ ls
+index.html  qt/  qtopia/
+[fenjin@seisyuu doc]$ cp -rp qtopia ~/public_html/kde_docs/
+[fenjin@seisyuu doc]$ cp index.html ~/public_html/kde_docs/qtopia/
+[fenjin@seisyuu doc]$ cd ~/public_html/kde_docs/
+[fenjin@seisyuu kde_docs]$ ls
+kde/  namazu-index/  namazu.bak*  namazu.cgi*  qt/  qtopia/
+[fenjin@seisyuu kde_docs]$ cd qtopia/
+[fenjin@seisyuu qtopia]$ vi index.html
+</pre><br>
+　index.htmlの編集としてはqtopiaのドキュメントへのリンクを修正したり、Qtへのライブラリリファレンスのリンクを
+修正します。幸い今回のディレクトリ構成は qt と qtopia ディレクトリが同じ階層にありますので、Qtライブラリへのリンクは
+../qt 等と変更するだけでうまくリンクが張れます。<br>
+<br>
+　んで、後は kde_docs/namazu-index 下に qtopia ディレクトリを作り、Namazuのインデックスファイルをそこにぶち込むだけです。<br>
+　もちろん namazu-index/template 下の NMZ.head.ja を編集して qtopia のインデックスを利用できるようにしておくことも
+忘れちゃいけません。<br>
+<br><pre>
+[fenjin@seisyuu qtopia]$ cd ../namazu-index/
+[fenjin@seisyuu namazu-index]$ mkdir qtopia
+[fenjin@seisyuu namazu-index]$ ls
+kde/  qt/  qtopia/  template/
+[fenjin@seisyuu namazu-index]$ cd ..
+[fenjin@seisyuu kde_docs]$ mknmz --replace='s#/home/fenjin/public_html/kde_docs/##' \
+--html-split \
+--output-dir=/home/fenjin/public_html/kde_docs/namazu-index/qtopia \
+/home/fenjin/public_html/kde_docs/qtopia
+
+（インデックスファイルの作成）
+...
+...
+[fenjin@seisyuu kde_docs]$ cd namazu-index/qtopia/
+[fenjin@seisyuu qtopia]$ ls
+NMZ.body          NMZ.field.message-id
+...
+[fenjin@seisyuu qtopia]$ cd ../template/
+[fenjin@seisyuu template]$ vi NMZ.head.ja
+
+（ここで idxname にqtopiaを追加する。具体的な参考例は以下のようになる。）
+&lt;strong>検索対象:&lt;/strong>
+&lt;ul>
+&lt;li>&lt;input type="checkbox" name="idxname" value="qt" checked>qt
+&lt;li>&lt;input type="checkbox" name="idxname" value="kde">kde
+&lt;li>&lt;input type="checkbox" name="idxname" value="qtopia">qtopia
+</pre><br>
+　これで、以前整備した KDE/Qt ドキュメント検索ページに qtopia が現れてQtopiaの提供するクラスやAPIドキュメントが検索
+出来るようになります。<br>
+　検索できるようにはなったが、リンクがおかしくなっているときなどは mknmz するときの --replace で指定するパスを、
+たとえば kde_docs から kde_docs/qtopia にしてみるとか、少しずらしてみて下さい。私の場合は上記例で上手く行きました。<br>
+<br>
+<br>
+<font size=+1><b><a name="links">参考リンク</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　今回参考にした、というか利用したＨＰです。<br>
+<br>
+<a href="http://www.zaurusworld.ne.jp/" target=_blank>Sharp Space Town for Zaurus</a><br>
+<a href="http://more.sbc.co.jp/default.asp" target=_blank>ザウルス宝箱Pro　トップページ</a><br>
+<a href="http://more.sbc.co.jp/sl_j/tool/tools.htm#Linux" target=_blank>SLシリーズ関連　開発ツール一覧のページ</a><br>
+<a href="http://www.trolltech.com/" target=_blank>Trolltech</a><br>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+<br>
+　長丁場になってしまいごめんなさい。<br>
+　コマンドライン風景も含めるとどうしても長くなってしまいます。<br>
+　ですが、実際にどんな風に作業しているのか、の手本というか、参考例を載っけた方がわかりやすいと思うので。<br>
+　え？やっぱ邪魔？・・・うーん・・・。<br>
+<br>
+　と、とにかく。環境変数のexportを除けばx86用のコンパイルと動作確認はこれで出来るようになりました。<br>
+　ARM用の本番はちょっと、先輩のSLを借りるしかありませんね・・・。<br>
+<br>
+　実際問題として、SLシリーズ用のソフトは既に相当数出てはいるようです。<br>
+　が、ゲームであったりベータ版であったり。MIシリーズで使われている名作ソフトはなかなかポーティングされていないようです。<br>
+<br>
+　まあ入れ込むつもりはありませんが、組み込みLinuxとしてはずいぶん大きめのシステムですし、いじくるには結構最適かな、と。<br>
+　まあそんな感じで始めてみました。<br>
+<br>
+　exampleのソースを見てみると、QtDesignerが生成したuiファイルを元にしてテンプレートクラスをでっち上げるまでは一緒のようです。<br>
+　ただ、main.cppでQtならQApplicationクラスを用いていた部分が QPEApplication に変更されていました。<br>
+　調査が必要ですが、特別なインターフェイスやクラスを用いていない限りかなり簡単にポーティング出来るかもしれません。<br>
+<br>
+　Qtのチュートリアルが現時点では未完成ですので、そちらを先にやっつけた後ぼちぼちとザウルスLinuxに進出していきたいと思います。<br>
+　最終的にはZaurusLinuxのカーネルをある程度カスタマイズできるようになれればな、とか。<br>
+　まあそれは本当の本当に最終目標ですが。<br>
+<br>
+　それでは今回はここまで。お付き合いいただきありがとうございました。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>
+</body>
+</html>

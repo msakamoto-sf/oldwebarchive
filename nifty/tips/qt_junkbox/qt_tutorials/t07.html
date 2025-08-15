@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 7: One Thing Leads to Another</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 7: One Thing Leads to Another</h1>
+初版作成：2002/01/01<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+	<li><a href="#src1">付録：lcdrange.h</a></li>
+	<li><a href="#src2">付録：lcdrange.cpp</a></li>
+	<li><a href="#src3">付録：main.cpp</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t07_1.png"></center>
+<br>
+　今回の例ではシグナルとスロットを使ったカスタムウィジェットの作成方法を示します。んで、シグナルやスロットをコネクト
+するための（ちょっと）複雑な方法も例示する予定です。<br>
+　とりあえず後の拡張のため、いよいよソースコードを分離します。ソースコードの内容は末尾に「付録」として添付して
+おきました。<br>
+　冒頭に実行画面のスナップショットをしめしておきました。<br>
+<br>
+　というわけで、今回からソースコードは最後にまとめて示すようになります。ここでは各ソースコードの概要だけ示して
+おきます。<br>
+<br>
+<a href="#src1"><b>lcdrange.h</b></a>：前回作成したLCDRangeカスタムウィジェットをmain.cppから分離します。
+lcdrange.hはLCDRangeクラスの宣言をしておきます。<br>
+<br>
+<a href="#src2"><b>lcdrange.cpp</b></a>：こっちはLCDRangeクラスの実装部です。<br>
+<br>
+<a href="#src3"><b>main.cpp</b></a>:前回通りのMyWidgetクラスとmain関数が納められています。
+lcdrange.hがインクルードされています。<br>
+<br>
+　なお、今回もスロットとシグナルを独自定義していますが、mocコマンドを打ち込む必要はありません。<br>
+　というのもクラス定義をファイルに分離しておくと、どうやらtmakeあたりがmocファイルの自動生成やら何やらを行ってくれる
+ようなのです。mocファイルのインクルードを自前でやる必要もなくなります。<br>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+　それでは各ファイルごとに、ポイント部分の解説を行っていきます。<br>
+<br>
+<a href="#src1"><b>lcdrange.h</b></a><br>
+<br>
+　このファイルはChapter 6からLCDRangeクラスの宣言部に関して取り出したものです。クラス定義ファイルとして付け足された
+部分を中心に説明していきます。<br>
+<br><pre>
+    #ifndef LCDRANGE_H
+    #define LCDRANGE_H
+</pre><br>
+　ここはヘッダファイルの多重インクルードを防ぐためによく使われている古典的な手法です。もしもLCDRANGE_Hが既にdefine
+されているなら、既にインクルード済みですのでここから#endifに至るまで（つまりこのファイル全て）無視されます。<br>
+<br><pre>
+    #include &lt;qvbox.h>
+</pre><br>
+　このクラス宣言では、継承元にQVBoxを使いますので、qvbox.hをインクルードしておきます。クラス宣言中でQWidgetが引数
+の型として使われていますが、んなもん最初っからqvbox.hによりインクルードされてますのでへーきです。<br>
+<br><pre>
+    class QSlider;
+</pre><br>
+　これも宣言に関する古典的な手法の一つですが、あんまり使われていません。QSliderクラスはインターフェイスで実際に
+使っているわけではなく、本当に必要なのは実装部の方です。そんなわけでヘッダーファイルではqslider.hのインクルード
+まではせずに前方宣言で認識させるだけしておき、実装部の.cppファイルの方でqslider.hをインクルードするわけです。<br>
+<br>
+　こうしておく利点は大きなプロジェクトになってくるとはっきりしてくるようです。あるヘッダーファイルを変更しても
+その影響範囲を抑え、再コンパイルの必要なファイルを少なくしてくれるようです。<br>
+　私自身はそんなに大きなプログラムなんて書いたことがないので原文の意味もいまいちつかみ取れ無いのですが・・・
+まあ、とりあえずこう書いておくと後で良いことありそうなんだな、と素直に従っておきましょう。<br>
+<br><pre>
+    class LCDRange : public QVBox
+    {
+        Q_OBJECT
+    public:
+        LCDRange( QWidget *parent=0, const char *name=0 );
+</pre><br>
+　Q_OBJECTに注意して下さい。<br>
+　このマクロはシグナルやスロットを実装したクラスではかならず、そのメンバの定義部の先頭に記述しておく必要があります。
+　このマクロはシグナルやスロットの実装でお世話になるメタオブジェクト(moc)ファイル内で定義される関数を展開してくる
+ようです。<br>
+<br><pre>
+        int value() const;
+    public slots:
+        void setValue( int );
+
+    signals:
+        void valueChanged( int );
+</pre><br>
+　ここにある三つのメンバが、このウィジェットと他のコンポーネントを結びつけるためのインターフェイスとなります。<br>
+　前回のChapterまではLCDRangeは本当の意味でのインターフェイスを備えていたとはいえませんでした。<br>
+<br>
+　value()はLCDRangeクラスの保持する値、valueへのアクセスを提供するpublicなメンバ関数です。setValue()は本チュートリアル
+初登場となるカスタムスロットです。valueChanged()は初登場となるカスタムシグナルです。<br>
+　・・・といってもChapter 5あたりでさんざんいじくり回していますが。<br>
+<br>
+　スロットは普通のC++関数として実装されます。<br>
+　シグナルはChapter 5でいじくり回したとおりmocファイルにて自動的に実装されます。実は、<b>シグナルは C++の protected
+関数として実装されます。</b>そのためシグナルはそれが定義されているクラス自身か、そのクラスから派生したクラスからしか
+送出(emit)できません。<br>
+<br>
+　valueChanged()シグナルは名前からも予想できる通りLCDRangeの値が変わったときに送出されます。<br>
+　（次の一文ちょっと翻訳できなかったので原文のまま載っけます）<br>
+　This is not the last signal you'll see called somethingChanged().<br>
+<br>
+<a href="#src2"><b>lcdrange.cpp</b></a><br>
+　このファイルもヘッダファイル同様、Chapter 6から実装部分に関するところを抜き出して、必要なヘッダファイルとかを
+インクルードしたものです。Chapter 6の実装と比べて目立って違うところを解説します。<br>
+<br><pre>
+        connect( slider, SIGNAL(valueChanged(int)),
+                 lcd, SLOT(display(int)) );
+        connect( slider, SIGNAL(valueChanged(int)),
+                 SIGNAL(valueChanged(int)) );
+</pre><br>
+　これはLCDRangeのコンストラクタからの抜粋です。<br>
+　最初のconnectは今まで見てきたのと同様ですが、二番目のconnectは引数が三つしかありません。<br>
+　引数が三つのconnectとゆーのは、それが使われているオブジェクト自身のシグナルかスロットをconnectするように
+なっています。そんなわけで、二番目のconnectはQSliderのvalueChanged()シグナルとLCDRangeのvalueChanged()シグナルを
+connectしているわけです。<br>
+<br>
+　こうしてサンプルに載っている以上、シグナルとシグナルをconnectすることは全く問題ないわけです。最初のシグナルが
+送出されると続くシグナルもまた送出されます。<br>
+<br>
+　ユーザーがスライダを操作したとき何が起こるか見ていきましょう。<br>
+　スライダは自分自身の値が変更されたことを感知し（これ自体はQSliderが実装してます）、valueChanged()シグナルを送出
+します。このシグナルはまずQLCDNumberのdisplay()を発動し、LCDRangeのvalueChanged()シグナルを送出します。<br>
+　QLCDNumberのdisplay()スロットの発動によってLCD表示値を更新し、LCDRange自身のvalueChanged()シグナルが送出されます。<br>
+<br>
+　<b>connectする順番は実際の実行順序とは関係ない</b>ことに注意して下さい。今回の例ならLCDRange::valueChanged()が
+QLCDNumber::display()よりも先に送出される場合もあるということです。<br>
+<br><pre>
+    int LCDRange::value() const
+    {
+        return slider->value();
+    }
+</pre><br>
+　今回のvalue()の実装では単純にQSliderのvalue()へフォワードしているだけです。<br>
+<br><pre>
+    void LCDRange::setValue( int value )
+    {
+        slider->setValue( value );
+    }
+</pre><br>
+　今回のsetValue()の実装も又、QSliderのsetValue()へフォワードしているだけです。QSliderとLCDNumberはconnectされて
+いますので、setValue()でスライダの値を変更すると自動的にLCDNumberの値も変更されることに注意して下さい。<br>
+　加えて、QSliderは（現在設定されている）範囲外の値がsetValue()されてくると自動的に値を調節してくれます。<br>
+<br>
+<a href="#src3"><b>main.cpp</b></a><br>
+<br><pre>
+        LCDRange *previous = 0;
+        for( int r = 0 ; r &lt; 4 ; r++ ) {
+            for( int c = 0 ; c &lt; 4 ; c++ ) {
+                LCDRange* lr = new LCDRange( grid );
+                if ( previous )
+                    connect( lr, SIGNAL(valueChanged(int)),
+                             previous, SLOT(setValue(int)) );
+                previous = lr;
+            }
+        }
+</pre><br>
+　前回のメイン部分から丸写しです。LCDRangeクラスの実装と、MyWidgetコンストラクタ内でLCDRangeオブジェクトを16個作って
+た部分とかを除きました。んでもって新たにシグナルとスロットをちょっと変な形でつなげてみました。<br>
+　それぞれのvalueChanged()シグナルは、その一つ前に生成されたLCDRangeオブジェクトのsetValue()スロットとconnectされます。<br>
+　LCDRangeはsetValue()されるとvalueChanged()シグナルを送出しますので、これによって一風変わったシグナル - スロットの
+チェインを作ることができます。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+<br>
+　んじゃあ、コンパイルしてみましょう。<br>
+<br><pre>
+[fenjin@murasame t07]$ ls
+lcdrange.cpp  lcdrange.h  main.cpp
+[fenjin@murasame t07]$ progen -n t07 -o t07.pro
+[fenjin@murasame t07]$ tmake -o Makefile t07.pro
+[fenjin@murasame t07]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o lcdrange.o lcdrange.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o main.o main.cpp
+
+　ここでmocファイルを生成して・・・
+/usr/lib/qt/bin/moc lcdrange.h -o moc_lcdrange.cpp
+
+ mocファイルをコンパイル。
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o moc_lcdrange.o moc_lcdrange.cpp
+
+　最後に一斉にリンクして t07 バイナリを生成してます。
+g++  -o t07 lcdrange.o main.o moc_lcdrange.o  -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@murasame t07]$ ls
+Makefile      lcdrange.h  main.cpp  moc_lcdrange.cpp  t07*
+lcdrange.cpp  lcdrange.o  main.o    moc_lcdrange.o    t07.pro
+</pre><br>
+　んで、実行ファイル t07 を実行すると冒頭に示したようなウインドウが表示されるわけです。上部のQuitボタンをクリック
+するとアプリケーションは終了します。<br>
+　動作に関しては・・・main.cppのconnectのおかげでなんだか変な動きします。楽しんでやって下さい。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+<br>
+　・・・今回はあんまりいじくり回すようなネタが思いつかないので、お休みとさせていただきます。<br>
+　う〜〜ん・・・何か、あります？<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src1">付録：lcdrange.h</a></h2>
+<br><pre>
+#ifndef LCDRANGE_H
+#define LCDRANGE_H
+
+#include &lt;qvbox.h>
+
+class QSlider;
+
+class LCDRange : public QVBox
+{
+        Q_OBJECT
+public:
+        LCDRange(QWidget *parent=0, const char *name=0);
+
+        int value() const;
+
+public slots:
+        void setValue(int);
+
+signals:
+        void valueChanged(int);
+
+private:
+        QSlider *slider;
+};
+
+#endif //LCDRANGE_H
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src2">付録：lcdrange.cpp</a></h2>
+<br><pre>
+#include &lt;qslider.h>
+#include &lt;qlcdnumber.h>
+
+#include "lcdrange.h"
+
+LCDRange::LCDRange(QWidget *parent, const char *name)
+        : QVBox(parent, name)
+{
+        QLCDNumber *lcd = new QLCDNumber(2, this, "lcd");
+        slider = new QSlider(Horizontal, this, "slider");
+        slider->setRange(0,99);
+        slider->setValue(0);
+        connect(slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
+        connect(slider, SIGNAL(valueChanged(int)), SIGNAL(valueChanged(int)));
+}
+
+int LCDRange::value() const
+{
+        return slider->value();
+}
+
+void LCDRange::setValue(int value)
+{
+        slider->setValue(value);
+}
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src3">付録：main.cpp</a></h2>
+<br><pre>
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qlcdnumber.h>
+#include &lt;qfont.h>
+#include &lt;qvbox.h>
+#include &lt;qgrid.h>
+
+#include "lcdrange.h"
+
+class MyWidget : public QVBox
+{
+public:
+        MyWidget(QWidget *parent=0, const char *name=0);
+};
+
+MyWidget::MyWidget(QWidget *parent, const char *name)
+        : QVBox(parent, name)
+{
+        QPushButton *quit = new QPushButton("Quit", this, "quit");
+        quit->setFont(QFont("Times", 18, QFont::Bold));
+
+        connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
+
+        QGrid *grid = new QGrid(4, this);
+
+        LCDRange *previous = 0;
+        for(int r=0; r&lt;4; r++) {
+                for(int c=0; c&lt;4; c++) {
+                        LCDRange *lr = new LCDRange(grid);
+                        if(previous)
+                                connect(lr, SIGNAL(valueChanged(int)), previous, SLOT(setValue(int)));
+                        previous = lr;
+                }
+        }
+}
+
+int main(int argc, char **argv)
+{
+        QApplication a(argc, argv);
+
+        MyWidget w;
+        a.setMainWidget(&w);
+        w.show();
+        return a.exec();
+}
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

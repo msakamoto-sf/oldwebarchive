@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 1: Hello, World!</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 1: Hello, World!</h1>
+初版作成：2002/12/26<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t01_1.png"></center>
+<br>
+　最初のプログラムはシンプルな「Hello, World」です。このサンプルではQtアプリケーションを作成し、実行するための
+最低限の構成を紹介しています。上の絵がサンプルの実行時のスナップショットです。<br>
+<br>
+<pre>
+/****************************************************************
+**
+** Qt tutorial 1
+**
+****************************************************************/
+
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+
+int main( int argc, char **argv )
+{
+    QApplication a( argc, argv );
+
+    QPushButton hello( "Hello world!", 0 );
+    hello.resize( 100, 30 );
+
+    a.setMainWidget( &hello );
+    hello.show();
+    return a.exec();
+}
+</pre>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+<pre>	#include &lt;qapplication.h></pre>
+<br>
+　この行はQtアプリケーションのベースクラスとなるQApplicationクラスの定義ヘッダーファイルをインクルードしています。<br>
+　Qtアプリケーションでは（殆どの場合）QApplicationクラスのオブジェクトを一つ作成します。QApplicationはアプリケーション
+の様々なリソースを管理します。たとえばデフォルトフォントやカーソルなどです。<br>
+　BCBやDelphiやってる人なら一発で「ああ、TApplicationか。」とぴーんと来るはず。その通りでした。<br>
+<br>
+<pre>	#include &lt;qpushbutton.h></pre>
+<br>
+　QPushButtonのクラス定義ヘッダーファイルをインクルードしています。<br>
+　ボタンを使うようなアプリケーション（よーするに殆どすべてのアプリケーション）ではこれをインクルードする必要があります。<br>
+　まあ、GUIプログラミングではずっと使われてきてます。<br>
+　んで、QPushButtonってゆーのは<b>QWidget</b>から派生してます。<br>
+　QWidget・・・よーするにウィジェットと呼ばれてるシロモノですが。Windowsプログラマー向けにすっげー乱暴にたとえてしまえば、
+<b>Win32APIで言うところの Controls であり、BCB,Delphiで言うところの VCL である</b>としても問題ないでしょう。<br>
+　んでもってオブジェクト指向で作られていますので、プロパティを変更することによって色とかテキストとか変更できます。
+んで、BCBのTButtonとかでもそうであったように文字だけでなく絵もQPixmapクラスを利用して表示できます。<br>
+<br>
+<pre>
+int main( int argc, char **argv )
+    {
+</pre>
+<br>
+　これは今更解説する必要もないでしょう。argcが引数の数、argvが引数文字列へのポインタ。<br>
+　WindowsとかDOSではmainの戻り値がvoidになっているのも多いですが、UNIXではintとして、実行結果を返せるようにするのが
+作法みたいです。<br>
+　んで、QApplicationクラスには引数を処理する機構が内蔵されています。そのため、QApplicationを作成するときにコンストラクタに
+引数としてargc, argvを渡します。<br>
+<br>
+<pre>
+        QApplication a( argc, argv );
+</pre>
+<br>
+　QApplicationクラスのオブジェクトを作成しています。んでですね。tutorialの原文ではこんな事が書いてあるんですよ。<br>
+<pre>
+ Note that all command-line arguments recognized by Qt are removed from argv (and argc is decremented accordingly).
+</pre>
+　素直に読むなら、「Qtにより処理されるコマンドライン引数は、argvから外されます。それと一緒にargcもデクリメント
+されて行きます。」ですよね。ちょっとばっかし気になったので、ドキュメントを引いてみました。すると、こんなサンプルが
+載っています。<br>
+<br>
+<pre>
+Example:
+
+    // showargs.cpp - displays program arguments in a list box
+
+    #include &lt;qapplication.h>
+    #include &lt;qlistbox.h>
+
+    int main( int argc, char **argv )
+    {
+        QApplication a( argc, argv );
+        QListBox b;
+        a.setMainWidget( &b );
+        for ( int i=0; i&lt;a.argc(); i++ )        // a.argc() == argc
+            b.insertItem( a.argv()[i] );        // a.argv()[i] == argv[i]
+        b.show();
+        return a.exec();
+    }
+</pre>
+<br>
+　・・・BCBとかDelphiでも見かけそうな・・・って、TListBox.InsertItem()そのまんまではないですか！？<br>
+　とにかく。こんな感じでQApplicationでは（多分）簡単にコマンドライン引数にアクセスできる様にしてくれてます。<br>
+<br>
+　横道にだいぶそれたので戻ります。ここで注意ですが、<b>Qtでは他のいかなるウィンドウのウィジェットよりも先に
+QApplicationオブジェクトが作成されるようにしてください。</b>だ、そうです。<br>
+<br>
+<pre>
+        QPushButton hello( "Hello world!", 0 );
+</pre>
+<br>
+　ここでQPushButtonクラスのオブジェクトを作成しています。コンストラクタはこれを使っていると思われます。<br>
+<pre>
+QPushButton::QPushButton ( const QString & text, QWidget * parent, const char * name=0 )
+</pre>
+　QStringってゆーのはBCBで言うところのAnsiStringと殆ど一緒です。VCならCStringとかいうクラスにあたるのかな？<br>
+　QWidgetでparentとゆーのが渡されますが、WinAPIで言うところのhWndParentみたいな。親ウインドウ。そのまんまです。
+0 が渡されると親ウインドウなし、と判断されるようです。HWND_DESKTOPを親ウインドウに指定した、みたいな。<br>
+　nameはウィジェットに付けるIDみたいなもんです。<br>
+<br><pre>
+        hello.resize( 100, 30 );
+</pre><br>
+　ここで、幅100ピクセル、高さ30ピクセルに調整されています。今回はボタンの位置は気にしてません。デフォルト値を
+そのまんま使ってます。<br>
+<br><pre>
+        a.setMainWidget( &hello );
+</pre><br>
+　ここがポイントといえばポイントで。BCBで言うなら"Application.CreateForm()"みたいなもんですか。とにかく、ここで「
+アプリケーションのメインウィジェット<b>（Windows風に言うならメインウインドウ）</b>を設定しています。<br>
+　メインウィジェットは設定する必要は無いんですが、殆どのプログラムは設定してます。<br>
+<br><pre>
+        hello.show();
+</pre><br>
+　Win32APIのShowWindow()ですね。あるいはTForm::Show()ですか。作成した段階ではまだ可視状態(Visible)ではありません。
+show()メソッドで明示的に可視状態(Visible)にする必要があります。<br>
+<br><pre>
+        return a.exec();
+}
+</pre><br>
+　・・・TApplication::Run()ですか。<br>
+　メインイベントループに入ります。exit()が呼ばれるか、メインウィジェットが破棄されるまでループは回ります。<br>
+　メインイベントループはウインドウシステムからイベントを受け取り、アプリケーションのウィジェットへディスパッチ
+します。<br>
+　・・・ここら辺は原文のままの方がよっぽどすっきり書かれてる。結局全部カタカナのままになってしまうのだし・・・。<br>
+<pre>
+ Enters the main event loop and waits until exit() is called or the main widget is destroyed,
+and Returns the value that was set via to exit() (which is 0 if exit() is called via quit()).
+ It is necessary to call this function to start event handling.
+ The main event loop receives events from the window system and dispatches these to the application widgets.
+
+ Generally speaking, no user interaction can take place before calling exec().
+As a special case, modal widgets like QMessageBox can be used before calling exec(),
+because modal widgets call exec() to start a local event loop.
+
+ To make your application perform idle processing, i.e. executing a special function whenever there are no
+pending events, use a QTimer with 0 timeout.
+  More advanced idle processing schemes can be achieved by using processEvents() and processOneEvent().
+This is where main() passes control to Qt. exec() will return when the application exits.
+</pre>
+　不正確なのを承知で要約すれば、一般にQApplicationのexec()を呼び出す前はユーザーとの対話はしないんだけどQMessageBox
+みたいなのだけはオッケーだよ、と。んでアイドリングなんかを実現したいときは QTimer をタイムアウト0で使うか、processEvents()
+とprocessOneEvent()とか使ってくださいよ、と。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+　んじゃあ、コンパイルしてみましょう。<br>
+　t01というディレクトリ中に、冒頭のソースコードを記述したt01.cppというソースコードファイルが置かれているとします。<br>
+<br><pre>
+[fenjin@seisyuu qt_tutorials]$ ls
+t01/
+[fenjin@seisyuu qt_tutorials]$ cd t01/
+[fenjin@seisyuu t01]$ ls
+t01.cpp
+[fenjin@seisyuu t01]$ progen -n t01 -o t01.pro
+[fenjin@seisyuu t01]$ ls
+t01.cpp  t01.pro
+[fenjin@seisyuu t01]$ tmake -o Makefile t01.pro
+[fenjin@seisyuu t01]$ ls
+Makefile  t01.cpp  t01.pro
+[fenjin@seisyuu t01]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o t01.o t01.cpp
+g++  -o t01 t01.o   -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@seisyuu t01]$ ls
+Makefile  t01*  t01.cpp  t01.o  t01.pro
+</pre><br>
+　んで、t01を実行すると最初に見せたようなウインドウが表示されます。終了するには右上の×ボタンをクリックして終了します。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+　引数に「-geometry 100x200+10+20」みたくXのオプションを指定してみてください。こんなんなります。<br>
+<img src="img/qt_t01_2.png"><br>
+<br>
+　もっと遊んでみます。先ほど「必ずしもメインウィジェットを設定する必要は無い」みたいなこと書きました。<br>
+　これに関してはQApplicationクラスのドキュメントに載っていまして・・・<br>
+<br><pre>
+void QApplication::setMainWidget ( QWidget * mainWidget ) [virtual]
+
+ Sets the main widget of the application.
+ The main widget is like any other, in most respects except
+that if it is deleted, the application exits.
+ You need not have a main widget; connecting lastWindowClosed()
+to quit() is another alternative.
+ For X11, this function also resizes and moves the main widget
+according to the -geometry command-line option, so you should
+set the default geometry (using QWidget::setGeometry()) before
+calling setMainWidget().
+</pre><br>
+　みたいな。つまり、「setMainWidgetしなくても、lastWindowClosed()シグナルとquit()スロットつなげちゃえばオッケー」であるけど、
+「setMainWidget()した方がXのコマンドラインオプションを処理してくれるから便利だよ」、と。<br>
+<br>
+　えー・・・ここで<b>シグナル</b>と<b>スロット</b>という言葉が出てきましたが・・・<br>
+　<b>イー加減疲れてきたので解説は後回しにします。</b>ごめんなさい・・・。<br>
+　乱暴にBCBやDelphiにたとえるとですね、メインフォームのOnClose()イベントハンドラで、Application->Exit()メソッドを
+呼び出す？みたいな？多分これだとおかしくなっちゃうでしょうが・・・。<br>
+　とにかく<b>「lastWindowClosed() を quit() 関数発動のトリガーとする」</b>わけです。<br>
+　ということでしてみましょう。今はとにかく、実験するのを眺めててください。<br>
+<br>
+　ソースコードを編集します。<br>
+<br><pre>
+修正前：
+
+   a.setMainWidget(&hello);
+   hello.show();
+
+修正後：
+
+    //a.setMainWidget(&hello);
+    a.connect(&a, SIGNAL(lastWindowClosed()), SLOT(quit()));
+    hello.show();
+</pre><br>
+<br>
+　な・・・なんとなーく、感じは掴めます？なんとなーく、「ああ、connect関数によって lastWindowClose()関数と quit()関数を
+つなげてるんだな。」って位は・・・。<br>
+　修正が終わったら「make clean」でいったんmake前の状態に戻して、改めて「make」してください。<br>
+　見た感じは全く同じプログラムですが、ドキュメントにあるとおり「-geometry」オプションが通らなくなります。<br>
+<br>
+　SIGNALとSLOTはQtのヘッダーで定義されているマクロらしいのですが・・・Qtのコアでもあり、斜め読みでは通りません。<br>
+　「イベント」とそれに対する「応答」を抽象化しまくって具体化しまくった挙げ句のシステムらしいです。<br>
+　ちょっとこれは難しいので、パス。<br>
+<br>
+　とにかく、setMainWidgetによってX11のオプションの御利益を預かれることが分かりました。<br>
+<br>
+　もう一ついたずらしましょう。argvを調べたときのプログラムサンプルありましたよね？QListBox使ったやつ。<br>
+　あれをそのまま打ち込んで実行してみました。<br>
+<br>
+<pre>
+[fenjin@seisyuu yorimichi01]$ vi listargv.cpp
+[fenjin@seisyuu yorimichi01]$ ls
+listargv.cpp
+[fenjin@seisyuu yorimichi01]$ progen -n listargv -o listargv.pro
+[fenjin@seisyuu yorimichi01]$ tmake -o Makefile listargv.pro
+[fenjin@seisyuu yorimichi01]$ ls
+Makefile  listargv.cpp  listargv.pro
+[fenjin@seisyuu yorimichi01]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o listargv.o listargv.cpp
+g++  -o listargv listargv.o   -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@seisyuu yorimichi01]$ ./listargv --help --hogehoge -foo-bar
+</pre><br>
+<img src="img/qt_t01_3.png"><br>
+<br>
+　・・・とまあ、それなりに素直に作り込めていけそうです。<br>
+<br>
+　さて、なんだか「Hello, World!」一つ作るのにぜーはーぜーはー言ってしまいそうですが・・・<br>
+　なにしろQtの勉強ですし、寄り道もしますし・・・ま、まあ気長につきあってください。<br>
+<br>
+　逃げないでえぇぇぇぇ・・・（エコー）<br>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

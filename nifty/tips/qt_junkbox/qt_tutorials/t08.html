@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 8: Preparing for Battle</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 8: Preparing for Battle</h1>
+初版作成：2002/01/03<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+	<li><a href="#src1">付録：lcdrange.h</a></li>
+	<li><a href="#src2">付録：lcdrange.cpp</a></li>
+	<li><a href="#src3">付録：cannon.h</a></li>
+	<li><a href="#src4">付録：cannon.cpp</a></li>
+	<li><a href="#src5">付録：main.cpp</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t08_1.png"></center>
+<br>
+　長らくお待たせしました。いよいよミニゲームの土台づくりに取りかかります。<br>
+　今回の例はQtウィジェットの備える基本的な描画機能についてのごく簡単な紹介となります。<br>
+　また、二行のコードにより便利なキーボードインターフェイスを付け足してみました（ようするに備え付けのインターフェイス
+を有効にしました、ってーこと）。<br>
+　冒頭に実行画面のスナップショットを示します。<br>
+<br>
+　では、各ソースコードの役割分担です。<br>
+<br>
+<a href="#src1"><b>lcdrange.h</b></a>：LCDRangeクラスの宣言部ヘッダーファイル。<br>
+<a href="#src2"><b>lcdrange.cpp</b></a>：LCDRangeクラスの実装部。<br>
+<a href="#src3"><b>cannon.h</b></a>：CannonFieldクラス（新規）の宣言部ヘッダーファイル。<br>
+<a href="#src4"><b>cannon.cpp</b></a>：CannonFieldクラスの実装部。<br>
+<a href="#src5"><b>main.cpp</b></a>：MyWidgetクラスとmain()関数。<br>
+<br>
+　今回も同じくmocコマンドを手動で打ち込む必要はありません。<br>
+<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+　それでは各ファイルごとに、ポイント部分の解説を行っていきます。<br>
+<br>
+<a href="#src1"><b>lcdrange.h</b></a><br>
+<br>
+　このファイルはChapter 7とほとんど変わりません。新たに setRange() スロットが加わっただけです。<br>
+<br><pre>
+        void setRange( int minVal, int maxVal );
+</pre><br>
+　これでLCDRangeの範囲指定ができるようになりました（今までは0...99で固定でした）。<br>
+<br>
+<a href="#src2"><b>lcdrange.cpp</b></a><br>
+<br>
+　コンストラクタで若干の変更がありますがそれについては後述します。<br>
+<br><pre>
+    void LCDRange::setRange( int minVal, int maxVal )
+    {
+        if ( minVal &lt; 0 || maxVal > 99 || minVal > maxVal ) {
+          qWarning( "LCDRange::setRange(%d,%d)\n"
+                   "\tRange must be 0..99\n"
+                   "\tand minVal must not be greater than maxVal",
+                   minVal, maxVal );
+          return;
+        }
+        slider->setRange( minVal, maxVal );
+    }
+</pre><br>
+　setRange()はLCDRangeのQSliderの範囲を変更します。QLCDNumberには二桁の数値までしか表示させたくありませんので、
+QLCDNumberのoverflowを防ぐためには 0 - 99 までの範囲に最小値(minVal)、最大値(maxVal)を制限する必要があります。
+（それを言うなら -9 からでも・・・という意見は当然ですが、今回は手を抜いて無視。）<br>
+　もし引数が不正なものであれば、Qtの qWarning() 関数を使って警告メッセージを表示、即座に終了します。<br>
+<br>
+　qWarning()はprintf()風の関数で、デフォルトではstderrに出力します。プログラマーは::qInstallMsgHandler()によって
+オリジナルの出力ハンドラを追加できます。<br>
+<br>
+<a href="#src3"><b>cannon.h</b></a><br>
+　CannonField は描画処理を自力で処理するためにカスタマイズするためのクラスです。<br>
+　要するにQtの描画機能の練習用ってことです。<br>
+　CannonFieldという名前の通り、最終的に「砲座(Cannon)」みたいなのを自力で描画して、ぐるぐる回します。<br>
+<br><pre>
+    class CannonField : public QWidget
+    {
+        Q_OBJECT
+    public:
+        CannonField( QWidget *parent=0, const char *name=0 );
+</pre><br>
+　CannonFieldは QWidget から派生させます。<br>
+　原文では続いて「 and we use the same idiom as for LCDRange.」と来てますが、良く訳せません・・・。<br>
+<br><pre>
+        int angle() const { return ang; }
+        QSizePolicy sizePolicy() const;
+
+    public slots:
+        void setAngle( int degrees );
+
+    signals:
+        void angleChanged( int );
+</pre><br>
+　とりあえずCannonFieldクラスは砲座の角度を保持させます。んで、角度を保持するprivate: int ang; に対する
+インターフェイスとしてLCDRangeと似たり寄ったりなシグナルとスロットを準備します。<br>
+<br><pre>
+    protected:
+        void paintEvent( QPaintEvent * );
+</pre><br>
+　これはQWidgetから派生したウィジェットにおけるイベントハンドラを実装する二つ目の方法です（ちなみに一つ目は多分シグナルと
+スロット）。この仮想関数はQtが自分自身を再描画する必要が発生したときに呼ばれます。<br>
+　久しぶりのWin32API風に言うならWM_PAINTメッセージへの応答、ってとこでしょうか。<br>
+<br>
+<a href="#src4"><b>cannon.cpp</b></a><br>
+<br>
+<br><pre>
+    CannonField::CannonField( QWidget *parent, const char *name )
+            : QWidget( parent, name )
+    {
+</pre><br>
+　コンストラクタです。LCDRangeと同じパラメータの渡し方です。<br>
+<br><pre>
+        ang = 45;
+        setPalette( QPalette( QColor( 250, 250, 200) ) );
+    }
+</pre><br>
+　コンストラクタでは角度を45度に初期化して、このウィジェットのパレットをカスタマイズしてます。<br>
+　このパレットは指定された色を背景色として用い、それを基準として3Dっぽく表示するときの他の色も
+適当に設定してくれます。（今回のウィジェットでは背景色とテキスト文字色しか使うことはないでしょう。）<br>
+<br><pre>
+    void CannonField::setAngle( int degrees )
+    {
+        if ( degrees &lt; 5 )
+            degrees = 5;
+        if ( degrees > 70 )
+            degrees = 70;
+        if ( ang == degrees )
+            return;
+        ang = degrees;
+        repaint();
+        emit angleChanged( ang );
+    }
+</pre><br>
+　この関数では砲座の角度を設定します。今回は引数となるdegreesに応じて5度から70度の範囲を設定できるように
+しました。今回の例では範囲外の指定が来たときの警告やエラーは出さない事にしました。<br>
+　新しい角度が古いのと同じだったときはすぐに戻るようにしました。角度が直前と異なるときのみ、angleChanged()シグナル
+を送出するようにしています。<br>
+<br>
+　んで、その後新しい角度をセットしてウィジェットを再描画します。QWidget::repaint()関数はウィジェットをクリア
+（通常はその背景色でウィジェット内部を塗りつぶす）した後、paintイベントをウィジェットに送ります。これにより
+ウィジェットのpaintイベントに対する関数が発動されます。<br>
+<br>
+　実際問題として update() というのも再描画用にあるんですよ。ですが、<b>repaint()は即座に再描画させるが
+update()はupdate()がdisabledになっていたりウィジェットがhiddenしていたりすると再描画を行わない</b>という
+約束になっているようです。・・・これ、後でupdate()にしてみたらどう変わるか楽しみです。<br>
+　ドキュメントを探っていると、再描画時にいったん背景をクリアした後塗りつぶすのですがそのときにイメージで
+埋めることもできそうです。これもおもしろそうですね。<br>
+<br>
+　とにかく最終的にangleChanged()シグナルを送出して、角度が変更されたことを知らせませす。<br>
+　<b>emitはQt独自の拡張でその実体はマクロです。</b><br>
+<br><pre>
+    void CannonField::paintEvent( QPaintEvent * )
+    {
+        QString s = "Angle = " + QString::number( ang );
+        QPainter p( this );
+        p.drawText( 200, 200, s );
+    }
+</pre><br>
+　これがペイントイベントハンドラの「書き初め」です。引数のQPaintEventには描画処理の詳細が格納されています。
+QPaintEventにはウィジェット内で再描画されるべきリージョン矩形の情報（その型名もズバリ QRect, QRegion）が
+格納されています。本当ならその内容を判断した上で描画処理をすべきなんでしょうが・・・初めてということもありますし、
+手を抜いて全面描画することにしました。<br>
+<br>
+　今回のコードでは角度が変更されたとき、その角度をウィジェット内の固定された位置に表示します。最初にQStringで
+角度を表示するのに使う文字列を作ります。んで、このウィジェット用のQPainterを作り、drawTextで先ほど作った文字列
+を描画します。<br>
+　なんだかWindowsでデバイスコンテクストを取得したのと、何となく似てますね。<br>
+　<b>っつーか、BCBやDelphiのCanvasにそっくり。</b><br>
+<br>
+　QPainterについては又後でいろいろ触れることになります。それだけ、いろいろなことができます。<br>
+<br>
+<a href="#src5"><b>main.cpp</b></a><br>
+<br><pre>
+    #include "cannon.h"
+</pre><br>
+　新しいクラスをインクルードしてます。<br>
+<br><pre>
+    class MyWidget: public QWidget
+    {
+    public:
+        MyWidget( QWidget *parent=0, const char *name=0 );
+    };
+</pre><br>
+　今回はトップレベルウィジェットでLCDRangeとCannonFieldを一つずつ生成しておきます。<br>
+<br><pre>
+        LCDRange *angle = new LCDRange( this, "angle" );
+</pre><br>
+　コンストラクタでLCDRangeをセットアップします。<br>
+<br><pre>
+        angle->setRange( 5, 70 );
+</pre><br>
+　LCDRangeの範囲を 5 - 70 に設定します。<br>
+<br><pre>
+        CannonField *cannonField
+            = new CannonField( this, "cannonField" );
+</pre><br>
+　ここでCannonFieldを作っています。<br>
+<br><pre>
+        connect( angle, SIGNAL(valueChanged(int)),
+                 cannonField, SLOT(setAngle(int)) );
+        connect( cannonField, SIGNAL(angleChanged(int)),
+                 angle, SLOT(setValue(int)) );
+</pre><br>
+　ここでLCDRangeの valueChanged() シグナルをCannonFieldの setAngle() スロットにconnectしています。これによって
+ユーザーの操作によりLCDRangeが変更されたときは必ずCannonFieldの角度も更新されるようになります。<br>
+　ここでさらに逆方向のconnectも行っています。すなわち二番目のconnect()でCannonFieldの angleChanged() シグナルで
+LCDRangeの setValue() スロットが発動するようにもなっています。<br>
+　今回の作例ではCannonFieldの角度を直接操作するような実装はしませんが、このような両方向のconnectを行うことにより
+、将来いろいろ変更することがあってもこれら二つの値の同期を崩すことは無くなります。<br>
+<br>
+　これがコンポーネントプログラミング（とゆーかオブジェクト指向によるGUIプログラミング）と、カプセル化の便利な
+使い方です。<br>
+<br>
+　CannonFieldの setAngle() で、値が本当に変更されたときのみangleChanged()を送出しているのがいかに重要かがここに
+あります。もしLCDRange, CannonFieldの両方ともがこのチェックをしていないと、最初の値変更のが行われるとLCDRange
+とCannonFieldの間で**Changed()の無限ループが発生してしまうからです。<br>
+<br><pre>
+        QGridLayout *grid = new QGridLayout( this, 2, 2, 10 );
+        //2x2, 10 pixel border
+</pre><br>
+　今まで使ってきたQVBoxやらQGridやらは配置を完全自動化してくれる変わりにあまり融通が利かないウィジェットでもありました。<br>
+　今回はゲームということもあり、もうちょっとサイズやら配置やらをカスタマイズできる<b>QGridLayout</b>を使って
+みます。<br>
+　QGridLayoutはウィジェット<b>ではありません。</b>Qtの解説本などではその名も<b>レイアウト</b>と呼ばれるシロモノ
+です。というのは、QGridLayout自体はウインドウを生成したりはしないからです。QGridLayoutは<b>升目状の配置、という
+動作のみをまかなうための（悪い言い方をしてしまえば）ただのクラス</b>です。<br>
+　そのため、今回の作例のようにQGridLayoutは必ずQWidgetから派生したクラスの子ウィジェットとして用います。QGrid
+Layout自体はウインドウを持たないため、使う場合は必ず親となるウィジェットに"張り付ける"形になるからです。<br>
+<br>
+　QGridLayoutのコンストラクタの引数は直感的には分かりづらい表現になっているため、作例のようにコメントを入れて
+わかりやすくしています。<br>
+<br><pre>
+        grid->addWidget( quit, 0, 0 );
+</pre><br>
+　左上の升目(0, 0)にQuitボタンを生成します。<br>
+<br><pre>
+        grid->addWidget( angle, 1, 0, Qt::AlignTop );
+</pre><br>
+　続いてLCDRangeオブジェクトである angle を左下(1, 0)に生成します。んで、升目(cell)内の並びは上詰めです（こう
+いった詰め型の指定などはQGirdでは難しく、QGridLayoutならではの機能です）。<br>
+<br><pre>
+        grid->addWidget( cannonField, 1, 1 );
+</pre><br>
+　続いて砲座を（近いうちに）表示する（ことになるであろう）ためのCannonFieldオブジェクト、cannonFieldを右下の
+升目(1, 1)に生成します。（この調子ですと右上のセルは空のままになりますが構いません。）<br>
+<br><pre>
+        grid->setColStretch( 1, 10 );
+</pre><br>
+　ここでQGridLayoutに右側の列（カラム1）をサイズ変更可能(stretchable)にするように指示しています。左側の列（
+カラム0）はサイズ変更可能にしていない（ストレッチファクターが0）ので、もしMyWidgetがサイズ変更されたとき
+QGridLayoutは左側のカラムはサイズ変更せず、右側のカラムだけサイズを変更します。<br>
+<br><pre>
+        angle->setValue( 60 );
+</pre><br>
+　ここで角度の初期値を設定しています。LCDRangeからのコネクションでCannonFieldに連鎖していることに注意して下さい。<br>
+<br><pre>
+        angle->setFocus();
+</pre><br>
+　最後にキーボードフォーカスをangleオブジェクトにセットしています。デフォルトではこれによりキーボード入力は
+まずLCDRangeウィジェットに流れるようになります。<br>
+<br>
+　ところでLCDRangeには何のkeyPressEvent()も実装していません。ので、この動作はあんまり使えそうではないように見
+えます。が。LCDRangeのコンストラクタでこの一行が加わっていたことを思い出して下さい。<br>
+<br><pre>
+        setFocusProxy( slider );
+</pre><br>
+　LCDRangeはこれによって<b>フォーカスプロクシ</b>をQSliderクラスのオブジェクトである slider に設定しています。
+これはですね。誰かがLCDRangeにキーボードフォーカスを設定した場合、sliderがとりあえずキーボードフォーカスを
+監視しましょう、という事です。まさにsliderがキーボードフォーカスの"プロクシ（代理人）"となるわけです。<br>
+　QSliderの方にはキーボードインターフェイスが備わっていますので、上の一行を加えるだけでとりあえずのキーボード
+インターフェイスを実装できるという塩梅です。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+<br>
+　んじゃあ、コンパイルしてみましょう。<br>
+<br><pre>
+[fenjin@murasame t08]$ ls
+cannon.cpp  cannon.h  lcdrange.cpp  lcdrange.h  main.cpp
+[fenjin@murasame t08]$ progen -n t08 -o t08.pro
+[fenjin@murasame t08]$ tmake -o Makefile t08.pro
+[fenjin@murasame t08]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o cannon.o cannon.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o lcdrange.o lcdrange.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o main.o main.cpp
+/usr/lib/qt/bin/moc cannon.h -o moc_cannon.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o moc_cannon.o moc_cannon.cpp
+/usr/lib/qt/bin/moc lcdrange.h -o moc_lcdrange.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o moc_lcdrange.o moc_lcdrange.cpp
+g++  -o t08 cannon.o lcdrange.o main.o moc_cannon.o moc_lcdrange.o  -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@murasame t08]$ ls
+Makefile    cannon.o      lcdrange.o  moc_cannon.cpp    moc_lcdrange.o
+cannon.cpp  lcdrange.cpp  main.cpp    moc_cannon.o      t08*
+cannon.h    lcdrange.h    main.o      moc_lcdrange.cpp  t08.pro
+</pre><br>
+　んで、実行ファイル t08 を実行すると冒頭に示したようなウインドウが表示されるわけです。上部のQuitボタンをクリック
+するとアプリケーションは終了します。<br>
+　んで、QSliderには左右の矢印キーやHome, End, PageUp, PageDownに応じた処理が実装されてますので。まあ押してみますと
+スライダも連動して動いてくれます。<br>
+　ウインドウをリサイズしてみて下さい。左の列は全く大きさが変わりませんが、右のCannonFieldが変化します。<br>
+<br>
+　8ビット画面では背景色が化けるかもしれません。次のChapterではその辺の処理も入ってきます。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+<br>
+<br>
+　とりあえず限界までウインドウサイズを小さくしました。左側の列は相変わらずですが、右側のCannonFieldがまさに１
+ピクセルレベルまで小さくなってしまっています。<br>
+<br><img src="img/qt_t08_2.png"><br>
+<br>
+　QPushButton の"Quit"の部分を"<b>&amp;</b>Quit"にしてみました。これってキーボードショートカットで、Windowsと
+同じ。<br>
+<br><img src="img/qt_t08_3.png"><br>
+<br>
+　angleをQGridLayoutに加えるときのQt::AlignTopを省いてみました。angleが升目一杯に広がってしまいました。<br>
+<br><img src="img/qt_t08_4.png"><br>
+<br>
+　LCDRangeのコンストラクタでsetFocusProxy()をコメントアウトしてみました。フォーカスが直接LCDRangeにかかってしまし、
+カーソルキーの反応もありません。もちろん、QPushButtonのショートカットは有効のままです。<br>
+<br><img src="img/qt_t08_5.png"><br>
+<br>
+　・・・さて。んじゃあ、CannonField::setAngle()中のrepaint()をupdate()に変更してみましょう。<br>
+　ここいらあたりはWindowsとさして変わらず、要するに「ウインドウが隠れていたり、一部隠れていたり、アイコン化
+状態から復帰するときなどにようやく再描画がかかる」類のものではないかと予想されます。<br>
+<br>
+　・・・結果、撃沈。<br>
+　いえ、何が撃沈かと言いますと。<b>今回みたいな仕様では、どのタイミングで再描画がかかったか感知できない</b>事です。<br>
+　現象としては「repaint()と同じく即刻再描画」してるようにしか見えないんですよ・・・。<br>
+　QWidget::update()のQtドキュメントにはこんな事が書いてありました。<br>
+<br><pre>
+void QWidget::update () [slot]
+
+ Updates the widget unless updates are disabled or the widget is hidden.
+
+ Updating the widget will erase the widget contents and generate an appropriate paint event
+for the invalidated region. The paint event is processed after the program has returned to
+the main event loop. Calling update() many times in a row will generate a single paint event.
+
+If the widgets sets the WRepaintNoErase flag, update() will not erase its contents.
+</pre></br>
+　素直に考えるならウィジェット内部を消去(erase)した後に適切なペイントイベントを、必要な再描画領域
+を教えて発生させる、と言ったところでしょうか。ペイントイベントはプログラムがmainイベントループに戻って来た後
+処理される、とも書かれています。このmainイベントループが何を示しているのかは現段階では不明です。<br>
+　となってくると・・・update()はrepaint()のラッパー？ってこと？<br>
+　？？<br>
+　・・・よくわかりません。QtのQWidget::repaint()ドキュメントは・・・<br>
+<br><pre>
+void QWidget::repaint ( int x, int y, int w, int h, bool erase=TRUE ) [slot]
+
+ Repaints the widget directly by calling paintEvent() directly, unless updates
+are disabled or the widgetis hidden.
+ Erases the widget area (x,y,w,h) if erase is TRUE.
+
+ If w is negative, it is replaced with width() - x. If h is negative, it is replaced
+width height() - y.
+
+ Use repaint if your widget needs to be repainted immediately, for example when
+doing some animation. In all other cases, update() is to be preferred. Calling
+update() many times in a row will generate a single paint event.
+
+ Warning: If you call repaint() in a function which may itself be called from
+paintEvent(), you may see infinite recursion. The update() function never generates recursion.
+</pre><br>
+　とあります。アニメーションみたいに素早い描画が期待されれるような場面ではrepaint()を用いた方がよいようです。<br>
+　またpaintEvent()から呼ばれる関数内などでrepaint()を呼ばないように、とも書いてあります。そうすると再描画の
+無限ループになってしまうようです。そういった場合はupdate()を使うと、循環というかループを引き起こさなくて済む
+ようです。<br>
+<br>
+　次は・・・とりあえずQGridLayoutをせっかくですのでいじくってみましょう。<br>
+　いっとう分かりやすそうな所でコンストラクタの数値を変更してみましょう。他の多くのQtウィジェットと同様にQGridLayout
+のコンストラクタにも引数によっていくつかの種類があります。<br>
+<pre>
+QGridLayout ( QWidget * parent, int nRows = 1, int nCols = 1, int border=0, int space = -1, const char * name=0 )
+QGridLayout ( int nRows = 1, int nCols = 1, int space = -1, const char * name=0 )
+QGridLayout ( QLayout * parentLayout, int nRows = 1, int nCols = 1, int space = -1, const char * name=0 )
+</pre>
+　今回は第一引数がQWidgetですので、最初のコンストラクタを使用していることがわかります。ということは、作例の
+コンストラクタは<br>
+<pre>
+QGridLayout *grid = new QGridLayout(this, 2, 2, 10);
+</pre>
+　だったので、borderというやつが10ピクセル（多分）と指定していたわけです。これを30にしてみました。<br>
+<br><img src="img/qt_t08_6.png"><br>
+<br>
+　だいぶ余白が空いた感じがします。限界までウインドウサイズを小さくした場合も・・・<br>
+<br><img src="img/qt_t08_7.png"><br>
+<br>
+　といった具合で、しっかり30ピクセル空いた状態で縮まってくれました。<br>
+<br>
+　ところでQGridLayout::addWidget()についてですが。<br>
+<pre>
+void QGridLayout::addWidget ( QWidget * w, int row, int col, int alignment = 0 )
+</pre>
+　んで、alignment=0ってゆーのは升目中一杯に広がる指示らしいです。<br>
+　それと升目位置の指定ですが、行→列の順序になっていました。<br>
+<br>
+　drawText調べていたら、「文字を回転できないものか・・・」と思い立ちました。で調べてみると、描画矩形の座標空間
+ごと回転させる仕組みがあるようです。ズバリQPainter::rotate()というやつです。他にもtranslate()とかscale()とか、
+興味深そうなメソッドが存在しますがとりあえず今回はrotate()だけで遊んでみましょう。<br>
+<br>
+　テキストを眺め回していると、どうやら最低これだけの変更で回転できるようになるらしいです。<br>
+<br><pre>
+cannon.cpp, CannonField::paintEvent()の・・・
+修正前：
+    QPainter p( this );
+    p.drawText( 200, 200, s );
+
+修正後：
+    p.save();
+    p.rotate(ang);
+    p.drawText(100,0,s);
+    p.restore();
+</pre><br>
+　細かいことは抜きにして、とりあえずたったこれだけで文字が回転するようになりました。<br>
+<br><img src="img/qt_t08_8.png"><br>
+<br>
+　といったところで、ネタもそれを思いついて実験する気力もつきたので今回はこれでおしまいにします。<br>
+　どうせQPainterネタは続くChapterにもでてくるでしょうし・・・。それでは。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src1">付録：lcdrange.h</a></h2>
+<br><pre>
+#ifndef LCDRANGE_H
+#define LCDRANGE_H
+
+#include &lt;qvbox.h>
+
+class QSlider;
+
+class LCDRange : public QVBox
+{
+        Q_OBJECT
+public:
+        LCDRange(QWidget *parent=0, const char *name=0);
+
+        int value() const;
+
+public slots:
+        void setValue(int);
+        void setRange(int minVal, int maxVal);
+
+signals:
+        void valueChanged(int);
+
+private:
+        QSlider *slider;
+};
+
+#endif //LCDRANGE_H
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src2">付録：lcdrange.cpp</a></h2>
+<br><pre>
+#include &lt;qslider.h>
+#include &lt;qlcdnumber.h>
+
+#include "lcdrange.h"
+
+LCDRange::LCDRange(QWidget *parent, const char *name)
+        : QVBox(parent, name)
+{
+        QLCDNumber *lcd = new QLCDNumber(2, this, "lcd");
+        slider = new QSlider(Horizontal, this, "slider");
+        slider->setRange(0,99);
+        slider->setValue(0);
+        connect(slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
+        connect(slider, SIGNAL(valueChanged(int)), SIGNAL(valueChanged(int)));
+
+        setFocusProxy(slider);
+}
+
+int LCDRange::value() const
+{
+        return slider->value();
+}
+
+void LCDRange::setValue(int value)
+{
+        slider->setValue(value);
+}
+
+void LCDRange::setRange(int minVal, int maxVal)
+{
+        if(minVal &lt; 0 || maxVal > 99 || minVal > maxVal) {
+                qWarning("LCDRange::setRange(%d, %d)\n /
+                        \t Range must be 0...99.\n /
+                        \t and minVal must not greater than maxVal",
+                        minVal, maxVal);
+                return;
+        }
+        slider->setRange(minVal, maxVal);
+}
+
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src3">付録：cannon.h</a></h2>
+<br><pre>
+#ifndef CANNON_H
+#define CANNON_H
+
+#include &lt;qwidget.h>
+
+class CannonField : public QWidget
+{
+        Q_OBJECT
+public:
+        CannonField(QWidget *parent=0, const char *name=0);
+
+        int angle() const { return ang; }
+        QSizePolicy sizePolicy() const;
+
+public slots:
+        void setAngle(int degrees);
+
+signals:
+        void angleChanged(int);
+
+protected:
+        void paintEvent(QPaintEvent *);
+
+private:
+        int ang;
+};
+
+#endif //CANNON_H
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src4">付録：cannon.cpp</a></h2>
+<br><pre>
+#include "cannon.h"
+#include &lt;qpainter.h>
+
+CannonField::CannonField(QWidget *parent,const char *name)
+        : QWidget(parent, name)
+{
+        ang = 45;
+        setPalette(QPalette(QColor(250,250,200)));
+}
+
+void CannonField::setAngle(int degrees)
+{
+        if(degrees &lt; 5)
+                degrees = 5;
+        if(degrees > 70)
+                degrees = 70;
+        if(ang == degrees)
+                return;
+        ang = degrees;
+        repaint();
+        emit angleChanged(ang);
+}
+
+void CannonField::paintEvent(QPaintEvent *)
+{
+        QString s = "Angle = " + QString::number(ang);
+        QPainter p(this);
+        p.drawText(200,200,s);
+}
+
+QSizePolicy CannonField::sizePolicy() const
+{
+        return QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="src5">付録：main.cpp</a></h2>
+<br><pre>
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qlcdnumber.h>
+#include &lt;qfont.h>
+#include &lt;qlayout.h>
+
+#include "lcdrange.h"
+#include "cannon.h"
+
+class MyWidget : public QVBox
+{
+public:
+        MyWidget(QWidget *parent=0, const char *name=0);
+};
+
+MyWidget::MyWidget(QWidget *parent, const char *name)
+        : QVBox(parent, name)
+{
+        QPushButton *quit = new QPushButton("&Quit", this, "quit");
+        quit->setFont(QFont("Times", 18, QFont::Bold));
+
+        connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
+
+        LCDRange *angle = new LCDRange(this, "angle");
+        angle->setRange(5,70);
+
+        CannonField *cannonField = new CannonField(this, "cannonField");
+
+        connect(angle, SIGNAL(valueChanged(int)), cannonField, SLOT(setAngle(int)));
+        connect(cannonField, SIGNAL(angleChanged(int)), angle, SLOT(setValue(int)));
+
+        QGridLayout *grid = new QGridLayout(this, 2, 2, 10);
+        //2x2, 10 pixel border
+
+        grid->addWidget(quit,0,0);
+        grid->addWidget(angle, 1, 0, Qt::AlignTop);
+        grid->addWidget(cannonField, 1, 1);
+        grid->setColStretch(1,10);
+
+        angle->setValue(60);
+        angle->setFocus();
+}
+
+int main(int argc, char **argv)
+{
+        QApplication a(argc, argv);
+
+        MyWidget w;
+        w.setGeometry(100,100,500,355);
+        a.setMainWidget(&w);
+        w.show();
+        return a.exec();
+}
+</pre><br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

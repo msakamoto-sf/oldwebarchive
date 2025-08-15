@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 2: Calling it Quits</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+<br>
+<h1>Chapter 2: Calling it Quits</h1>
+初版作成：2002/12/27<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#sources">ソースコード</a></li>
+	<li><a href="#description">解説</a></li>
+	<li><a href="#compilation">コンパイル・動作確認</a></li>
+	<li><a href="#quickhack">いじくりまわす</a></li>
+</ol>
+
+<h2><a name="sources">ソースコード</a></h2>
+<center><img src="img/qt_t02_1.png"></center>
+<br>
+　単にウインドウを作るだけなのが前回のChapter1でした。<br>
+　今度はボタンを押したら終了するようにしてみましょう。<br>
+<br>
+　それに加えてフォント関連もいじくってみましょう。上のスナップショットが今回のプログラムですが、ボタンの文字列
+がBoldになっています。それでは、ソースコードです。<br>
+<br>
+<pre>
+/****************************************************************
+**
+** Qt tutorial 2
+**
+****************************************************************/
+
+#include &lt;qapplication.h>
+#include &lt;qpushbutton.h>
+#include &lt;qfont.h>
+
+int main( int argc, char **argv )
+{
+    QApplication a( argc, argv );
+
+    QPushButton quit( "Quit", 0 );
+    quit.resize( 75, 30 );
+    quit.setFont( QFont( "Times", 18, QFont::Bold ) );
+
+    QObject::connect( &quit, SIGNAL(clicked()), &a, SLOT(quit()) );
+
+    a.setMainWidget( &quit );
+    quit.show();
+    return a.exec();
+}
+</pre>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="description">解説</a></h2>
+<br>
+　それでは各行に解説を付け加えていくことにします。<br>
+　qapplication, qpushbuttonのヘッダファイルのインクルードはChapter1で解説しました。今回は<b>qfont.h</b>を
+インクルードします。これによって、Xのフォント機能だけでなく高度に使いやすくなっている（はずの）Qtのフォント
+機能を使えるようになります。<br>
+<pre>
+#include &lt;qfont.h>
+</pre>
+<br>
+　QApplicationを作るあたりは前回と一緒です。<br>
+<pre>
+	QPushButton quit( "Quit", 0 );
+</pre>
+　今回は、"Quit"と表示するボタンを作ります。<br>
+　相変わらず「トップレベルウインドウ」(Win32APIかっつーの)のままですので、親ウインドウとして0を指定します。<br>
+　ここに関しては原文でも<br>
+<pre>
+We still pass 0 as the parent, since the button is a top-level window.
+</pre>
+　とある通り・・・まあ、ウインドウ系列のプログラミングっつーのはどこも一緒ですか。<br>
+　んで、WindowControl、じゃなかったWidget(ウィジェット)のサイズを変更します。<br>
+<br><pre>
+	quit.resize( 75, 30 );
+</pre><br>
+　今回は"Hello, World!"よりは短い文字列なので、その分小さめのウインドウサイズにしてみました。<br>
+　他にも、<b>Win32APIと同様にQFontMetrics</b>なんっつーのもあるみたいです。これをつかえば、文字列に応じた
+ウインドウサイズにできそうですね。<br>
+<br><pre>
+	quit.setFont( QFont( "Times", 18, QFont::Bold ) );
+</pre><br>
+　ここで、Timesファミリーのフォントで18ポイント、ボールドなフォントに<b>このボタンウィジェットに対してのみ</b>
+変更しています。アプリケーション全体で一度にフォントを変更するにはQApplication::setFont()を使えるみたいです。<br>
+<br><pre>
+	QObject::connect( &quit, SIGNAL(clicked()), &a, SLOT(quit()) );
+</pre><br>
+　connect()関数はおそらく、Qtの最たる特徴でしょう。connect関数はQObjectクラスの静的関数(static function)であること
+に注意してください。socketライブラリのconnect()関数とも混同しないようにしてください。<br>
+　こっからがQtのつぼ、というかキモ、というか。<br>
+　今回のconnect()関数は、二つのQtオブジェクト（直接的にせよ間接的にせよ、とにかくQObjectから派生しているやつ）を
+結びつけるための手法の使い方の一つです。<br>
+　Qtオブジェクトは<b>メッセージを送るためのシグナル(signal)</b>と、<b>メッセージを受け取るためのスロット(slot)</b>
+を実装することができます。
+　全てのWindowControlsじゃなかった、WidgetはQtオブジェクトです。とゆーのは、WidgetはQWidgetクラスを元にしていますが
+QWidgetとユーのはそもそもQObjectから派生しているからです。<br>
+　んで、今回はquitプッシュボタンが備えているclicked()（とーぜん、マウスでクリックしたとき）とQApplicationクラス
+のオブジェクトである a のquit()スロットを結んでいます。<br>
+　これによってボタンがクリックされると clicked()シグナルが発生しそれによりQApplication::quit()が実行されるわけです。<br>
+<br>
+　SIGNAL とか、SLOTとかゆーのはQtが定義しているマクロです。これのおかげでただの関数がシグナルとかスロットに化ける
+らしいのですが・・・まだまだよく分かんないっす。なんでも、<b>メタオブジェクトコンパイラ(Meta Object Compiler:moc)</b>
+とかいうのに処理されているらしいのですが・・・。まだ、パス。<br>
+<br>
+　後はChapter1と一緒で、setMainWidgetして、show()して、returnしておしまいです。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="compilation">コンパイル・動作確認</a></h2>
+<br>
+　んじゃあ、コンパイルしてみましょう。<br>
+<br><pre>
+[fenjin@murasame t02]$ progen -n t02 -o t02.pro
+[fenjin@murasame t02]$ tmake -o Makefile t02.pro
+[fenjin@murasame t02]$ ls
+Makefile  t02.cpp  t02.pro
+[fenjin@murasame t02]$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o t02.o t02.cpp
+g++  -o t02 t02.o   -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+[fenjin@murasame t02]$ ls
+Makefile  t02*  t02.cpp  t02.o  t02.pro
+</pre><br>
+　んで、実行してみると冒頭に示したようなウインドウが表示され、ボタンを押すと終了します。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<h2><a name="quickhack">いじくりまわす</a></h2>
+<br>
+　・・・まずは、QFontMetricsで遊んでみましょうか。QFontMetricsをQtのドキュメントから引いてみると、<br>
+<pre>
+QRect QFontMetrics::boundingRect ( const QString & str, int len = -1 ) const
+int QFontMetrics::height () const
+int QFontMetrics::width ( const QString & str, int len = -1 ) const
+</pre>
+　と、使えそうなメンバ関数が並んでいます。とりあえずheight()とwidth()だけをさくっとresize()に渡してみましょう。<br>
+　とゆーわけでソースコードを変更します。<br>
+<br><pre>
+修正前：
+    QPushButton quit( "Quit", 0 );
+    quit.resize( 75, 30 );
+    quit.setFont( QFont( "Times", 18, QFont::Bold ) );
+
+修正後：
+    QString str("hogehogefoobar");
+    QPushButton quit(str, 0);
+    QFontMetrics fm(QFont("Times", 18, QFont::Bold));
+
+    //quit.resize(75,30);
+    quit.resize(fm.width(str), fm.height());
+    quit.setFont(QFont("Times", 18, QFont::Bold));
+</pre><br>
+　まずボタンに表示する文字列をQStringクラスのオブジェクトにしてしまいます。というのはwidth()メンバに渡す必要が
+あるからです。んで、それでもってQPushButton()を実行します。<br>
+　次にQFontMetricsクラスのオブジェクト、fmを生成します。QFontMetricsのコンストラクタの一つに<br>
+<pre>QFontMetrics::QFontMetrics ( const QFont & font )</pre>
+　こんなのがあったんで、QFontを直接渡してます。<br>
+　んでもって、後は fm.width(QString, len=-1) と fm.height() を resize() に渡しておしまいです。<br>
+<br>
+　width()メンバ関数は、第二引数のlenで実際に幅を返す文字列長を指示します。-1を指定するとQStringで渡されてきた
+全ての文字列の幅を返します。<br>
+　height()は引数をとりません。<br>
+<br>
+　実行画面を示します。<br>
+<img src="img/qt_t02_2.png"><br>
+<br>
+　・・・もう少しいじってみましょう。文字列を指定できるよう、コマンドラインから引っ張ってきましょう。<br>
+　QApplication::argv()[]を使えばなんとなかなりそうではありませんか？<br>
+　というわけで、ソースを又変更します。<br>
+<br><pre>
+修正前：
+    QPushButton quit( "Quit", 0 );
+
+修正後：
+    QString str( (a.argc() > 1) ? a.argv()[1] : a.argv()[0] );
+</pre><br>
+　一応、引数がなにも指定されていなかった場合は実行ファイル名それ自身を表示するようにしています。<br>
+　んで、その実行結果です。<br>
+<br>
+[fenjin@murasame t02]$ ./t02<br>
+<img src="img/qt_t02_3.png"><br>
+<br>
+[fenjin@murasame t02]$ ./t02 dsafdsa<br>
+<img src="img/qt_t02_4.png"><br>
+<br>
+　本当はQFontMetrics::boundingRect()とかも試してみたかったのですがそこまでいくとQtのフォントシステムの話にまで
+いってしまいそうだったんで今回は控えました。<br>
+　というかフォントシステム、全然知らないので。<br>
+　まあでも、だいぶ遊べるようになってきました。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<br>
+<a href="../../../index.html">トップページ</a>＞＞＞
+<a href="../../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>＞＞＞
+<a href="index.html">「Qt Tutorial Index Page」</a><br>
+</body>
+</html>

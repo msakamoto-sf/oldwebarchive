@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TLXW8におけるQtの学習法</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a><br>
+<br>
+<h1>TLXW8におけるQtの学習法</h1>
+初版作成：2002/12/25<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2>注意</h2>
+<p>
+2008/11月現在、実に6年前のドキュメントになっています。「昔はこうしていた」という参考としてご利用下さい。
+</p>
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　さて。Qtプログラミングを始めるにあたって、とりあえず「TLXW8のQtパッケージには何が入っているの？」を確認しておき
+ましょう。ひょっとしたらイカスサンプルプログラム群や、チュートリアルなHTMLが入っているかもしれません。<br>
+　<b>実際そのとおりだし。</b><br>
+<br>
+　ここではQtプログラミングというよりはTLXW8のqt, qt-develの構成について理解を深めたいと思います。<br>
+　また、HTMLドキュメントなどをApacheとNamazuを利用して検索できるようにしたいと思います。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">TLXW8におけるQtのディレクトリツリー</a></li>
+	<li><a href="#main_02">Qtのドキュメントの利用方法(Apache, Namazu連携)</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">TLXW8におけるQtのディレクトリツリー</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　単刀直入に言うと、TLXW8の場合<b>「/usr/lib/qt」ディレクトリ下</b>にQt-2.3.1の内容が納められています。<br>
+　そして、これ又単刀直入ですがそのディレクトリツリー構成はTrolltechから落としてきた最新のQtとほとんど同じです。<br>
+　つまり。<b>TLXW8の場合qtとqt-develパッケージさえ入れてしまえばQt全体として一式そろう訳です。</b><br>
+　ですので、「これから始めようと思ってんだけど・・・自分のシステムにはQtちゃんと入ってるのかな？どきどき」という方
+もqt、qt-develパッケージが入っていればおそらく大丈夫でしょう。<br>
+　入っていない場合でもTrolltechのＨＰから最新版の<b>tarボールを</b>落としてきて、中に入っているINSTALLに沿って
+インストールすれば問題ないでしょう。<br>
+　qt,qt-develとtarボール、共にdoc/htmlやtutorialが含まれているのでどちらでもかまいません。<br>
+<br>
+　じゃあ、とりあえず大まかなディレクトリ構成を示します。これはTLXW8のRPMパッケージの場合で、tarボールからインストール
+した人は/usr/lib/qt/の部分をインストールしたディレクトリに読み替えてください。<br>
+<pre>
+[fenjin@seisyuu qt]$ pwd
+/usr/lib/qt
+[fenjin@seisyuu qt]$ ll
+合計 32
+drwxr-xr-x    2 root     root         4096  9月 10日 08:09 bin/
+drwxr-xr-x    3 root     root         4096  9月 10日 08:09 doc/
+drwxr-xr-x   76 root     root         4096  9月 10日 08:09 examples/
+drwxr-xr-x    4 root     root         4096  9月 10日 08:09 extensions/
+drwxr-xr-x    2 root     root         8192  9月 10日 08:09 include/
+drwxr-xr-x    2 root     root         4096  9月 10日 08:09 lib/
+drwxr-xr-x   16 root     root         4096  9月 10日 08:09 tutorial/
+
+
+binディレクトリです。QtDesignerをはじめとした開発ツールが納められています。
+[fenjin@seisyuu qt]$ cd bin/
+[fenjin@seisyuu bin]$ ls
+designer*  makeqpf*  moc*     qconfig*  qtrename140*
+findtr*    mergetr*  msg2qm*  qt20fix*  uic*
+
+
+docディレクトリです。その中のhtmlディレクトリ中に諸々のヘルプ、tutorialの解説が納められています。
+[fenjin@seisyuu bin]$ cd ../doc
+[fenjin@seisyuu doc]$ ls
+html/
+[fenjin@seisyuu doc]$ cd html/
+[fenjin@seisyuu html]$ du -h
+20k     ./designer/arrows
+788k    ./designer/figures
+1.3M    ./designer
+16M     .
+
+
+examplesディレクトリです。膨大な量のサンプルが収まっていて、RPMの場合はおそらく実行ファイルも含まれています。
+[fenjin@seisyuu html]$ cd ../../examples/
+[fenjin@seisyuu examples]$ ls
+Makefile       dirview/       layout/           progressbar/    tabdialog/
+Makefile.in    dragdrop/      life/             qdir/           table/
+README         drawdemo/      lineedits/        qfd/            tetrix/
+aclock/        drawlines/     listbox/          qmag/           texture/
+action/        examples.pro   listboxcombo/     qwerty/         themes/
+addressbook/   fileiconview/  listviews/        rangecontrols/  tictac/
+application/   forever/       mail/             richtext/       tooltip/
+biff/          ftpclient/     mdi/              rot13/          trayicon/
+box/           gear/          menu/             scribble/       validator/
+buttongroups/  glpixmap/      movies/           scrollview/     widgets/
+canvas/        guithreads/    networkprotocol/  semaphores/     wizard/
+checklists/    hello/         overlay/          sharedbox/      xform/
+cursor/        helpviewer/    overlay_x11/      showimg/        xml/
+customlayout/  httpd/         picture/          sound/          xmlquotes/
+dclock/        i18n/          popup/            splitter/
+desktop/       iconview/      progress/         statistics/
+
+
+extensionsディレクトリですが・・・よくわかりません。
+[fenjin@seisyuu examples]$ cd ../extensions/
+[fenjin@seisyuu extensions]$ ls
+nsplugin/  xt/
+
+
+includeディレクトリです。たくさん.hファイルが入っています。
+[fenjin@seisyuu extensions]$ cd ../include/
+[fenjin@seisyuu include]$ ls
+jri.h               qfileinf.h         qmotifplusstyle.h      qsizepolicy.h
+jri_md.h            qfileinfo.h        qmotifstyle.h          qsjiscodec.h
+
+
+libディレクトリです。意外とライブラリ（の数）はスリムみたいです。
+[fenjin@seisyuu include]$ cd ../lib/
+[fenjin@seisyuu lib]$ ll
+合計 11908
+lrwxrwxrwx    1 root     root           15  9月 10日 08:09 libqnp.so -> libqnp.so.0.3.0*
+lrwxrwxrwx    1 root     root           15  9月 10日 08:09 libqnp.so.0 -> libqnp.so.0.3.0*
+lrwxrwxrwx    1 root     root           15  9月 10日 08:09 libqnp.so.0.3 -> libqnp.so.0.3.0*
+-rwxr-xr-x    1 root     root        81890  4月 28日  2002 libqnp.so.0.3.0*
+lrwxrwxrwx    1 root     root           17  9月 10日 08:09 libqt-mt.so -> libqt-mt.so.2.3.1*
+lrwxrwxrwx    1 root     root           17  9月 10日 07:29 libqt-mt.so.2 -> libqt-mt.so.2.3.1*
+lrwxrwxrwx    1 root     root           17  9月 10日 07:29 libqt-mt.so.2.3 -> libqt-mt.so.2.3.1*
+-rwxr-xr-x    1 root     root      5986793  4月 28日  2002 libqt-mt.so.2.3.1*
+lrwxrwxrwx    1 root     root           14  9月 10日 08:09 libqt.so -> libqt.so.2.3.1*
+lrwxrwxrwx    1 root     root           14  9月 10日 07:30 libqt.so.2 -> libqt.so.2.3.1*
+lrwxrwxrwx    1 root     root           14  9月 10日 07:30 libqt.so.2.3 -> libqt.so.2.3.1*
+-rwxr-xr-x    1 root     root      5964930  4月 28日  2002 libqt.so.2.3.1*
+lrwxrwxrwx    1 root     root           17  9月 10日 08:09 libqutil.so -> libqutil.so.1.0.0*
+lrwxrwxrwx    1 root     root           17  9月 10日 07:30 libqutil.so.1 -> libqutil.so.1.0.0*
+lrwxrwxrwx    1 root     root           17  9月 10日 07:30 libqutil.so.1.0 -> libqutil.so.1.0.0*
+-rwxr-xr-x    1 root     root        54913  4月 28日  2002 libqutil.so.1.0.0*
+lrwxrwxrwx    1 root     root           15  9月 10日 08:09 libqxt.so -> libqxt.so.0.3.0*
+lrwxrwxrwx    1 root     root           15  9月 10日 08:09 libqxt.so.0 -> libqxt.so.0.3.0*
+lrwxrwxrwx    1 root     root           15  9月 10日 08:09 libqxt.so.0.3 -> libqxt.so.0.3.0*
+-rwxr-xr-x    1 root     root        59078  4月 28日  2002 libqxt.so.0.3.0*
+
+
+tutorialディレクトリです。学習用に。気が利いてます。
+[fenjin@seisyuu lib]$ cd ../tutorial/
+[fenjin@seisyuu tutorial]$ ls
+Makefile  Makefile.in  README  t1/  t10/  t11/  t12/  t13/  t14/  t2/  t3/  t4/  t5/  t6/  t7/  t8/  t9/  tutorial.pro
+</pre>
+<br>
+　んで。結局Qt関連のライブラリは/usr/lib/qt/libに納められているようですが・・・本当かな？<br>
+<pre>
+[fenjin@seisyuu etc]$ cat ld.so.conf
+/usr/X11R6/lib
+/usr/lib/gconv
+/usr/lib/qt/lib
+</pre>
+　・・・本当でした。疑い深い人は以下のコマンドとかを試してください。<br>
+<pre>
+$ ldconfig -p | grep qt
+$ cat /etc/ld.so.conf
+</pre>
+　よく見てみると、いくつかのQtライブラリは/usr/lib/qt/lib/ではなく/usr/lib/内に直接アクセスされています。<br>
+　ldconfigのmanページを見ると/lib, /usr/libが優先的に検索されるので、/usr/lib内にある方に先を越されてしまった
+様です。ちなみに何で共有ライブラリがlib*.so.versionとなっているのかはmanページを見る限りではldconfigの仕様
+としか読みとれませんでした。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ /sbin/ldconfig -p | grep qt
+        libqxt.so.0.3 (libc6) => /usr/lib/qt/lib/libqxt.so.0.3
+        ...
+        libqtmcop.so.0 (libc6) => /usr/lib/libqtmcop.so.0
+        libqtmcop.so (libc6) => /usr/lib/libqtmcop.so
+        libqtcups.so.2 (libc6) => /usr/lib/libqtcups.so.2
+        libqtcups.so (libc6) => /usr/lib/libqtcups.so
+        libqt.so.2.3 (libc6) => /usr/lib/qt/lib/libqt.so.2.3
+        ...
+	libqnp.so (libc6) => /usr/lib/qt/lib/libqnp.so
+
+libqtcups, libqtmcopだけ/usr/lib/qtからはずれています。いったいどのパッケージでしょうか。
+
+[fenjin@seisyuu fenjin]$ rpm -qf /usr/lib/libqtmcop.so.0
+kdelibs-2.2.2-5
+
+KDEの提供によるものだったようです。おそらく、名称からKDEとQtのアプリケーション間通信とか、
+CUPSプリントシステム関連でしょう。
+</pre>
+<br>
+　<b>と、言うことはですよ？RPMでもインストールしたし、tarボールでもインストールしちゃった人はどうなるんでしょう。</b><br>
+　こうなったら/etc/ld.co.confを書き換えるしかありません。<br>
+<b>１．/usr/lib/qt/libよりも前方に、/usr/local/qt/lib を記述する。</b><br>
+<b>２．/usr/lib/qt/libをいっそのこと/usr/local/qt/lib とかに置換する。</b><br>
+　（その後ldconfigするのを忘れないでください）<br>
+　位でしょう。手段としては。<br>
+<br>
+　長くなってきたし、ldconfigでも遊べたのでディレクトリツリーに関してはこの辺でおしまいにします。<br>
+　とっととApache上からNamazudeで、doc/html/以下のHTMLファイルを検索できるようにしちゃいましょう。<br>
+<br>
+<font size=+1><b><a name="main_02">Qtのドキュメントの利用方法(Apache, Namazu連携)</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+　えーと・・・どちらも今更解説する必要のないくらいメジャーなアプリケーションになってしまいました。<br>
+　おそらく、ほとんどのディストリビューションでApacheとNamazuは当然のごとくくっついてくるはずです。<br>
+　解説本や、雑誌記事も非常に多くなりました。<br>
+<br>
+　ので。<b>ここではApacheやNamazuのインストール方法は解説しません。</b><br>
+<br>
+<a href="http://www.apache.org/">http://www.apache.org</a><br>
+<a href="http://www.namazu.org/">http://www.namazu.org</a><br>
+　そのほか雑誌記事(Linux magazine, Linux World, 日経Linux)などをご覧ください。<br>
+　ちなみにTLXW8ではNamazuはRPMのまんまで全く問題ありません。ただ、ディレクトリ構成がちょっとわかりづらいかも。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ rpm -ql namazu
+
+NAMAZU実行ファイル群
+/etc/namazu/mknmzrc
+/etc/namazu/namazurc
+/usr/bin/adnmz
+...
+/usr/bin/mknmz
+/usr/bin/namazu
+...
+/usr/bin/vfnmz
+/usr/lib/libnmz.so.3
+/usr/lib/libnmz.so.3.2.0
+
+NAMAZU関連のドキュメントファイル
+/usr/share/doc/packages/namazu-2.0.10
+...
+/usr/share/doc/packages/namazu-2.0.10/TODO
+...
+/usr/share/man/man1/namazu.1.gz
+/usr/share/namazu/doc
+...
+/usr/share/namazu/doc/ja
+/usr/share/namazu/doc/ja/manual.html
+...
+/usr/share/namazu/etc
+/usr/share/namazu/etc/AUTHORS
+...
+/usr/share/namazu/etc/namazu.png
+
+フィルタ処理関連スクリプト
+/usr/share/namazu/filter
+/usr/share/namazu/filter/bzip2.pl
+...
+/usr/share/namazu/pl/wakati.pl
+
+namazu.cgiを動作させるために必要なHTMLテンプレートファイルです。
+/usr/share/namazu/template
+/usr/share/namazu/template/NMZ.body
+...
+/usr/share/namazu/template/NMZ.tips.ja
+
+namazuが用意してくれた、インデックスを吐き出すためのデフォルトディレクトリ
+/var/namazu
+/var/namazu/index
+
+namazu.cgi本体
+/var/www/cgi-bin/namazu.cgi
+</pre>
+<br>
+　寄り道が長すぎました。とにかく、<br>
+<pre>
+$ cp -r /usr/lib/qt/doc/html /home/****/public_html/kde_docs/qt
+</pre>
+　とでもしてコピーしてください。んで、<br>
+<pre>
+$ cd ~/public_html/kde_docs/
+$ mkdir namazu-index
+$ cd namazu-index; mkdir qt
+$ cd ../
+$ mknmz --replace='s#/home/****/public_html/kde_docs/qt/##' \
+--html-split \
+--output-dir=/home/****/public_html/kde_docs/namazu-index/qt \
+/home/****/public_html/kde_docs/qt
+
+$ cd /home/****/public_html/kde_docs/
+$ cp (/etc/ or /usr/local/namazu/etc/)namazurc .namazurc
+$ cp /var/www/cgi-bin/namazu.cgi ./
+$ cp -r /usr/share/namazu/template /home/****/public_html/kde_docs/namazu-index/template
+</pre>
+　みたいな感じにしてインデックスを作成した後、namazurc, namazu.cgi, templateをコピーしてください。<br>
+　namazurcで、日本語設定をしたりURL置換を設定したりするのを忘れないようにしてください。<br>
+　・・・まあ、詳しいところはNAMAZU公式HPにも載っているので、そっちを見ながらやってみてください。<br>
+<br>
+　これで、Qt情報の検索環境が整いました。namazuからTutorialを検索してみてください。チュートリアルのページが見つかるはず
+です。<b>tutorial.html</b>がその目次です。<br>
+<br>
+　これを見ながらQtプログラミングの入門を始めればいいわけです。<br>
+<br>
+　さて、この後ですが・・・Tutorialが英語なんですよね。エーゴ。<br>
+　<b>著作権無視って勝手に訳すアーンド、勝手に注釈を入れるという作業を通して一丁深めの勉強をして見ようじゃないかってな
+感じで行きたいと思います。</b>
+　チュートリアルは全部で１４章ありますので、まあ気長につきあっていきましょう。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　ぷふーなかんじでプロローグお仕舞い。<br>
+　本当だったら現時点(2002/12/24)安定版最新のqt-x11-free-3.1.1.tar.gzのインストール、さらに旧バージョンのQtライブラリとの
+共存にまで踏み込めたら良かったんだけど、さすがにそこまではまだまだ力不足。<br>
+<br>
+　なんでQt？・・・いったんBCBが厭になってPureWin32APIへ行ったように、私は「最初から巨大開発環境」という学習ペースに
+全く耐えられない人間なんです。<br>
+　まずは小さくて、透明度の高い開発環境を深くなくても良いのでしっかりと勉強して、その後です。BCBやKDEへ行くのは。<br>
+　Win32APIを知らずしてDelphiやBCBは扱いきれないでしょう。<br>
+　DOSプロンプトからコンパイルする経験が無いままでも勉強は続けられないでしょう。裏で蠢く不安に押しつぶされます。<br>
+　同様に、UNIXのプログラミングを知らずしてQtやKDEだけでしのぎきることはできないでしょうし、最小環境にちかい開発環境
+から始めなくてはKDevelopという巨大IDEと対しても裏で行われている処理に徒に恐怖するだけです。<br>
+<br>
+　というわけで、progenとtmakeの助けによりすっげー透明度の高い開発環境であるQtプログラミングを。<br>
+　（バイト先の先輩から尻を叩かれているZaurus Linuxの事もあって）ぼちぼち、始めたいと思います。<br>
+　基本的にBCBのVCLとクリソツなクラス構造なので。違和感なし。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>
+</body>
+</html>

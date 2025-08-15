@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tmakeのインストールと動作確認</title>
+<style>
+</style>
+</head>
+<body >
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a><br>
+<br>
+<h1>tmakeのインストールと動作確認</h1>
+初版作成：2002/12/25<br>
+<!-- 二版作成：$date_2<br> -->
+<br>
+<h2>注意</h2>
+<p>
+2008/11月現在、実に6年前のドキュメントになっています。「昔はこうしていた」という参考としてご利用下さい。
+</p>
+
+<h2><a name="contents">目次</a></h2>
+<ol>
+	<li><a href="#preface">前書き</a></li>
+	<li><a href="#main">本題</a></li>
+	<li><a href="#postscript">後書き或いは感想</a></li>
+</ol>
+
+<h2><a name="preface">前書き</a></h2>
+　tmakeはQtプログラミングに欠くことのできないミニツールです。カレントディレクトリ内に存在するソースコードからMakefile
+を自動的に生成してくれるツール群で、RPMではアーキテクチャの指定がありません。つまり、OSは何でも良いわけです。<br>
+　tmakeはprogenというツールも提供してくれます。tmakeとprogenは共にPerlスクリプトです。<br>
+<br>
+　正確に言うと、まずprogenによって*.proというファイルを生成します。<br>
+　*.proはコンパイルするソースコードやその他tmakeの使うオプションが記述されています。<br>
+　tmakeは*.proを元にしてMakefileを生成してくれます。<br>
+　あとはmakeを実行すれば、Qtプログラミングが簡単にできます。<br>
+<br>
+　思いつきですが、今後KDEの開発環境を使わない、tmakeをメインにしたQt開発を「Pure Qt Programming」と呼ぶのも良いかも。<br>
+<br>
+　で、このtmakeですが多くのディストリビューションではQt関連のパッケージには含まれていません。<br>
+　本家のTrolltechでもqtとはバンドルせずに、独自に作ったQtプログラミング用ミニツールとして提供しています。<br>
+　したがって、Qtプログラミングをするには最初にtmakeをインストールしておくべきです。<br>
+<br>
+　先ほども書きましたが実体はシェルスクリプトなのでコンパイルも必要ありません。<br>
+　<b>ただ、あらかじめQtがインストールされいることを確認してください。</b>Qtがインストールされていないと、tmakeに付属して
+くる動作確認用サンプルプログラムをコンパイルできないからです。<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="main">本題</a></h2>
+<ol>
+	<li><a href="#main_01">tmakeの入手</a></li>
+	<li><a href="#main_02">インストール</a></li>
+	<li><a href="#main_03">動作確認</a></li>
+</ol>
+<br>
+<font size=+1><b><a name="main_01">tmakeの入手</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　現時点(2002/12/25)での最新バージョンは tmake-1.8 です。<br>
+<br>
+　TrolltechのFTPサーバーからダウンロードします。<br>
+<a href="http://www.trolltech.com/developer/download/tmake.html">tmakeのホームページはこちら。</a><br>
+　FTPサーバーは<br>
+<a href="ftp://ftp.trolltech.com/freebies/tmake/">ftp://ftp.trolltech.com/freebies/tmake/</a><br>
+<br>
+　<b>注意：通常のＨＰブラウザからではFTPサーバーにアクセスできても、ディレクトリ内容をみれません。</b><br>
+　また、多くのLinuxディストリビューションに付属してくるgFTPクライアントも正常にアクセスできません。<br>
+　Trolltechに問い合わせた結果、TrolltechのFTPサーバーとの相性が悪いらしくコマンドラインftpによるアクセスを奨められました。<br>
+　下にftpコマンドを使ったFTPサーバーとのやりとりの記録を残しておきます。<br>
+<br>
+<pre>
+[fenjin@seisyuu fenjin]$ ftp
+ftp> open ftp.trolltech.com
+Connected to ftp.trolltech.com.
+220-You are user number 11 of 200 allowed.
+220-Setting memory limit to 1024+1024kbytes
+...
+220 You will be disconnected after 1800 seconds of inactivity.
+Name (ftp.trolltech.com:fenjin): anonymous
+331 Any password will work.
+Password:
+230 OK.  Current directory is /
+Remote system type is UNIX.
+Using binary mode to transfer files.
+
+ftp> ls
+502-PORT/EPRT is disabled for security reasons.
+502 Please use PASV/EPSV instead ("passive on")
+ftp: bind: Address already in use
+ftp> passive on
+Passive mode on.
+
+ftp> cd freebies/tmake/
+...
+250 Changed to /freebies/tmake
+ftp> ls
+227 Passive mode OK (80,232,38,140,46,160)
+150 Accepted data connection from 61.209.207.204:55156
+total 1
+drwxrwxr-x   2 hanord   56          1024 Jan  6  2000 old-releases
+drwxrwxr-x   2 hanord   56          1024 Oct 11  1999 snapshots
+-rw-r--r--   1 root     56         64163 Nov 29 01:55 tmake-1.10.tar.gz
+...
+-rw-rw-r--   1 aavit    56        634972 Jan  2  2001 tmake-1.7.zip
+-rw-r--r--   1 mike     56         47410 Nov  1  2001 tmake-1.8.tar.gz
+-rw-r--r--   1 mike     56        645724 Nov  1  2001 tmake-1.8.zip
+226-Options: -l
+226 17 matches total
+
+ftp> get tmake-1.8.tar.gz
+local: tmake-1.8.tar.gz remote: tmake-1.8.tar.gz
+227 Passive mode OK (80,232,38,140,46,160)
+150-Accepted data connection from 61.209.207.204:55157
+150 46.3 kbytes to download
+226-File written successfully
+226 0.008 seconds (measured by the server), 0.00 Kb/s
+47410 bytes received in 1.91 secs (24 Kbytes/sec)
+ftp> bye
+</pre>
+<br>
+　ftpコマンドを実行した時点でのカレントディレクトリ内に、tmake-1.8.tar.gzが出現しているはずです。<br>
+<br>
+<br>
+<font size=+1><b><a name="main_02">インストール</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　ユーザーのホームディレクトリの直下にtmakeがダウンロードできたものとします。(/home/****/tmake-1.8.tar.gz)<br>
+　ここから解凍するわけですが・・・パスの指定がどうなっているか確認して置いてください。<br>
+　もしも/usr/localとかにインストールできないようであれば、ホームディレクトリ内で直接解凍しちゃって、シェルのパス指定で
+ホームディレクトリのtmakeを指定することも可能です。<br>
+　というわけで、今回はそれで行きます。どちらにせよパス指定はして置いた方が便利ですし。<br>
+<br>
+<pre>
+$ pwd
+/home/****
+$ tar zxvf tmake-1.8.tar.gz
+...
+...
+$ ls
+...
+tmake-1.8/
+tmake-1.8.tar.gz
+...
+$ cd tmake-1.8; ls
+CHANGES  LICENSE  README  bin/  doc/  example/  lib/
+$ cd bin/; ls
+progen*  tmake*  tmake_win
+</pre>
+<br>
+　この後、.bashrcとか.loginとかでPATH変数に /home/****/tmake-1.8/bin を加えておきます。<br>
+　再ログインした後、<br>
+<pre>
+[fenjin@seisyuu fenjin]$ tmake
+Usage:
+    tmake [options] project-files
+Options:
+    -e expr    Evaluate expression, ignore template file
+    -nodepend  Don't generate dependency information
+    -o file    Write output to file
+    -t file    Specify a template file
+    -unix      Create output for Unix (auto detects)
+    -v         Verbose/debug mode
+    -win32     Create output for Win32 (auto detects)
+</pre>
+　と表示されればオッケーでしょう。表示されなければ tmake-1.8/bin/ 内で試します。それで表示されるようならPATH指定が
+間違っている可能性が高いです。それでも表示されなければファイルが壊れていた可能性があるので、ダウンロードしなおして
+ください。<br>
+<br>
+　同様にprogenコマンドも試します。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ progen --help
+Usage:
+    progen [options] [files]
+Options:
+    -lower   Lower-case letters filenames (useful for non-Unix)
+    -n name  Specify a project name (= TARGET)
+    -o file  Write output to "file"
+    -t file  Specify a template file other than qtapp
+    -d directory Search for files in specified directory and subdirectories[fenjin@seisyuu fenjin]$
+</pre>
+　と表示されれば問題ありません。最後の改行がなんか変ですが、動作に支障はありません。<br>
+<br>
+　さて、tmakeを解凍したときに example/ ディレクトリがありました。この中に動作確認用のミニプログラムのソースコードが
+納められています。実際にコンパイルしてみて、きちんと実行できるか確認します。<br>
+<br>
+<br>
+<font size=+1><b><a name="main_03">動作確認</a></b></font><br>
+<font size=-1><a href="#main">「本題」に戻る</a></font><br>
+<br>
+　exampleディレクトリの内容を確認します。<br>
+<pre>
+[fenjin@seisyuu fenjin]$ cd tmake-1.8/example/
+[fenjin@seisyuu example]$ ls
+hello.cpp  hello.h  hello.pro  main.cpp  wc.t
+</pre>
+<br>
+　既に *.pro ファイルが出来てしまっています。・・・が。ちょっとここでprogenの確認をするためにも*.proを作り直
+してみましょう。hello.pro を適当にリネームした後・・・<br>
+<pre>
+$ mv hello.pro hello_pro
+
+progenは -n オプションで最終的なプログラム実行ファイル名を。-o で生成するproファイル名を指定します。
+
+$ progen -n hello -o hello.pro
+$ ls
+hello.cpp  hello.h  hello.pro  hello_pro  main.cpp  wc.t
+
+比べてみましょう。
+
+$ diff hello.pro hello_pro
+6d5
+&lt; INTERFACES    =
+$
+</pre>
+　progenで生成し直したものには「INTERFACES」オプションが含まれているようです。このオプションの詳細はまだわかりません。
+（シェルスクリプト読む気力がない）とにかく、生成できていればまあオッケーです。<br>
+<br>
+　ではhello.proをtmakeに渡して、Makefileを生成させます。-o でメイクファイルの出力ファイル名を指定します。指定しないと
+標準出力に流れていきます。<br>
+<pre>
+$ tmake -o Makefile hello.pro
+$ ls
+Makefile  hello.cpp  hello.h  hello.pro  hello_pro  main.cpp  wc.t
+
+Makefileが生成されました。このまま make に突入します。
+
+$ make
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o hello.o hello.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o main.o main.cpp
+/usr/lib/qt/bin/moc hello.h -o moc_hello.cpp
+g++ -c -pipe -Wall -W -O2 -DNO_DEBUG -I/usr/lib/qt/include -o moc_hello.o moc_hello.cpp
+g++  -o hello hello.o main.o moc_hello.o  -L/usr/lib/qt/lib -L/usr/X11R6/lib -lqt -lXext -lX11 -lm
+$ ls
+Makefile  hello*  hello.cpp  hello.h  hello.o  hello.pro  hello_pro  main.cpp  main.o  moc_hello.cpp  moc_hello.o  wc.t
+</pre>
+<br>
+　無事実行ファイル hello が生成されたようです。mocファイルというのが新たに作られています。これは「メタオブジェクトコンパイラ
+(Meta Object Compiler)」によって生成されたファイルです。中身は、Qtがシグナルとスロットを実現するために独自に定義した
+マクロの展開とか、Qt独自のプロパティシステムとかいろいろ展開されたものらしいですがよく分かんないッス。<br>
+<br>
+　下が、hello の実行結果ウインドウです。文字が泳いでウインドウ内部をクリックするとプログラムは終了します。<br>
+<br>
+<img src="qt_tmake.png"><br>
+<br>
+　これでtmake, progenのインストールは完了です。お疲れさまでした。<br>
+　それでは、Qtプログラミングの世界を私と一緒に探検していかうではありませんか。<br>
+<br>
+<font size=-1><a href="#contents">目次に戻る</a></font>
+<br>
+<h2><a name="postscript">後書き或いは感想</a></h2>
+　これで一通りの準備は整いました。<br>
+　では、ぼちぼちチュートリアルを消化していくとします・・・。<br>
+<br>
+
+<font size=-1><a href="#contents">目次に戻る</a></font><br>
+<br>
+<a href="../../index.html">トップページ</a>＞＞＞<a href="../index.html#qt_junkbox">「ぷろぐらみんぐ」目次</a>
+</body>
+</html>
