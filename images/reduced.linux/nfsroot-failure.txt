@@ -1,0 +1,121 @@
+Linux version 2.6.38.2 (msakamoto@siranui.localdomain) (gcc version 4.1.2 200807
+04 (Red Hat 4.1.2-48)) #1 Thu Apr 28 14:47:24 JST 2011
+BIOS-provided physical RAM map:
+ BIOS-e820: 0000000000000000 - 000000000009f400 (usable)
+ BIOS-e820: 000000000009f400 - 00000000000a0000 (reserved)
+ BIOS-e820: 00000000000ca000 - 00000000000cc000 (reserved)
+ BIOS-e820: 00000000000dc000 - 00000000000e4000 (reserved)
+ BIOS-e820: 00000000000e8000 - 0000000000100000 (reserved)
+ BIOS-e820: 0000000000100000 - 0000000007ef0000 (usable)
+ BIOS-e820: 0000000007ef0000 - 0000000007eff000 (ACPI data)
+ BIOS-e820: 0000000007eff000 - 0000000007f00000 (ACPI NVS)
+ BIOS-e820: 0000000007f00000 - 0000000008000000 (usable)
+ BIOS-e820: 00000000e0000000 - 00000000f0000000 (reserved)
+ BIOS-e820: 00000000fec00000 - 00000000fec10000 (reserved)
+ BIOS-e820: 00000000fee00000 - 00000000fee01000 (reserved)
+ BIOS-e820: 00000000fffe0000 - 0000000100000000 (reserved)
+Notice: NX (Execute Disable) protection cannot be enabled: non-PAE kernel!
+DMI present.
+Hypervisor detected: VMware
+last_pfn = 0x8000 max_arch_pfn = 0x100000
+x86 PAT enabled: cpu 0, old 0x0, new 0x7010600070106
+init_memory_mapping: 0000000000000000-0000000008000000
+0MB HIGHMEM available.
+128MB LOWMEM available.
+  mapped low ram: 0 - 08000000
+  low ram: 0 - 08000000
+Zone PFN ranges:
+  DMA      0x00000010 -> 0x00001000
+  Normal   0x00001000 -> 0x00008000
+  HighMem  empty
+Movable zone start PFN for each node
+early_node_map[3] active PFN ranges
+    0: 0x00000010 -> 0x0000009f
+    0: 0x00000100 -> 0x00007ef0
+    0: 0x00007f00 -> 0x00008000
+Allocating PCI resources starting at 8000000 (gap: 8000000:d8000000)
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 32383
+Kernel command line: console=ttyS0,115200 console=tty0 root=/dev/nfs rw ip=dhcp
+nfsroot=192.168.240.10:/opt/nfsexports/root1 nfsrootdebug BOOT_IMAGE=bzImageNfs
+PID hash table entries: 512 (order: -1, 2048 bytes)
+Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+Initializing CPU#0
+Initializing HighMem for node 0 (00000000:00000000)
+Memory: 126432k/131072k available (1867k kernel code, 4124k reserved, 565k data,
+ 244k init, 0k highmem)
+virtual kernel memory layout:
+    fixmap  : 0xfffe5000 - 0xfffff000   ( 104 kB)
+    pkmap   : 0xff800000 - 0xffc00000   (4096 kB)
+    vmalloc : 0xc8800000 - 0xff7fe000   ( 879 MB)
+    lowmem  : 0xc0000000 - 0xc8000000   ( 128 MB)
+      .init : 0xc1261000 - 0xc129e000   ( 244 kB)
+      .data : 0xc11d2d3f - 0xc1260340   ( 565 kB)
+      .text : 0xc1000000 - 0xc11d2d3f   (1867 kB)
+Checking if this processor honours the WP bit even in supervisor mode...Ok.
+SLUB: Genslabs=15, HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+NR_IRQS:16
+Console: colour VGA+ 80x25
+console [tty0] enabled
+console [ttyS0] enabled
+TSC freq read from hypervisor : 3059.060 MHz
+Detected 3059.060 MHz processor.
+Calibrating delay loop (skipped) preset value.. 6118.12 BogoMIPS (lpj=12236240)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 512
+CPU: Intel(R) Core(TM) i3 CPU         540  @ 3.07GHz stepping 02
+Performance Events: Westmere events, Broken PMU hardware detected, using softwar
+e events only.
+NET: Registered protocol family 16
+bio: create slab <bio-0> at 0
+Switching to clocksource pit
+NET: Registered protocol family 2
+IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
+TCP established hash table entries: 4096 (order: 3, 32768 bytes)
+TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
+TCP: Hash tables configured (established 4096 bind 4096)
+TCP reno registered
+UDP hash table entries: 256 (order: 0, 4096 bytes)
+UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
+RPC: Registered udp transport module.
+RPC: Registered tcp transport module.
+RPC: Registered tcp NFSv4.1 backchannel transport module.
+platform rtc_cmos: registered platform RTC device (no PNP device found)
+io scheduler noop registered (default)
+Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+serial8250: ttyS0 at I/O 0x3f8 (irq = 4) is a 16550A
+serial8250: ttyS1 at I/O 0x2f8 (irq = 3) is a 16550A
+serio: i8042 KBD port at 0x60,0x64 irq 1
+serio: i8042 AUX port at 0x60,0x64 irq 12
+mousedev: PS/2 mouse device common for all mice
+TCP cubic registered
+NET: Registered protocol family 10
+IPv6 over IPv4 tunneling driver
+input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/inpu
+t0
+Switching to clocksource tsc
+Root-NFS: nfsroot=/opt/nfsexports/root1
+NFS: nfs mount opts='udp,nolock,addr=192.168.240.10'
+NFS:   parsing nfs mount option 'udp'
+NFS:   parsing nfs mount option 'nolock'
+NFS:   parsing nfs mount option 'addr=192.168.240.10'
+NFS: MNTPATH: '/opt/nfsexports/root1'
+NFS: sending MNT request for 192.168.240.10:/opt/nfsexports/root1
+NFS: failed to create MNT RPC client, status=-101
+NFS: unable to mount server 192.168.240.10, error -101
+VFS: Unable to mount root fs via NFS, trying floppy.
+List of all partitions:
+No filesystem could mount root, tried:
+Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(2,0)
+Pid: 1, comm: swapper Not tainted 2.6.38.2 #1
+Call Trace:
+ [<c101ccec>] ? panic+0x5c/0x140
+ [<c1261d5c>] ? mount_block_root+0x16c/0x1c0
+ [<c1002930>] ? irq_entries_start+0x30/0x400
+ [<c1077e77>] ? sys_mknod+0x27/0x30
+ [<c1261640>] ? kernel_init+0x0/0x150
+ [<c1261e3b>] ? mount_root+0x8b/0xc0
+ [<c1261fb6>] ? prepare_namespace+0x146/0x180
+ [<c106bd0f>] ? sys_access+0x1f/0x30
+ [<c126175b>] ? kernel_init+0x11b/0x150
+ [<c1002d36>] ? kernel_thread_helper+0x6/0x10

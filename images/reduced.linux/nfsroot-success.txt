@@ -1,0 +1,338 @@
+Linux version 2.6.38.2 (msakamoto@siranui.localdomain) (gcc version 4.1.2 200807
+04 (Red Hat 4.1.2-48)) #3 Thu Apr 28 15:37:40 JST 2011
+BIOS-provided physical RAM map:
+ BIOS-e820: 0000000000000000 - 000000000009f400 (usable)
+ BIOS-e820: 000000000009f400 - 00000000000a0000 (reserved)
+ BIOS-e820: 00000000000ca000 - 00000000000cc000 (reserved)
+ BIOS-e820: 00000000000dc000 - 00000000000e4000 (reserved)
+ BIOS-e820: 00000000000e8000 - 0000000000100000 (reserved)
+ BIOS-e820: 0000000000100000 - 0000000007ef0000 (usable)
+ BIOS-e820: 0000000007ef0000 - 0000000007eff000 (ACPI data)
+ BIOS-e820: 0000000007eff000 - 0000000007f00000 (ACPI NVS)
+ BIOS-e820: 0000000007f00000 - 0000000008000000 (usable)
+ BIOS-e820: 00000000e0000000 - 00000000f0000000 (reserved)
+ BIOS-e820: 00000000fec00000 - 00000000fec10000 (reserved)
+ BIOS-e820: 00000000fee00000 - 00000000fee01000 (reserved)
+ BIOS-e820: 00000000fffe0000 - 0000000100000000 (reserved)
+Notice: NX (Execute Disable) protection cannot be enabled: non-PAE kernel!
+DMI present.
+Hypervisor detected: VMware
+last_pfn = 0x8000 max_arch_pfn = 0x100000
+x86 PAT enabled: cpu 0, old 0x0, new 0x7010600070106
+init_memory_mapping: 0000000000000000-0000000008000000
+0MB HIGHMEM available.
+128MB LOWMEM available.
+  mapped low ram: 0 - 08000000
+  low ram: 0 - 08000000
+Zone PFN ranges:
+  DMA      0x00000010 -> 0x00001000
+  Normal   0x00001000 -> 0x00008000
+  HighMem  empty
+Movable zone start PFN for each node
+early_node_map[3] active PFN ranges
+    0: 0x00000010 -> 0x0000009f
+    0: 0x00000100 -> 0x00007ef0
+    0: 0x00007f00 -> 0x00008000
+Allocating PCI resources starting at 8000000 (gap: 8000000:d8000000)
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 32383
+Kernel command line: console=ttyS0,115200 console=tty0 root=/dev/nfs rw ip=dhcp
+nfsroot=192.168.240.10:/opt/nfsexports/root1 nfsrootdebug BOOT_IMAGE=bzImageNfs
+PID hash table entries: 512 (order: -1, 2048 bytes)
+Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+Initializing CPU#0
+Initializing HighMem for node 0 (00000000:00000000)
+Memory: 126268k/131072k available (1969k kernel code, 4288k reserved, 613k data,
+ 256k init, 0k highmem)
+virtual kernel memory layout:
+    fixmap  : 0xfffe5000 - 0xfffff000   ( 104 kB)
+    pkmap   : 0xff800000 - 0xffc00000   (4096 kB)
+    vmalloc : 0xc8800000 - 0xff7fe000   ( 879 MB)
+    lowmem  : 0xc0000000 - 0xc8000000   ( 128 MB)
+      .init : 0xc1286000 - 0xc12c6000   ( 256 kB)
+      .data : 0xc11ec417 - 0xc1285840   ( 613 kB)
+      .text : 0xc1000000 - 0xc11ec417   (1969 kB)
+Checking if this processor honours the WP bit even in supervisor mode...Ok.
+SLUB: Genslabs=15, HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+NR_IRQS:16
+Console: colour VGA+ 80x25
+console [tty0] enabled
+console [ttyS0] enabled
+TSC freq read from hypervisor : 3059.060 MHz
+Detected 3059.060 MHz processor.
+Calibrating delay loop (skipped) preset value.. 6118.12 BogoMIPS (lpj=12236240)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 512
+CPU: Intel(R) Core(TM) i3 CPU         540  @ 3.07GHz stepping 02
+Performance Events: Westmere events, Broken PMU hardware detected, using softwar
+e events only.
+NET: Registered protocol family 16
+PCI: PCI BIOS revision 2.10 entry at 0xfd8a0, last bus=34
+PCI: Using configuration type 1 for base access
+bio: create slab <bio-0> at 0
+vgaarb: loaded
+PCI: Probing PCI hardware
+pci 0000:00:07.3: quirk: [io  0x1000-0x103f] claimed by PIIX4 ACPI
+pci 0000:00:07.3: quirk: [io  0x1040-0x104f] claimed by PIIX4 SMB
+pci 0000:00:01.0: PCI bridge to [bus 01-01]
+pci 0000:00:11.0: PCI bridge to [bus 02-02] (subtractive decode)
+pci 0000:00:15.0: PCI bridge to [bus 03-03]
+pci 0000:00:15.1: PCI bridge to [bus 04-04]
+pci 0000:00:15.2: PCI bridge to [bus 05-05]
+pci 0000:00:15.3: PCI bridge to [bus 06-06]
+pci 0000:00:15.4: PCI bridge to [bus 07-07]
+pci 0000:00:15.5: PCI bridge to [bus 08-08]
+pci 0000:00:15.6: PCI bridge to [bus 09-09]
+pci 0000:00:15.7: PCI bridge to [bus 0a-0a]
+pci 0000:00:16.0: PCI bridge to [bus 0b-0b]
+pci 0000:00:16.1: PCI bridge to [bus 0c-0c]
+pci 0000:00:16.2: PCI bridge to [bus 0d-0d]
+pci 0000:00:16.3: PCI bridge to [bus 0e-0e]
+pci 0000:00:16.4: PCI bridge to [bus 0f-0f]
+pci 0000:00:16.5: PCI bridge to [bus 10-10]
+pci 0000:00:16.6: PCI bridge to [bus 11-11]
+pci 0000:00:16.7: PCI bridge to [bus 12-12]
+pci 0000:00:17.0: PCI bridge to [bus 13-13]
+pci 0000:00:17.1: PCI bridge to [bus 14-14]
+pci 0000:00:17.2: PCI bridge to [bus 15-15]
+pci 0000:00:17.3: PCI bridge to [bus 16-16]
+pci 0000:00:17.4: PCI bridge to [bus 17-17]
+pci 0000:00:17.5: PCI bridge to [bus 18-18]
+pci 0000:00:17.6: PCI bridge to [bus 19-19]
+pci 0000:00:17.7: PCI bridge to [bus 1a-1a]
+pci 0000:00:18.0: PCI bridge to [bus 1b-1b]
+pci 0000:00:18.1: PCI bridge to [bus 1c-1c]
+pci 0000:00:18.2: PCI bridge to [bus 1d-1d]
+pci 0000:00:18.3: PCI bridge to [bus 1e-1e]
+pci 0000:00:18.4: PCI bridge to [bus 1f-1f]
+pci 0000:00:18.5: PCI bridge to [bus 20-20]
+pci 0000:00:18.6: PCI bridge to [bus 21-21]
+pci 0000:00:18.7: PCI bridge to [bus 22-22]
+vgaarb: device added: PCI:0000:00:0f.0,decodes=io+mem,owns=io+mem,locks=none
+pci 0000:00:07.0: PIIX/ICH IRQ router [8086:7110]
+Switching to clocksource pit
+pci 0000:00:0f.0: BAR 6: assigned [mem 0x08000000-0x08007fff pref]
+pci 0000:00:10.0: BAR 6: assigned [mem 0x08008000-0x0800bfff pref]
+pci 0000:00:15.3: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:15.4: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:15.5: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:15.6: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:15.7: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:16.3: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:16.4: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:16.5: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:16.6: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:16.7: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:17.3: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:17.4: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:17.5: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:17.6: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:17.7: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:18.3: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:18.4: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:18.5: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:18.6: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:18.7: BAR 7: can't assign io (size 0x1000)
+pci 0000:00:01.0: PCI bridge to [bus 01-01]
+pci 0000:00:01.0:   bridge window [io  disabled]
+pci 0000:00:01.0:   bridge window [mem disabled]
+pci 0000:00:01.0:   bridge window [mem pref disabled]
+pci 0000:02:00.0: BAR 6: assigned [mem 0xdc100000-0xdc10ffff pref]
+pci 0000:00:11.0: PCI bridge to [bus 02-02]
+pci 0000:00:11.0:   bridge window [io  0x2000-0x3fff]
+pci 0000:00:11.0:   bridge window [mem 0xd9200000-0xd9cfffff]
+pci 0000:00:11.0:   bridge window [mem 0xdc100000-0xdc6fffff 64bit pref]
+pci 0000:00:15.0: PCI bridge to [bus 03-03]
+pci 0000:00:15.0:   bridge window [io  0x4000-0x4fff]
+pci 0000:00:15.0:   bridge window [mem 0xd9d00000-0xd9dfffff]
+pci 0000:00:15.0:   bridge window [mem 0xdc700000-0xdc7fffff 64bit pref]
+pci 0000:00:15.1: PCI bridge to [bus 04-04]
+pci 0000:00:15.1:   bridge window [io  0x8000-0x8fff]
+pci 0000:00:15.1:   bridge window [mem 0xda100000-0xda1fffff]
+pci 0000:00:15.1:   bridge window [mem 0xdcb00000-0xdcbfffff 64bit pref]
+pci 0000:00:15.2: PCI bridge to [bus 05-05]
+pci 0000:00:15.2:   bridge window [io  0xc000-0xcfff]
+pci 0000:00:15.2:   bridge window [mem 0xda500000-0xda5fffff]
+pci 0000:00:15.2:   bridge window [mem 0xdcf00000-0xdcffffff 64bit pref]
+pci 0000:00:15.3: PCI bridge to [bus 06-06]
+pci 0000:00:15.3:   bridge window [io  disabled]
+pci 0000:00:15.3:   bridge window [mem 0xda900000-0xda9fffff]
+pci 0000:00:15.3:   bridge window [mem 0xdd300000-0xdd3fffff 64bit pref]
+pci 0000:00:15.4: PCI bridge to [bus 07-07]
+pci 0000:00:15.4:   bridge window [io  disabled]
+pci 0000:00:15.4:   bridge window [mem 0xdad00000-0xdadfffff]
+pci 0000:00:15.4:   bridge window [mem 0xdd700000-0xdd7fffff 64bit pref]
+pci 0000:00:15.5: PCI bridge to [bus 08-08]
+pci 0000:00:15.5:   bridge window [io  disabled]
+pci 0000:00:15.5:   bridge window [mem 0xdb100000-0xdb1fffff]
+pci 0000:00:15.5:   bridge window [mem 0xddb00000-0xddbfffff 64bit pref]
+pci 0000:00:15.6: PCI bridge to [bus 09-09]
+pci 0000:00:15.6:   bridge window [io  disabled]
+pci 0000:00:15.6:   bridge window [mem 0xdb500000-0xdb5fffff]
+pci 0000:00:15.6:   bridge window [mem 0xddf00000-0xddffffff 64bit pref]
+pci 0000:00:15.7: PCI bridge to [bus 0a-0a]
+pci 0000:00:15.7:   bridge window [io  disabled]
+pci 0000:00:15.7:   bridge window [mem 0xdb900000-0xdb9fffff]
+pci 0000:00:15.7:   bridge window [mem 0xde300000-0xde3fffff 64bit pref]
+pci 0000:00:16.0: PCI bridge to [bus 0b-0b]
+pci 0000:00:16.0:   bridge window [io  0x5000-0x5fff]
+pci 0000:00:16.0:   bridge window [mem 0xd9e00000-0xd9efffff]
+pci 0000:00:16.0:   bridge window [mem 0xdc800000-0xdc8fffff 64bit pref]
+pci 0000:00:16.1: PCI bridge to [bus 0c-0c]
+pci 0000:00:16.1:   bridge window [io  0x9000-0x9fff]
+pci 0000:00:16.1:   bridge window [mem 0xda200000-0xda2fffff]
+pci 0000:00:16.1:   bridge window [mem 0xdcc00000-0xdccfffff 64bit pref]
+pci 0000:00:16.2: PCI bridge to [bus 0d-0d]
+pci 0000:00:16.2:   bridge window [io  0xd000-0xdfff]
+pci 0000:00:16.2:   bridge window [mem 0xda600000-0xda6fffff]
+pci 0000:00:16.2:   bridge window [mem 0xdd000000-0xdd0fffff 64bit pref]
+pci 0000:00:16.3: PCI bridge to [bus 0e-0e]
+pci 0000:00:16.3:   bridge window [io  disabled]
+pci 0000:00:16.3:   bridge window [mem 0xdaa00000-0xdaafffff]
+pci 0000:00:16.3:   bridge window [mem 0xdd400000-0xdd4fffff 64bit pref]
+pci 0000:00:16.4: PCI bridge to [bus 0f-0f]
+pci 0000:00:16.4:   bridge window [io  disabled]
+pci 0000:00:16.4:   bridge window [mem 0xdae00000-0xdaefffff]
+pci 0000:00:16.4:   bridge window [mem 0xdd800000-0xdd8fffff 64bit pref]
+pci 0000:00:16.5: PCI bridge to [bus 10-10]
+pci 0000:00:16.5:   bridge window [io  disabled]
+pci 0000:00:16.5:   bridge window [mem 0xdb200000-0xdb2fffff]
+pci 0000:00:16.5:   bridge window [mem 0xddc00000-0xddcfffff 64bit pref]
+pci 0000:00:16.6: PCI bridge to [bus 11-11]
+pci 0000:00:16.6:   bridge window [io  disabled]
+pci 0000:00:16.6:   bridge window [mem 0xdb600000-0xdb6fffff]
+pci 0000:00:16.6:   bridge window [mem 0xde000000-0xde0fffff 64bit pref]
+pci 0000:00:16.7: PCI bridge to [bus 12-12]
+pci 0000:00:16.7:   bridge window [io  disabled]
+pci 0000:00:16.7:   bridge window [mem 0xdba00000-0xdbafffff]
+pci 0000:00:16.7:   bridge window [mem 0xde400000-0xde4fffff 64bit pref]
+pci 0000:00:17.0: PCI bridge to [bus 13-13]
+pci 0000:00:17.0:   bridge window [io  0x6000-0x6fff]
+pci 0000:00:17.0:   bridge window [mem 0xd9f00000-0xd9ffffff]
+pci 0000:00:17.0:   bridge window [mem 0xdc900000-0xdc9fffff 64bit pref]
+pci 0000:00:17.1: PCI bridge to [bus 14-14]
+pci 0000:00:17.1:   bridge window [io  0xa000-0xafff]
+pci 0000:00:17.1:   bridge window [mem 0xda300000-0xda3fffff]
+pci 0000:00:17.1:   bridge window [mem 0xdcd00000-0xdcdfffff 64bit pref]
+pci 0000:00:17.2: PCI bridge to [bus 15-15]
+pci 0000:00:17.2:   bridge window [io  0xe000-0xefff]
+pci 0000:00:17.2:   bridge window [mem 0xda700000-0xda7fffff]
+pci 0000:00:17.2:   bridge window [mem 0xdd100000-0xdd1fffff 64bit pref]
+pci 0000:00:17.3: PCI bridge to [bus 16-16]
+pci 0000:00:17.3:   bridge window [io  disabled]
+pci 0000:00:17.3:   bridge window [mem 0xdab00000-0xdabfffff]
+pci 0000:00:17.3:   bridge window [mem 0xdd500000-0xdd5fffff 64bit pref]
+pci 0000:00:17.4: PCI bridge to [bus 17-17]
+pci 0000:00:17.4:   bridge window [io  disabled]
+pci 0000:00:17.4:   bridge window [mem 0xdaf00000-0xdaffffff]
+pci 0000:00:17.4:   bridge window [mem 0xdd900000-0xdd9fffff 64bit pref]
+pci 0000:00:17.5: PCI bridge to [bus 18-18]
+pci 0000:00:17.5:   bridge window [io  disabled]
+pci 0000:00:17.5:   bridge window [mem 0xdb300000-0xdb3fffff]
+pci 0000:00:17.5:   bridge window [mem 0xddd00000-0xdddfffff 64bit pref]
+pci 0000:00:17.6: PCI bridge to [bus 19-19]
+pci 0000:00:17.6:   bridge window [io  disabled]
+pci 0000:00:17.6:   bridge window [mem 0xdb700000-0xdb7fffff]
+pci 0000:00:17.6:   bridge window [mem 0xde100000-0xde1fffff 64bit pref]
+pci 0000:00:17.7: PCI bridge to [bus 1a-1a]
+pci 0000:00:17.7:   bridge window [io  disabled]
+pci 0000:00:17.7:   bridge window [mem 0xdbb00000-0xdbbfffff]
+pci 0000:00:17.7:   bridge window [mem 0xde500000-0xde5fffff 64bit pref]
+pci 0000:00:18.0: PCI bridge to [bus 1b-1b]
+pci 0000:00:18.0:   bridge window [io  0x7000-0x7fff]
+pci 0000:00:18.0:   bridge window [mem 0xda000000-0xda0fffff]
+pci 0000:00:18.0:   bridge window [mem 0xdca00000-0xdcafffff 64bit pref]
+pci 0000:00:18.1: PCI bridge to [bus 1c-1c]
+pci 0000:00:18.1:   bridge window [io  0xb000-0xbfff]
+pci 0000:00:18.1:   bridge window [mem 0xda400000-0xda4fffff]
+pci 0000:00:18.1:   bridge window [mem 0xdce00000-0xdcefffff 64bit pref]
+pci 0000:00:18.2: PCI bridge to [bus 1d-1d]
+pci 0000:00:18.2:   bridge window [io  0xf000-0xffff]
+pci 0000:00:18.2:   bridge window [mem 0xda800000-0xda8fffff]
+pci 0000:00:18.2:   bridge window [mem 0xdd200000-0xdd2fffff 64bit pref]
+pci 0000:00:18.3: PCI bridge to [bus 1e-1e]
+pci 0000:00:18.3:   bridge window [io  disabled]
+pci 0000:00:18.3:   bridge window [mem 0xdac00000-0xdacfffff]
+pci 0000:00:18.3:   bridge window [mem 0xdd600000-0xdd6fffff 64bit pref]
+pci 0000:00:18.4: PCI bridge to [bus 1f-1f]
+pci 0000:00:18.4:   bridge window [io  disabled]
+pci 0000:00:18.4:   bridge window [mem 0xdb000000-0xdb0fffff]
+pci 0000:00:18.4:   bridge window [mem 0xdda00000-0xddafffff 64bit pref]
+pci 0000:00:18.5: PCI bridge to [bus 20-20]
+pci 0000:00:18.5:   bridge window [io  disabled]
+pci 0000:00:18.5:   bridge window [mem 0xdb400000-0xdb4fffff]
+pci 0000:00:18.5:   bridge window [mem 0xdde00000-0xddefffff 64bit pref]
+pci 0000:00:18.6: PCI bridge to [bus 21-21]
+pci 0000:00:18.6:   bridge window [io  disabled]
+pci 0000:00:18.6:   bridge window [mem 0xdb800000-0xdb8fffff]
+pci 0000:00:18.6:   bridge window [mem 0xde200000-0xde2fffff 64bit pref]
+pci 0000:00:18.7: PCI bridge to [bus 22-22]
+pci 0000:00:18.7:   bridge window [io  disabled]
+pci 0000:00:18.7:   bridge window [mem 0xdbc00000-0xdbcfffff]
+pci 0000:00:18.7:   bridge window [mem 0xde600000-0xde6fffff 64bit pref]
+NET: Registered protocol family 2
+IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
+TCP established hash table entries: 4096 (order: 3, 32768 bytes)
+TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
+TCP: Hash tables configured (established 4096 bind 4096)
+TCP reno registered
+UDP hash table entries: 256 (order: 0, 4096 bytes)
+UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
+RPC: Registered udp transport module.
+RPC: Registered tcp transport module.
+RPC: Registered tcp NFSv4.1 backchannel transport module.
+pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+platform rtc_cmos: registered platform RTC device (no PNP device found)
+io scheduler noop registered (default)
+Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+serial8250: ttyS0 at I/O 0x3f8 (irq = 4) is a 16550A
+serial8250: ttyS1 at I/O 0x2f8 (irq = 3) is a 16550A
+pcnet32: pcnet32.c:v1.35 21.Apr.2008 tsbogend@alpha.franken.de
+pcnet32: PCnet/PCI II 79C970A at 0x2000, 00:0c:29:c2:20:03 assigned IRQ 10
+pcnet32: eth0: registered as PCnet/PCI II 79C970A
+pcnet32: 1 cards_found
+serio: i8042 KBD port at 0x60,0x64 irq 1
+serio: i8042 AUX port at 0x60,0x64 irq 12
+mousedev: PS/2 mouse device common for all mice
+TCP cubic registered
+NET: Registered protocol family 10
+IPv6 over IPv4 tunneling driver
+input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/inpu
+t0
+pcnet32 0000:02:00.0: eth0: link up
+Switching to clocksource tsc
+Sending DHCP requests ., OK
+IP-Config: Got DHCP answer from 192.168.240.254, my address is 192.168.240.130
+IP-Config: Complete:
+     device=eth0, addr=192.168.240.130, mask=255.255.255.0, gw=192.168.240.2,
+     host=192.168.240.130, domain=localdomain, nis-domain=(none),
+     bootserver=192.168.240.254, rootserver=192.168.240.10, rootpath=
+Root-NFS: nfsroot=/opt/nfsexports/root1
+NFS: nfs mount opts='udp,nolock,addr=192.168.240.10'
+NFS:   parsing nfs mount option 'udp'
+NFS:   parsing nfs mount option 'nolock'
+NFS:   parsing nfs mount option 'addr=192.168.240.10'
+NFS: MNTPATH: '/opt/nfsexports/root1'
+NFS: sending MNT request for 192.168.240.10:/opt/nfsexports/root1
+NFS: MNT request succeeded
+VFS: Mounted root (nfs filesystem) on device 0:10.
+Freeing unused kernel memory: 256k freed
+NFS: nfs mount opts='vers=2,rsize=8192,wsize=8192,namlen=255,hard,nolock,proto=u
+dp,timeo=11,retrans=3,sec=sys,mountaddr=192.168.240.10,mountvers=1,mountproto=ud
+p,local_lock=all,addr=192.168.240.10'
+NFS:   parsing nfs mount option 'vers=2'
+NFS:   parsing nfs mount option 'rsize=8192'
+NFS:   parsing nfs mount option 'wsize=8192'
+NFS:   parsing nfs mount option 'namlen=255'
+NFS:   parsing nfs mount option 'hard'
+NFS:   parsing nfs mount option 'nolock'
+NFS:   parsing nfs mount option 'proto=udp'
+NFS:   parsing nfs mount option 'timeo=11'
+NFS:   parsing nfs mount option 'retrans=3'
+NFS:   parsing nfs mount option 'sec=sys'
+NFS: parsing sec=sys option
+NFS:   parsing nfs mount option 'mountaddr=192.168.240.10'
+NFS:   parsing nfs mount option 'mountvers=1'
+NFS:   parsing nfs mount option 'mountproto=udp'
+NFS:   parsing nfs mount option 'local_lock=all'
+NFS:   parsing nfs mount option 'addr=192.168.240.10'
