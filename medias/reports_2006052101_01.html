@@ -1,0 +1,252 @@
+<html>
+<head>
+
+<style type="text/css">
+table.sample1 {border: solid 1px #000000; border-collapse: collapse;}
+table.sample2 {
+	border: solid 1px #000000;
+	border-collapse: separate;
+}
+td.sample {border: solid 1px #ff0000}
+
+</style>
+</head>
+<body>
+<hr>
+
+<p>border-collapse: collapse;</p>
+<table class="sample1">
+<tr><td class="sample">春</td><td class="sample">夏</td></tr>
+<tr><td class="sample">秋</td><td class="sample">冬</td></tr>
+</table>
+<br>
+<p>border-collapse: separate; (default)</p>
+<table class="sample2">
+<tr><td class="sample">春</td><td class="sample">夏</td></tr>
+<tr><td class="sample">秋</td><td class="sample">冬</td></tr>
+</table>
+
+<hr>
+
+<p>border-collapse: collapse; width cellspacing="15" cellpadding="5"</p>
+<table class="sample1" cellspacing="15" cellpadding="5">
+<tr><td class="sample">春</td><td class="sample">夏</td></tr>
+<tr><td class="sample">秋</td><td class="sample">冬</td></tr>
+</table>
+(&uarr; "cellspacing" attribute is ignored at FF1.5 .)
+<br>
+<p>border-collapse: separate; (default) width cellspacing="15" cellpadding="5"</p>
+<table class="sample2" cellspacing="15" cellpadding="5">
+<tr><td class="sample">春</td><td class="sample">夏</td></tr>
+<tr><td class="sample">秋</td><td class="sample">冬</td></tr>
+</table>
+
+<hr>
+
+<table border="1" style="table-layout: fixed;">
+<tr>
+	<td width="200">abcd</td>
+	<td width="200">12345678901234567890</td>
+	<td width="200">abcdefgh</td>
+</tr>
+<tr>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+</tr>
+<tr>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+</tr>
+<tr>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+	<td>"table-layout: fixed;"を使っても、tableタグに対して幅を指定しない場合、FF1.5ではは幅100%を基本に自動決定＆tdタグの幅指定は無視され、IE6ではtdタグの幅指定が有効になるようです。</td>
+</tr>
+</table>
+
+<hr>
+
+<table border="1" width="600" style="table-layout: fixed;">
+<tr>
+	<td width="200">abcd</td>
+	<td width="200">12345678901234567890</td>
+	<td width="200">abcdefgh</td>
+</tr>
+<tr>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+</tr>
+<tr>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+</tr>
+<tr>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+	<td>tableタグに対して幅を指定すれば、FF1.5とIE6の両方で、"table-layout: fixed;"でtdの幅指定が有効になります。</td>
+</tr>
+</table>
+
+<hr>
+
+<table border="1" width="600" style="table-layout: fixed;">
+<tr>
+	<td width="100">abcd</td>
+	<td width="100">12345678901234567890</td>
+	<td width="100">abcdefgh</td>
+</tr>
+<tr>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+</tr>
+<tr>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+</tr>
+<tr>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+	<td>tableタグの幅指定に対して、tdタグの幅指定の合計が足りない場合、tableタグの幅指定自体まで無視され自動計算されるようです。</td>
+</tr>
+</table>
+
+<hr>
+
+<table border="1" width="300" style="table-layout: fixed;">
+<tr>
+	<td width="200">abcd</td>
+	<td width="200">12345678901234567890</td>
+	<td width="200">abcdefgh</td>
+</tr>
+<tr>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+</tr>
+<tr>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+</tr>
+<tr>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+	<td>tdタグの幅指定の合計がtableタグの幅指定を超過してしまった場合、tdタグの幅指定が優先されるようです。(FF1.5/IE6)</td>
+</tr>
+</table>
+
+<hr>
+
+<p>width: 17em; としてぴったりの文字数にした場合(半角)</p>
+<table border="1" style="width: 17em; table-layout: fixed;">
+<tr>
+	<td style="width: 4em;">ABCD</td>
+	<td style="width: 10em;">0123456789</td>
+	<td style="width: 3em;">ABC</td>
+</tr>
+<tr>
+	<td>ABCD</td>
+	<td>0123456789</td>
+	<td>ABC</td>
+</tr>
+<tr>
+	<td>ABCD</td>
+	<td>0123456789</td>
+	<td>ABC</td>
+</tr>
+</table>
+
+<hr>
+
+<p>width: 17em; としてぴったりの文字数にした場合(全角)</p>
+<table border="1" style="width: 17em; table-layout: fixed;">
+<tr>
+	<td style="width: 4em;">ＡＢＣＤ</td>
+	<td style="width: 10em;">０１２３４５６７８９</td>
+	<td style="width: 3em;">ＡＢＣ</td>
+</tr>
+<tr>
+	<td>ＡＢＣＤ</td>
+	<td>０１２３４５６７８９</td>
+	<td>ＡＢＣ</td>
+</tr>
+<tr>
+	<td>ＡＢＣＤ</td>
+	<td>０１２３４５６７８９</td>
+	<td>ＡＢＣ</td>
+</tr>
+</table>
+
+<hr>
+
+<p>width指定した想定文字数を超えた内容の場合</p>
+<table border="1" style="width: 17em; table-layout: fixed;">
+<tr>
+	<td style="width: 4em;">ABCD</td>
+	<td style="width: 10em;">1234567890</td>
+	<td style="width: 3em;">123</td>
+</tr>
+<tr>
+	<td>ABCDEFGHIJKLMNOPQRSTUVWXYZ</td>
+	<td>123456789012345678901234567890</td>
+	<td>AB CD EF GH IJ KL MN OP QR ST UV WX YZ</td>
+</tr>
+<tr>
+	<td>ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ</td>
+	<td>１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０</td>
+	<td>ＡＢ　ＣＤ　ＥＦ　ＧＨ　ＩＪ　ＫＬ　ＭＮ　ＯＰ　ＱＲ　ＳＴ　ＵＶ　ＷＸ　ＹＺ</td>
+</tr>
+</table>
+
+<hr>
+
+<p>width指定した想定文字数を超えた内容の場合</p>
+<table border="1" width="600" style="table-layout: fixed;">
+<tr>
+	<td width="100">ABCD</td>
+	<td width="200">1234567890</td>
+	<td width="300">123</td>
+</tr>
+<tr>
+	<td>ABCDEFGHIJKLMNOPQRSTUVWXYZ</td>
+	<td>123456789012345678901234567890</td>
+	<td>AB CD EF GH IJ KL MN OP QR ST UV WX YZ</td>
+</tr>
+<tr>
+	<td>ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ</td>
+	<td>１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０</td>
+	<td>ＡＢ　ＣＤ　ＥＦ　ＧＨ　ＩＪ　ＫＬ　ＭＮ　ＯＰ　ＱＲ　ＳＴ　ＵＶ　ＷＸ　ＹＺ</td>
+</tr>
+<tr>
+	<td>ＡＢＣＤＥＦＧあいうえお０１２３４５６７８９あいうえお</td>
+	<td>ＡＢＣＤＥＦＧあいうえお０１２３４５６７８９あいうえお</td>
+	<td>ＡＢＣＤＥＦＧあいうえお０１２３４５６７８９あいうえお</td>
+</td>
+</table>
+
+<hr>
+
+<p>width指定した想定文字数を超えているが、overflowプロパティを組み合わせた場合</p>
+<table border="1" style="width: 17em; table-layout: fixed;">
+<tr>
+	<td style="width: 4em;">ABCD</td>
+	<td style="width: 10em;">1234567890</td>
+	<td style="width: 3em;">123</td>
+</tr>
+<tr>
+	<td style="overflow: scroll;">ABCDEFGHIJKLMNOPQRSTUVWXYZ</td>
+	<td style="overflow: hidden;">123456789012345678901234567890</td>
+	<td style="overflow: visible;">AB CD EF GH IJ KL MN OP QR ST UV WX YZ</td>
+</tr>
+</table>
+
+<hr>
+
+</body>
+</html>

@@ -1,0 +1,84 @@
+" vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
+"
+" An example for a Japanese version gvimrc file.
+" 日本語版のデフォルトGUI設定ファイル(gvimrc)
+"
+" Last Change: 13-Apr-2008.
+" Maintainer:  MURAOKA Taro <koron@tka.att.ne.jp>
+"
+" 解説:
+" このファイルにはVimの起動時に必ず設定される、GUI関連の設定が書かれていま
+" す。編集時の挙動に関する設定はvimrcに書かかれています。
+"
+" 個人用設定は_gvimrcというファイルを作成しそこで行ないます。_gvimrcはこの
+" ファイルの後に読込まれるため、ここに書かれた内容を上書きして設定することが
+" 出来ます。_gvimrcは$HOMEまたは$VIMに置いておく必要があります。$HOMEは$VIM
+" よりも優先され、$HOMEでみつかった場合$VIMは読込まれません。
+"
+" 管理者向けに本設定ファイルを直接書き換えずに済ませることを目的として、サイ
+" トローカルな設定を別ファイルで行なえるように配慮してあります。Vim起動時に
+" サイトローカルな設定ファイル($VIM/gvimrc_local.vim)が存在するならば、本設
+" 定ファイルの主要部分が読み込まれる前に自動的に読み込みます。
+"
+" 読み込み後、変数g:gvimrc_local_finishが非0の値に設定されていた場合には本設
+" 定ファイルに書かれた内容は一切実行されません。デフォルト動作を全て差し替え
+" たい場合に利用して下さい。
+"
+" 参考:
+"   :help gvimrc
+"   :echo $HOME
+"   :echo $VIM
+"   :version
+
+
+"---------------------------------------------------------------------------
+" フォント設定:
+"
+if has('win32')
+  " Windows用
+  set guifont=MS_Gothic:h10:cSHIFTJIS
+  "set guifont=VL_Gothic:h11:cSHIFTJIS
+  "set guifont=MS_Mincho:h12:cSHIFTJIS
+  " 行間隔の設定
+  set linespace=1
+elseif has('mac')
+  set guifont=Osaka－等幅:h14
+elseif has('xfontset')
+  " UNIX用 (xfontsetを使用)
+  set guifontset=a14,r14,k14
+endif
+
+"---------------------------------------------------------------------------
+" ウインドウに関する設定:
+"
+" ウインドウの幅
+set columns=80
+" ウインドウの高さ
+set lines=60
+" コマンドラインの高さ(GUI使用時)
+set cmdheight=2
+" 画面を黒地に白にする (次行の先頭の " を削除すれば有効になる)
+colorscheme desert " (GUI使用時)
+
+set ruler
+set nobackup
+set backupcopy=yes
+set nonumber
+set fdm=marker
+set list
+set listchars=tab:>-,extends:<,trail:-,eol:<
+set wrap
+
+iab Yruler 1234567890123456789012345678901234567890123456789012345678901234567890123456789
+
+set ignorecase
+set smartcase
+set wrapscan
+syntax on
+set list
+set hlsearch
+set statusline=%<%f\ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
+
+autocmd FileType php set expandtab tabstop=4 shiftwidth=4
+autocmd FileType ruby set expandtab tabstop=2 shiftwidth=2
+

@@ -1,0 +1,11 @@
+Expiration date:	none
+   Product name:	Celica
+  Serial number:	TTSS-120530-3878QP
+         E-mail:	sakamoto-gsyc-3s@glamenv-septzen.net
+      UpdateDir:	https//ftp.turbolinux.co.jp/pub/TurboLinux/TurboLinux/ia32/Server/10/updates/
+     UpdateDirC:	CELICA=4Oj5YbJqo
+   TurboPlugDir:	http//www.turbolinux.co.jp/CELICA/FreePlugIn/
+  TurboPlugDirC:	CELICA=Bu8S9rh1q
+   ThirdPlugDir:	http//www.turbolinux.co.jp/CELICA/ThirdPlugIn/.TTSA/e9c2ea8cf58d1484/
+  ThirdPlugDirC:	CELICA=27ztSgwIY
+      Signature:	Dx/freW1ulXlpuObQoiidtux+qMjrx33jeVEwoOOr1K5bBm4jFkahKFRxRlGbsxC/TVGsFXN/4FsM+SGl1AOSS4s/okwKfQFc6IeUmPSuKDVPW7xn2XOKAooPnCRig4603JqGpgoeWSTBlDZX1E7WSYXLTrq97KZRItciE7f93c=

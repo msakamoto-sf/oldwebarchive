@@ -1,0 +1,1033 @@
+diff -urN Stagehand_TestRunner-1.0.0_orig/Stagehand/TestRunner/SimpleTest1TestRunner.php Stagehand_TestRunner-1.0.0/Stagehand/TestRunner/SimpleTest1TestRunner.php
+--- Stagehand_TestRunner-1.0.0_orig/Stagehand/TestRunner/SimpleTest1TestRunner.php	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/Stagehand/TestRunner/SimpleTest1TestRunner.php	2007-10-10 16:14:53.843750000 +0900
+@@ -0,0 +1,293 @@
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 4 and 5
++ *
++ * Copyright (c) 2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id$
++ * @see        http://www.lastcraft.com/simple_test.php 
++ * @since      File available since Release 1.0.0
++ */
++
++require_once 'simpletest/unit_tester.php';
++require_once 'simpletest/reporter.php';
++require_once 'PHP/Compat.php';
++
++PHP_Compat::loadFunction('scandir');
++
++// {{{ Stagehand_TestRunner_SimpleTest1TestRunner
++
++/**
++ * A test runner for SimpleTest version 1.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    Release: 1.0.0
++ * @see        http://www.lastcraft.com/simple_test.php 
++ * @since      Class available since Release 1.0.0
++ */
++class Stagehand_TestRunner_SimpleTest1TestRunner
++{
++
++    // {{{ properties
++
++    /**#@+
++     * @access public
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access public
++     * @static
++     */
++
++    // }}}
++    // {{{ run()
++
++    /**
++     * Runs target tests in the directory.
++     *
++     * @param string $directory
++     * @param string $excludePattern
++     * @return mixed
++     */
++    function run($directory, $excludePattern = '!^phpunit!')
++    {
++        eval('$suite = ' . '&' .  __CLASS__ . "::_getTestSuite('$directory', '$excludePattern');");
++        $reporter =& new TextReporter();
++        $suite->run($reporter);
++        return $reporter;
++    }
++
++    // }}}
++    // {{{ runAll()
++
++    /**
++     * Runs all tests under the directory.
++     *
++     * @param string $directory
++     * @param string $excludePattern
++     * @return mixed
++     */
++    function runAll($directory, $excludePattern = '!^phpunit!')
++    {
++        $suite =& new TestSuite();
++        eval('$directories = ' . __CLASS__ . "::getDirectories('$directory');");
++
++        for ($i = 0, $count = count($directories); $i < $count; ++$i) {
++            eval('$test = ' . '&' . __CLASS__ . "::_getTestSuite('$directories[$i]', '$excludePattern');");
++            if (!$test->getSize()) {
++                continue;
++            }
++            $suite->addTestCase($test);
++        }
++
++        $reporter =& new SimpleReporter();
++        $suite->run($reporter);
++        return $reporter;
++    }
++
++    // }}}
++    // {{{ getDirectories()
++
++    /**
++     * Returns all directories under the directory.
++     *
++     * @param string $directory
++     * @return array
++     */
++    function getDirectories($directory)
++    {
++        static $directories;
++        if (is_null($directories)) {
++            $directories = array();
++        }
++
++        $directory = realpath($directory);
++        $directories[] = $directory;
++        $files = scandir($directory);
++
++        for ($i = 0, $count = count($files); $i < $count; ++$i) {
++            if ($files[$i] == '.' || $files[$i] == '..') {
++                continue;
++            }
++
++            $next = $directory . DIRECTORY_SEPARATOR . $files[$i];
++            if (!is_dir($next)) {
++                continue;
++            }
++
++            call_user_func(array(__CLASS__, 'getDirectories'), $next);
++        }
++
++        return $directories;
++    }
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     * @static
++     */
++
++    // }}}
++    // {{{ _getTestSuite()
++
++    /**
++     * Returns the test suite that contains all of the test cases in the
++     * directory.
++     *
++     * @param string $directory
++     * @param string $excludePattern
++     * @return PHPUnit_TestSuite
++     */
++    function &_getTestSuite($directory, $excludePattern = '!^phpunit!')
++    {
++        $directory = realpath($directory);
++        eval('$testCases = ' . __CLASS__ . "::_getTestCases('$directory', '$excludePattern');");
++        $suite =& new TestSuite();
++
++        for ($i = 0, $count = count($testCases); $i < $count; ++$i) {
++            $suite->addTestClass($testCases[$i]); // TODO NOT addTestCases()?
++        }
++
++        return $suite;
++    }
++
++    // }}}
++    // {{{ _getTestCases()
++
++    /**
++     * Returns target test cases in the directory.
++     *
++     * @param string $directory
++     * @param string $excludePattern
++     * @return array
++     */
++    function _getTestCases($directory, $excludePattern = '!^phpunit!')
++    {
++        $testCases = array();
++        if (is_dir($directory)) {
++            $files = scandir($directory);
++        } else {
++            $files = (array)$directory;
++        }
++
++        for ($i = 0, $iCount = count($files); $i < $iCount; ++$i) {
++            if (is_dir($directory)) {
++                $target = $directory . DIRECTORY_SEPARATOR . $files[$i];
++            } else {
++                $target = $files[$i];
++            }
++
++            if (!is_file($target)) {
++                continue;
++            }
++
++            if (!preg_match('/TestCase\.php$/', $files[$i])) {
++                continue;
++            }
++
++            print "Loading [ {$files[$i]} ] ... ";
++
++            $currentClasses = get_declared_classes();
++
++            if (!include_once($target)) {
++                print "Failed!\n";
++                continue;
++            }
++
++            print "Succeeded.\n";
++
++            $newClasses = array_values(array_diff(get_declared_classes(), $currentClasses));
++            for ($j = 0, $jCount = count($newClasses); $j < $jCount; ++$j) {
++                eval('$exclude = ' . __CLASS__ . "::_exclude('$newClasses[$j]', '$excludePattern');");
++                if ($exclude) {
++                    continue;
++                }
++
++                $testCases[] = $newClasses[$j];
++                print "  => Added [ {$newClasses[$j]} ]\n";
++            }
++        }
++
++        return $testCases;
++    }
++
++    // }}}
++    // {{{ _exclude()
++
++    /**
++     * Returns whether the class should be exclude or not.
++     *
++     * @param string $class
++     * @param string $excludePattern
++     * @return boolean
++     */
++    function _exclude($class, $excludePattern = '!^phpunit!')
++    {
++        if (!preg_match('/TestCase$/i', $class)) {
++            return true;
++        }
++
++        if (strlen($excludePattern) && preg_match($excludePattern, $class)) {
++            return true;
++        }
++
++        $test = new $class();
++        return !is_a($test, 'UnitTestCase');
++    }
++
++    /**#@-*/
++
++    // }}}
++}
++
++// }}}
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
+diff -urN Stagehand_TestRunner-1.0.0_orig/Stagehand/TestRunner.php Stagehand_TestRunner-1.0.0/Stagehand/TestRunner.php
+--- Stagehand_TestRunner-1.0.0_orig/Stagehand/TestRunner.php	2007-07-31 11:06:21.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/Stagehand/TestRunner.php	2007-09-22 13:10:28.687500000 +0900
+@@ -141,8 +141,14 @@
+             include_once 'Stagehand/TestRunner/PHPUnit2TestRunner.php';
+         } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 1) {
+             include_once 'Stagehand/TestRunner/PHPUnitTestRunner.php';
++        } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 'SimpleTest1') {
++            if (!defined('PHPUnit_MAIN_METHOD')) {
++                define('PHPUnit_MAIN_METHOD', 'Stagehand_TestRunner_SimpleTest1TestRunner::run');
++            }
++
++            include_once 'Stagehand/TestRunner/SimpleTest1TestRunner.php';
+         } else {
+-            echo "ERROR: The version of PHPUnit should be one of 3, 2, 1.\n";
++            echo "ERROR: The version of PHPUnit should be one of 3, 2, 1 or 'SimpleTest1'.\n";
+             return 1;
+         }
+ 
+@@ -157,6 +163,8 @@
+                 $result = Stagehand_TestRunner_PHPUnit2TestRunner::run($directory);
+             } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 1) {
+                 $result = Stagehand_TestRunner_PHPUnitTestRunner::run($directory);
++            } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 'SimpleTest1') {
++                $result = Stagehand_TestRunner_SimpleTest1TestRunner::run($directory);
+             }
+         } else {
+             $directory = getcwd();
+@@ -167,23 +175,37 @@
+                 $result = Stagehand_TestRunner_PHPUnit2TestRunner::runAll($directory);
+             } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 1) {
+                 $result = Stagehand_TestRunner_PHPUnitTestRunner::runAll($directory);
++            } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 'SimpleTest1') {
++                $result = Stagehand_TestRunner_SimpleTest1TestRunner::runAll($directory);
+             }
+         }
+ 
+         if ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 3) {
+             $runs = $result->count();
+             $passes = $runs - $result->failureCount();
++            $failures = $result->failureCount();
++            $errors = $result->errorCount();
+             $text = '';
+         } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 2) {
+             $runs = $result->runCount();
+             $passes = $runs - $result->failureCount();
++            $failures = $result->failureCount();
++            $errors = $result->errorCount();
+             $text = '';
+         } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 1) {
+             $runs = $result->runCount();
+             $passes = count($result->passedTests());
++            $failures = $result->failureCount();
++            $errors = $result->errorCount();
+             $text = $result->toString();
++        } elseif ($GLOBALS['STAGEHAND_TESTRUNNER_PHPUnit_Version'] == 'SimpleTest1') {
++            $passes = $result->getPassCount();
++            $failures = $result->getFailCount();
++            $errors = $result->getExceptionCount();
++            $runs = $passes + $failures + $errors;
++            $text = '';
+         }
+-        $failures = $runs - $passes;
++        $all_failures = $runs - $passes;
+ 
+         printf('### Results ###
+ %s
+@@ -194,7 +216,7 @@
+                $text,
+                $runs,
+                $passes, $runs ? $passes / $runs * 100 : 0,
+-               $failures, $runs ? $failures / $runs * 100 : 0, $result->failureCount(), $result->errorCount()
++               $all_failures, $runs ? $all_failures / $runs * 100 : 0, $failures, $errors
+                );
+ 
+         return 0;
+diff -urN Stagehand_TestRunner-1.0.0_orig/scripts/testrunner_st1 Stagehand_TestRunner-1.0.0/scripts/testrunner_st1
+--- Stagehand_TestRunner-1.0.0_orig/scripts/testrunner_st1	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/scripts/testrunner_st1	2007-09-21 23:49:14.328125000 +0900
+@@ -0,0 +1,61 @@
++#!/usr/bin/env php
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 5
++ *
++ * Copyright (c) 2005-2007 KUBO Atsuhiro <iteman@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2005-2007 KUBO Atsuhiro <iteman@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id: package.php 19 2007-06-19 09:05:41Z iteman $
++ * @since      File available since Release 0.6.0
++ */
++
++error_reporting(E_ALL);
++
++if (file_exists(dirname(__FILE__) . '/../Stagehand/TestRunner/SimpleTest1TestRunner.php')) {
++    set_include_path(realpath(dirname(__FILE__) . '/..') . PATH_SEPARATOR . get_include_path());
++}
++
++require_once 'Stagehand/TestRunner.php';
++
++Stagehand_TestRunner::setPHPUnitVersion('SimpleTest1');
++$result = Stagehand_TestRunner::run();
++exit($result);
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
+diff -urN Stagehand_TestRunner-1.0.0_orig/scripts/testrunner_st1.bat Stagehand_TestRunner-1.0.0/scripts/testrunner_st1.bat
+--- Stagehand_TestRunner-1.0.0_orig/scripts/testrunner_st1.bat	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/scripts/testrunner_st1.bat	2007-09-22 00:28:10.187500000 +0900
+@@ -0,0 +1,46 @@
++@ECHO OFF
++REM $Id: pearenv.bat 15 2007-05-26 17:31:39Z iteman $
++
++REM *************************************************************
++REM ** Stagehand_TestRunner CLI for Windows based systems (based on symfony.bat)
++REM *************************************************************
++
++REM This script will do the following:
++REM - check for PHP_COMMAND env, if found, use it.
++REM   - if not found detect php, if found use it, otherwise err and terminate
++
++IF "%OS%"=="Windows_NT" @SETLOCAL
++
++REM %~dp0 is expanded pathname of the current script under NT
++SET SCRIPT_DIR=%~dp0
++
++GOTO INIT
++
++:INIT
++
++IF "%PHP_COMMAND%" == "" GOTO NO_PHPCOMMAND
++
++IF EXIST ".\testrunner3" (
++  %PHP_COMMAND% -d html_errors=off -d open_basedir= -q ".\testrunner_st1" %1 %2 %3 %4 %5 %6 %7 %8 %9
++) ELSE (
++  %PHP_COMMAND% -d html_errors=off -d open_basedir= -q "%SCRIPT_DIR%testrunner_st1" %1 %2 %3 %4 %5 %6 %7 %8 %9
++)
++GOTO CLEANUP
++
++:NO_PHPCOMMAND
++REM ECHO ------------------------------------------------------------------------
++REM ECHO WARNING: Set environment var PHP_COMMAND to the location of your php.exe
++REM ECHO          executable (e.g. C:\PHP\php.exe).  (assuming php.exe on PATH)
++REM ECHO ------------------------------------------------------------------------
++SET PHP_COMMAND=php.exe
++GOTO INIT
++
++:CLEANUP
++IF "%OS%"=="Windows_NT" @ENDLOCAL
++REM PAUSE
++
++REM Local Variables:
++REM mode: bat-generic
++REM coding: iso-8859-1
++REM indent-tabs-mode: nil
++REM End:
+diff -urN Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunner1TestCase.php Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunner1TestCase.php
+--- Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunner1TestCase.php	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunner1TestCase.php	2007-09-22 00:26:21.515625000 +0900
+@@ -0,0 +1,105 @@
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 4 and 5
++ *
++ * Copyright (c) 2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id$
++ * @since      File available since Release 1.0.0
++ */
++
++if (!@include_once 'simpletest/unit_tester.php') {
++    return;
++}
++if (!@include_once 'simpletest/reporter.php') {
++    return;
++}
++
++// {{{ Stagehand_TestRunner_SimpleTest1TestRunner1TestCase
++
++/**
++ * TestCase for Stagehand_TestRunner_SimpleTest1TestRunner
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    Release: 1.0.0
++ * @since      Class available since Release 1.0.0
++ */
++class Stagehand_TestRunner_SimpleTest1TestRunner1TestCase extends UnitTestCase
++{
++
++    // {{{ properties
++
++    /**#@+
++     * @access public
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access public
++     */
++
++    function testTestShouldBeRunAutomatically()
++    {
++        $this->assertTrue(true);
++    }
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    // }}}
++}
++
++// }}}
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
+diff -urN Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunner2TestCase.php Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunner2TestCase.php
+--- Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunner2TestCase.php	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunner2TestCase.php	2007-09-22 01:05:52.703125000 +0900
+@@ -0,0 +1,105 @@
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 4 and 5
++ *
++ * Copyright (c) 2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id$
++ * @since      File available since Release 1.0.0
++ */
++
++if (!@include_once 'simpletest/unit_tester.php') {
++    return;
++}
++if (!@include_once 'simpletest/reporter.php') {
++    return;
++}
++
++// {{{ Stagehand_TestRunner_SimpleTest1TestRunner2TestCase
++
++/**
++ * TestCase for Stagehand_TestRunner_SimpleTest1TestRunner
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    Release: 1.0.0
++ * @since      Class available since Release 1.0.0
++ */
++class Stagehand_TestRunner_SimpleTest1TestRunner2TestCase extends UnitTestCase
++{
++
++    // {{{ properties
++
++    /**#@+
++     * @access public
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access public
++     */
++
++    function testTestShouldBeRunAutomatically()
++    {
++        $this->assertTrue(true);
++    }
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    // }}}
++}
++
++// }}}
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
+diff -urN Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunner3TestCase.php Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunner3TestCase.php
+--- Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunner3TestCase.php	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunner3TestCase.php	2007-09-22 00:26:43.921875000 +0900
+@@ -0,0 +1,105 @@
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 4 and 5
++ *
++ * Copyright (c) 2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id$
++ * @since      File available since Release 1.0.0
++ */
++
++if (!@include_once 'simpletest/unit_tester.php') {
++    return;
++}
++if (!@include_once 'simpletest/reporter.php') {
++    return;
++}
++
++// {{{ Stagehand_TestRunner_SimpleTest1TestRunner3TestCase
++
++/**
++ * TestCase for Stagehand_TestRunner_SimpleTest1TestRunner
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    Release: 1.0.0
++ * @since      Class available since Release 1.0.0
++ */
++class Stagehand_TestRunner_SimpleTest1TestRunner3TestCase extends UnitTestCase
++{
++
++    // {{{ properties
++
++    /**#@+
++     * @access public
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access public
++     */
++
++    function testTestShouldBeRunAutomatically()
++    {
++        $this->assertTrue(true);
++    }
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    // }}}
++}
++
++// }}}
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
+diff -urN Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner1TestCase.php Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner1TestCase.php
+--- Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner1TestCase.php	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner1TestCase.php	2007-09-22 00:32:03.687500000 +0900
+@@ -0,0 +1,105 @@
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 4 and 5
++ *
++ * Copyright (c) 2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id$
++ * @since      File available since Release 1.0.0
++ */
++
++if (!@include_once 'simpletest/unit_tester.php') {
++    return;
++}
++if (!@include_once 'simpletest/reporter.php') {
++    return;
++}
++
++// {{{ Stagehand_TestRunner_SimpleTest1TestRunnerTestCase_SimpleTest1TestRunner1TestCase
++
++/**
++ * TestCase for Stagehand_TestRunner_SimpleTest1TestRunner
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    Release: 1.0.0
++ * @since      Class available since Release 1.0.0
++ */
++class Stagehand_TestRunner_SimpleTest1TestRunnerTestCase_SimpleTest1TestRunner1TestCase extends UnitTestCase
++{
++
++    // {{{ properties
++
++    /**#@+
++     * @access public
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access public
++     */
++
++    function testTestShouldBeRunAutomatically()
++    {
++        $this->assertTrue(true);
++    }
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    // }}}
++}
++
++// }}}
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
+diff -urN Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner2TestCase.php Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner2TestCase.php
+--- Stagehand_TestRunner-1.0.0_orig/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner2TestCase.php	1970-01-01 09:00:00.000000000 +0900
++++ Stagehand_TestRunner-1.0.0/tests/Stagehand/TestRunner/SimpleTest1TestRunnerTestCase/SimpleTest1TestRunner2TestCase.php	2007-09-22 00:32:35.859375000 +0900
+@@ -0,0 +1,105 @@
++<?php
++/* vim: set expandtab tabstop=4 shiftwidth=4: */
++
++/**
++ * PHP versions 4 and 5
++ *
++ * Copyright (c) 2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>,
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    SVN: $Id$
++ * @since      File available since Release 1.0.0
++ */
++
++if (!@include_once 'simpletest/unit_tester.php') {
++    return;
++}
++if (!@include_once 'simpletest/reporter.php') {
++    return;
++}
++
++// {{{ Stagehand_TestRunner_SimpleTest1TestRunnerTestCase_SimpleTest1TestRunner2TestCase
++
++/**
++ * TestCase for Stagehand_TestRunner_SimpleTest1TestRunner
++ *
++ * @package    Stagehand_TestRunner
++ * @copyright  2007 Masahiko Sakamoto <msakamoto-sf@users.sourceforge.net>
++ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License (revised)
++ * @version    Release: 1.0.0
++ * @since      Class available since Release 1.0.0
++ */
++class Stagehand_TestRunner_SimpleTest1TestRunnerTestCase_SimpleTest1TestRunner2TestCase extends UnitTestCase
++{
++
++    // {{{ properties
++
++    /**#@+
++     * @access public
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    /**#@+
++     * @access public
++     */
++
++    function testTestShouldBeRunAutomatically()
++    {
++        $this->assertTrue(true);
++    }
++
++    /**#@-*/
++
++    /**#@+
++     * @access private
++     */
++
++    /**#@-*/
++
++    // }}}
++}
++
++// }}}
++
++/*
++ * Local Variables:
++ * mode: php
++ * coding: iso-8859-1
++ * tab-width: 4
++ * c-basic-offset: 4
++ * c-hanging-comment-ender-p: nil
++ * indent-tabs-mode: nil
++ * End:
++ */
++?>
