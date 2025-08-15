@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>(何の役に立つんだ)DOSプロンプトを登録してみる。</title>
+</head>
+<body class=body>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a><br>
+<br>
+　というわけで、今度はおなじみのDOSプロンプト（コマンドプロンプトかな？）というのを
+登録してみませう。<br>
+　<font size=+2>......本当に、何の役に立つんでしょうねえ？</font><br>
+　まあ、いいのです。登録して、メニューに表示されているというのが面白いのです。<br>
+<br>
+　んで。肝心のDOS窓はどこにあるかと言いますと。Win9x系とNT系では在処が違います。<br>
+Win9x：%WINDIR%¥command.com<br>
+WinNT：%WINDIR%¥system32¥cmd.exe<br>
+（%WINDIR%というのはWindowsのシステムディレクトリのことで、Win9xならC:¥Windows、WinNTなら
+C:¥WINNTに当たります。試しにコマンドプロンプトでecho %WINDIR%と打ってみて下さい。）<br>
+　それぞれお使いの環境にふさわしい方をセレクトして下さい。<br>
+　それでは登録します。設定はこんな感じにしました。<br>
+<br>
+　登録名はDOS窓とでもしときます。<br>
+　実行ファイルは参照ボタンでさくっと「command.com/cmd.exe」を指定しまして。<br>
+　オプションは要りませんね。。<br>
+　環境変数も・・・要らないでしょうが、一応Windowsディレクトリだけは通しておきましょう。<br>
+　PATH="C:¥Windows"<br>
+　WinNTならPATH="C:¥WINNT"<br>
+　結果のファイル出力はチェックを外しておきます。<br>
+<br>
+　以上の設定で追加、OKで設定ファイルに書き込みます。<br>
+　早速「コマンド」メニューを開けてみて、「DOS窓」の文字があるのを確認したらクリック。
+設定がきちんと保存されているか確かめましょう。<br>
+　今回は編集ファイルなどの指定は要りませんので、そのまま実行してしまって大丈夫です。<br>
+<br>
+　よっぽどミスを犯していない限り、コマンドプロンプトが開くはずです。<br>
+<br>
+<h2>で、何の役に立つの？</h2>
+　あうう。な、何となく。やってみたかったのじゃあ。<br>
+<br>
+　あんま実用的じゃないけど、今回はこれにておしまいです。<br>
+<br>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java2 SDKを試す（その１）javac（Java コンパイラ）</title>
+</head>
+<body class=body>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+<br>
+<br>
+というわけで、Javaがコンパイル、実行できるかどうか試してみました。<br>
+<br>
+とりあえずここからJava2SDK（よーするにJava2の開発キットね。)をダウンロードしました。<br>
+Java 2 SDK Standard Edition Version 1.4 ：<a href="http://java.sun.com/j2se/1.4/ja/">http://java.sun.com/j2se/1.4/ja/</a><br>
+<br>
+　ドキュメントも合わせると数十MBと大変に重いです。雑誌か本に付いてるのがあればそれを
+使うに越したことは無いでしょう。<br>
+<br>
+　とりあえずj2sdk-1_4_0_01-windows-i586.exeとか言うのをダブルクリックして、<br>
+C:¥j2sdk1.4.0_01<br>
+　とかゆうディレクトリにいろいろ展開されました。中を見ると、bin¥javaとかbin¥javacとか
+それっぽいのがいろいろ入っています。<br>
+　bin¥javac.exe<br>
+　これがJavaのコンパイラですね。<br>
+　bin¥java.exe<br>
+　これが何でも、Javaの実行環境とか言うのらしいです。<br>
+<br>
+　私も、今回はJavaを勉強しようと思ったわけでもなく、CetaでJavaが扱えるかを実験したわけで
+私自身はJavaに関する知識は殆どありません。<br>
+　文法がCPPに酷似。完全にオブジェクト指向。.classというのがjavacで生成されるクラスファイルで、
+これをjava.exeに渡すととりあえず実行してくれるらしい。<br>
+　この程度の知識です。<br>
+　ただjavac.exeと来たあたりで環境変数にぴーんとくるモノがあります。<br>
+「要はPATH通せばいいわけね。」<br>
+　とユー訳でCetaを起動しまして、設定に行きます。<br>
+<br>
+　登録名はJava2とでもしときます。<br>
+　実行ファイルは参照ボタンでさくっと「bin¥javac.exe」を指定しまして。<br>
+　オプションは実験するだけなので何も要らない。<br>
+　環境変数だけですね。ポイントは。<br>
+　PATH="C:¥j2sdk1.4.0_01¥bin"
+　としておけば良さそうです。<br>
+　結果のファイル出力はチェックします。<br>
+<br>
+　以上の設定で追加、OKで設定ファイルに書き込みます。<br>
+　早速「コマンド」メニューを開けてみて、「Java2」の文字があるのを確認したらクリック。
+設定がきちんと保存されているか確かめましょう。<br>
+<br>
+　あとはソースコードを用意してコンパイルするだけです。以下のソースコードを適当な
+ディレクトリに必ず「<b>hello</b>.java」と言う名前で保存します。<br>
+　要は、クラス名とそれを収めたファイル名が一致している必要があるみたいです。<br>
+<pre>
+public class hello {
+	public static void main (String[] args) {
+		System.out.println("Hello world");
+		try {
+			System.in.read();
+		} catch (Exception e) {
+		}
+	}
+}
+</pre>
+　んで、保存したら早速「Java2」をコマンドメニューから選びませう。<br>
+　速攻で「実行」にいっちゃって大丈夫でした。<br>
+<br>
+　ところが・・・ヌヌ？コンパイルメッセージ表示エリアに何も表示されん！！<br>
+<br>
+　いやいや。どうもDOS窓からも確認したところ、javac.exeは成功すると何も表示しない
+ようでした。エラーがあるときだけ何か出力するわけ。<br>
+　んで、結局ちゃんとhello.classが生成されてました。<br>
+<br>
+　というわけで、今回はこれでオッケー。とりあえずコンパイルして、クラスファイルを作るのは
+全然平気みたいでした。<br>
+<br>
+<br>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+</body>
+</html>

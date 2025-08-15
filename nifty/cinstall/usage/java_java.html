@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java2 SDKを試す（その２）java（Java 実行プログラム）</title>
+</head>
+<body class=body>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a><br>
+<br>
+　というわけで、今度はjava.exeとか言うのを使って前回作ったhello.classというのを
+実行してみましょう。元のソースコードはこんなでした。<br>
+<pre>
+public class hello {
+	public static void main (String[] args) {
+		System.out.println("Hello world");
+		try {
+			System.in.read();
+		} catch (Exception e) {
+		}
+	}
+}
+</pre>
+　System.out.println()で"Hello world"を表示して、その後read()でキー入力待ち。<br>
+　何かキーが押されたら終了。と言った内容です。<br>
+<br>
+　それではまず、java.exeを登録します。設定はこんな感じにしました。<br>
+<br>
+　登録名はJavaBinとでもしときます。<br>
+　実行ファイルは参照ボタンでさくっと「bin¥java.exe」を指定しまして。<br>
+　オプションは実験するだけなので何も要らない。<br>
+　環境変数だけですね。ポイントは。<br>
+　PATH="C:¥j2sdk1.4.0_01¥bin"
+　としておけば良さそうです。<br>
+　結果のファイル出力は・・・汎用性を考えてチェックを外しておきます。<br>
+<br>
+　以上の設定で追加、OKで設定ファイルに書き込みます。<br>
+　早速「コマンド」メニューを開けてみて、「JavaBin」の文字があるのを確認したらクリック。
+設定がきちんと保存されているか確かめましょう。<br>
+<br>
+　で、こっからが普通のコンパイラを起動するときとは勝手が違ってきます。<br>
+　編集ウインドウのファイル名はhello.javaですが、java.exeに渡すのはhello.classです。<br>
+　と言うわけで、「対象ファイル名」に<br>
+　"C:¥java¥src¥hello.java"<br>
+　となっているのを<br>
+　"C:¥java¥src¥hello.class"<br>
+　としました。で・・・。<br>
+　動かない。<br>
+<br>
+　DOS窓からも確認しましたが、とにかく<br>
+　java.exe "C:¥java¥src¥hello.class"としても動かない。<br>
+　で、ドキュメントやら入門者向けWebページなどを眺めたら。どうも、java.exeは.classが
+要らないみたいです。と言うか、ディレクトリ構造をそのままクラスの派生構造と見なしているようです。<br>
+　まあとにかく、んじゃ、.classを外しましょう。「対象ファイル名」を<br>
+　"C:¥java¥src¥hello.java"<br>
+　から<br>
+　"C:¥java¥src¥hello"<br>
+　としました。で・・・。<br>
+　やっぱりまだ動かない。<br>
+<br>
+　そこで、さっきの「ディレクトリ構造をそのままクラスの派生構造と見なす云々」を思い出しましょう。<br>
+　「はてな。んじゃ、ひょっとしてC:¥java¥srcの部分もクラスの何かと見なされちゃったのかな？」<br>
+　DOS窓で見てみれば当にそんな雰囲気ののエラーメッセージ（省略）がでてました。<br>
+　と言うことは、とにかくクラスファイルへのパスを別に渡せればいいのですな。<br>
+　しかし。どうやればクラスファイルへのパスを省略してクラスを特定できるか。<br>
+<br>
+　ありました。<br>
+　-classpathオプションです。<br>
+　これでクラスファイルのパスを指定できます。要は、上の例なら実行DLGのオプションをこうします。<br>
+-classpath C:¥java¥src<br>
+　んで、対象ファイルのところをhelloだけにします。
+　念のため結果出力も外したままにしときましょう（キーボードからの入力を受け取るから）。<br>
+　そうすると・・・動きましたよー。<br>
+<br>
+　どうにかこうにか、ちょっと実行時に手間取りますがJavaのコンパイルと実行がCeta上でも
+確認がとれました。<br>
+　あとは、Java知ってる友人に予約語のリストファイルと文字色設定ファイルを頼めばかなり
+良い感じだ。<br>
+　ただ、実際にいろいろ試すには手が掛かりすぎる。とくにjava.exeでのクラスパスの指定は
+ファイル毎にいちいちする必要があり面倒だ。<br>
+　ドキュメントを漁ると、そういったのをまとめたmakeファイルみたいなのを用意できるみたい。<br>
+　ということは、それをCeta上で編集してJavaに渡せばもっと便利にコンパイルと実行ができるかも。<br>
+<br>
+　というわけで、今回のJava実験はおしまいです。<br>
+<br>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+</body>
+</html>

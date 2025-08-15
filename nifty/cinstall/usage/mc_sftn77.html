@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salford FTN77 奮戦記</title>
+</head>
+<body class=body>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a><br>
+<br>
+　あー・・・。めんど。<br>
+　のっけからダウナーな調子で申し訳ないのです。<br>
+　とにかくですね。SalfordのFTN77というフリーのFortranコンパイラをインストールしまして、Cetaからコンパイルできるようにしちゃおう、という企画です。<br>
+　んで、ですね。肝心のSalfordFTN77コンパイラはどこにあるかといいますと。
+<a href="http://www.salford.co.uk/compilers/ftn77pe/index.shtml" target=_blank>http://www.salford.co.uk/compilers/ftn77pe/index.shtml</a><br>
+　にPersonalの、只版がおいてあります。んで、こっから適当にダウンロードして、ftn77pe.exeとかいうのがセットアッププログラムなので実行して、ftn77をインストールします。<br>
+　ここではデフォルトのインストール先を変更して、C:¥Origin¥salfordディレクトリ以下にインストールしたものとします。<br>
+　んで。この段階でautoexec.batなどの環境変数設定部分にC:¥ORIGIN¥SALFORDが追加されております。実は基本的にこれさえできていればオッケーのはず。<br>
+　・・・<font size=+1><b>ああ、めんどくさい！！とっとと種明かししましょう！！</b></font><br>
+<h2>実は、CetaからはSalford Fortran 77のコンパイラとリンカ（ftn77.exeとslink.exe）を正常に呼び出せません。</h2>
+　これはいろいろ実験して確かめたのですが、ftn77.exeのフルパス指定、ソースコードファイル名の指定、共にショートファイル名（つまりDOS8.3形式）でないと認識しない理由によるものです。さらに、Cetaの仕様である、実行ファイルやソースコードファイル名を""で囲む機能も認識されません。<br>
+　<b>つまり、Cetaからはftn77.exeを正しく呼び出せないんです。</b><br>
+<br>
+<br>
+　・・・で。仕方ないので補助プログラムを作ることにしました。<br>
+　Cetaからは直接呼び出せないわけです。ということは、Ceta→補助プログラム→ftn77.exeという順番で動作する用にするわけです。Cetaからは補助プログラムを呼び出し、環境変数やソースコードファイル名を渡します。補助プログラム側でそれらを適切に補正したり、調整して、ftn77.exeを正常に動くよう呼び出すわけです。<br>
+<br>
+<h2>というわけで作っちゃいました。「mc_sftn77」(内部Ver0.11)。</h2>
+　開発日誌は<a href="../../tips/ceta/mc_sftn77.html">こちら</a>から。<br>
+　ダウンロードは<a href="../../program/index.html">こちら</a>から。<br>
+　Salford FTN77のインストールやmc_sftn77のインストール、使い方は<a href="../../program/ceta/mc_sftn77/readme.txt">こちら</a>から。<br>
+<br>
+<br>
+　以上。上記ドキュメントが全てです。<br>
+　手抜きでごめん・・・って、正直な話mc_sftn77本体の制作だの、開発日誌だの、readme.txtだのの方で疲れ切ってるし、内容的にも開発日誌とreadme.txtがあれば十分と思われるのでもうここにはとやかく書きません。<br>
+　でわ。投げやりに思えるかもしれませんが、とにかくインストールしてみて使ってみてください。<br>
+　ぐっどらっく。<br>
+<br>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+</body>
+</html>

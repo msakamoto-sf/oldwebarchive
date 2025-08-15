@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borland C++ Compiler 5.5を登録してみる。</title>
+</head>
+<body class=body>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a><br>
+<br>
+　Cetaを作った本来の目的が、BCC32.EXEを使い込むという事でした。<br>
+　というわけで、今回はフリーのコンパイラとして非常に有名なBorland C++ Compiler 5.5を
+インストール。アンド、Cetaに登録してみませう。<br>
+<br>
+　なにはともあれ。BorlandのWebページ或いは「C MAGAZINE」あたりからセットアッププログラム
+をダウンロードしてきて、実行して、適当なディレクトリに突っ込んで下さい。ここら辺はありと
+あらゆる場所で解説されていますのでさくっと省略します。<br>
+　今回は以下のディレクトリにインストールしてみたものと仮定します。<br>
+C:¥bcc55<br>
+　というわけで。コンパイラ本体は以下の場所にあるはずです。<br>
+C:¥bcc55¥bin¥bcc32.exe<br>
+　んじゃあこれをCetaに登録すれば良いのか・・・と言いますと。まあ、解説やreadmeを読めば
+載っていると思いますが。bcc32.cfg、ilink32.cfgという二つのファイルを作る必要があるわけです。<br>
+　というわけで。<br>
+<pre>
+-I"C:¥bcc55¥Include"
+-L"C:¥bcc55¥Lib"
+</pre>
+　という内容のファイルを、<br>
+C:¥bcc55¥bin¥bcc32.cfg<br>
+C:¥bcc55¥bin¥ilink32.cfg<br>
+　という二つのファイル名で保存して下さい。<br>
+<br>
+　これでCetaに登録する準備が整いました。
+　それでは登録します。設定はこんな感じにしました。<br>
+<br>
+　登録名はBCC32 for DOSとでもしときます。<br>
+　実行ファイルは参照ボタンでさくっと「bcc32.exe」を指定しまして。<br>
+　オプションは要りません。DOSプログラムの生成確認だけですので。<br>
+　環境変数は念のため、Windowsディレクトリだけは通しておきましょう。<br>
+　PATH="C:¥Windows"<br>
+　WinNTならPATH="C:¥WINNT"<br>
+　結果のファイル出力はチェックしておきます。<br>
+<br>
+　以上の設定で追加、OKで設定ファイルに書き込みます。<br>
+　早速「コマンド」メニューを開けてみて、「BCC32 for DOS」の文字があるのを確認したらクリック。
+設定がきちんと保存されているか確かめましょう。<br>
+<br>
+　んじゃ、とりあえずDOS用のプログラムを作ってみませう。一番単純なHello,Worldで。<br>
+<pre>
+#include <stdio.h>
+void main(void)
+{
+	printf("Hello, World¥n");
+	getchar();
+	return;
+}
+</pre>
+　パターン通り、hello.cとでもしといて下さい。あとはコマンドメニューからBCC32 for DOS選んで、
+実行ボタンをクリックするだけです。<br>
+　新しくコマンドプロンプトウインドウが開いて、タイトルが「Bcc32.exe」→「ilink32.exe」とでも
+変わってくれればほぼ間違いなくコンパイルできてます。hello.cと同じフォルダ内にhello.exeが
+生成されているはずです。<br>
+　というわけで、あとはhello.exeをクリックすればさくっと「Hello, World」が表示されます。<br>
+　何かキーを押せば終了します。<br>
+<br>
+　まあ、設定ファイルの編集が伴いますが。メモ帳開いてちまちま編集すれば簡単に設定もできますし。<br>
+　CPad何かは*.cfgファイルの自動生成機能も付いてますし。<br>
+　本当に、ズイブンと勉強を始めやすくなったものです。<br>
+<br>
+　というわけで、とりあえずDOSプログラムのコンパイルはこれでオッケーです。<br>
+　コンパイルメッセージ表示エリアにも、コンパイルが成功するにしろ、失敗するにしろ何らかの
+メッセージが表示されているはずです。今回はこれでおしまい。<br>
+<br>
+　ほんじゃあ、次はCetaのおもしろさというわけで。Windowsプログラムのコンパイルオプションを
+登録してみませう。テスト用のプログラムもなあに。メッセージボックスを押すだけの簡素なモンです
+ので安心して試すとよい。<br>
+<br>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+</body>
+</html>

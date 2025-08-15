@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<TITLE>DOS8.3形式のファイル名について(LSIC-86)</TITLE>
+</HEAD>
+<BODY BGCOLOR=#FFFFFF>
+<A HREF="ceta_setup.html">Ceta セットアップ手順書</A><BR><BR>
+<H2>DOS8.3形式のファイル名について(LSIC-86)</H2>
+　このセクションでは主にLSIC-86を使用する方のためにDOS8.3形式ファイル名
+について解説します。<BR>
+　LSIC-86は16ビットDOSプログラムのため、Windowsのロングファイルネーム
+でのフォルダ指定ができません。ロングファイルネームとは、日本語やスペースを
+含んだり、フォルダ（ファイル）名が8文字を超えている名前のことを言います。
+例としては「c:¥Program Files」、「c:¥windows¥ﾃﾞｽｸﾄｯﾌﾟ」などです。<BR>
+またLSIC-86では<B>ソースファイル名にさえもロングファイル名は使えない</B>
+ことに注意して下さい。つまり、LSIC-86を使うときはLSIC-86のインストールフォルダ
+はもとより、ソースファイルのあるフォルダ、ソースファイル名全てをDOS8.3
+形式である必要があります。<BR>
+　もしLSIC-86をWindowsロングファイルネームを使ったフォルダ(c:¥Program Files 等)
+にインストールして使いたい場合は以下に示すようなロングファイルネームの
+短縮を使って下さい。<BR>
+<BR>
+　DOS8.3形式ファイル名とは、ファイル（フォルダ）名は８文字まで。拡張子は
+３文字まで。全角文字、半角スペースは使えない。という制限があるファイル名
+のことです。以下にWindowsロングファイルネームをDOS8.3形式に短縮する方法
+を示します。この問題は主にLSIC-86の諸設定に関わるので例でもLSIC-86の設定
+ファイル「_LCC」を例に挙げます。<BR>
+<BR>
+＜例＞・・・LSIC-86を「c:¥my compiler_lsic86」にインストールした時。<BR>
+_lcc設定ファイルでは・・・<BR>
+-Xc:¥my‾com‾1¥bin　　　　<----半角スペースが「‾」（チルダ）になる<BR>
+　と指定します。ロングファイル名用の" "は使えません。<BR>
+　もし「c:¥my compiler_bcc」というフォルダが存在していると、このフォルダの
+DOSディレクトリ名も「c:¥my‾com‾1」となってしまい、区別できない・・・となる
+ことはありません。エクスプローラで名前の順に表示させてみて下さい。<BR>
+c:¥my compiler_bcc<BR>
+c:¥my compiler_lsic86<BR>
+　の順で表示されるはずです。この場合、lsic86はmy comの二番目にあるので
+指定するフォルダ名は「c:¥my‾com‾2」となります。<BR>
+　以上の注意は、「c:¥Program Files」フォルダにコピーして使いたいという
+方は頭の片隅にでも置いておいて下さい。<BR>
+　ちなみに、c:¥Program Files¥lsic86にコピーした場合、_lccでは以下のように
+なります。<BR>
+<BR>
+-Xc:¥progra‾1¥lsic86¥bin -Lc:¥PROGRA‾1¥lsic86¥lib -Ic:¥Progra‾1¥lsic86¥include<BR>
+<BR>
+<BR>
+</BODY>
+</HTML>

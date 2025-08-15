@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borland C++ Compiler 5.5でWindows用オプションを設定する。</title>
+</head>
+<body class=body>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a><br>
+<br>
+　というわけで、BCC32.EXEのWindowsプログラムコンパイルオプションを登録してみませう。<br>
+　ちなみに既にBCC32.EXEのインストールが終わっていて、BCC32 for DOSも登録済と仮定しているのだ。<br>
+　要するに、最低限度BCC32.EXEが正常にDOSプログラムをコンパイルできる状態になっていると仮定します。<br>
+<br>
+　かいつまんでお話ししますと、BCC32.EXEでWindowsプログラムをコンパイルするには<br>
+-tW<br>
+　オプションを指定すればオッケーです。他にもWindowsプログラム用のオプションはありますが省略。<br>
+　じゃあ、あとは登録の際にこれをオプションに設定すればおしまいなわけです。<br>
+　それでは登録します。設定はこんな感じにしました。<br>
+<br>
+　登録名はBCC32 for WINとでもしときます。<br>
+　実行ファイルは参照ボタンでさくっと「bcc32.exe」を指定しまして。<br>
+　オプションは -tW の一個だけ指定。<br>
+　環境変数は念のため、Windowsディレクトリだけは通しておきましょう。<br>
+　PATH="C:¥Windows"<br>
+　WinNTならPATH="C:¥WINNT"<br>
+　結果のファイル出力はチェックしておきます。<br>
+<br>
+　以上の設定で追加、OKで設定ファイルに書き込みます。<br>
+　早速「コマンド」メニューを開けてみて、「BCC32 for WIN」の文字があるのを確認したらクリック。
+設定がきちんと保存されているか確かめましょう。<br>
+<br>
+　んじゃ、とりあえずWindows用のプログラムを作ってみませう。解説ページとか見ると、何十行か
+あるウインドウ生成サンプルが良くありますが。めんどくさいので、MessageBox() API関数を使える
+事を確認しておしまいにしましょう。一番単純なWindows版Hello,World。<br>
+<pre>
+#include <windows.h>
+int WINAPI WinMain(HINSTANCE hThisInst,HINSTANCE hPrevInst,LPSTR lpszArgs,int nWinMode)
+{
+	MessageBox(HWND_DESKTOP,"Hello, World!","Test Message",MB_OK);
+	return 0;
+}
+</pre>
+　hello_win.cとでもしといて下さい。あとはコマンドメニューからBCC32 for WIN選んで、
+実行ボタンをクリックするだけです。<br>
+　DOS用の設定がうまくいっていればWindows用も問題なくコンパイルできるはずです。<br>
+　というわけで、あとはhello_win.exeをクリックすればさくっと「Hello, World」が表示された
+メッセージボックスが表示されます。「OK」ボタンをクリックすれば終了します。<br>
+<br>
+　というわけで。とりあえずWindows用のプログラミングも最低限できるようになりましたね。<br>
+　とはいっても。これだけじゃあWindowsプログラミングは満足に学習できません。<br>
+　「リソースコンパイラ」を使いこなさなければ、BITMAPもダイアログボックスも勉強できない。<br>
+　というわけで、今度は「リソースコンパイラ」BRC32.EXEを登録してみましょう。<br>
+　今度の確認用サンプルは・・・ちと、めんどくさいです。<br>
+<br>
+　とゆーわけで今回はこれでおしまい。<br>
+<br>
+<a href="../ceta_usage.html">Cetaを作者はどう使っているか。に戻る。</a>
+</body>
+</html>
